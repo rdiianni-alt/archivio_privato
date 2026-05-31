@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔢 Quiz Matematica — Prima Elementare</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f0f0f8;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+  }
+  h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.4rem;
+    text-align: center;
+  }
+  .subtitle {
+    font-size: 0.95rem;
+    color: #888;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  .card {
+    width: 100%;
+    max-width: 360px;
+    border-radius: 24px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    color: white;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    transition: box-shadow 0.2s;
+  }
+  .card-number {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 0.8rem;
+  }
+  .emoji { font-size: 2rem; margin-bottom: 0.5rem; }
+  .question { font-size: 2.2rem; font-weight: 700; margin-bottom: 1.8rem; }
+  .options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+  .opt-btn {
+    border: none;
+    border-radius: 14px;
+    padding: 14px 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(255,255,255,0.22);
+    color: white;
+    transition: transform 0.1s, background 0.15s;
+  }
+  .opt-btn:hover:not(:disabled) { transform: scale(1.05); background: rgba(255,255,255,0.32); }
+  .opt-btn.correct { background: rgba(255,255,255,0.92); color: #333; outline: 3px solid white; }
+  .opt-btn.wrong { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); text-decoration: line-through; }
+  .opt-btn.dimmed { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); }
+  .result-msg { min-height: 26px; font-size: 0.9rem; font-weight: 600; margin-top: 0.5rem; color: white; }
+  .score-wrap { margin-top: 0.8rem; }
+  .score-label { font-size: 11px; opacity: 0.75; margin-bottom: 4px; }
+  .score-bar-bg { background: rgba(255,255,255,0.25); border-radius: 99px; height: 6px; }
+  .score-bar-fill { height: 6px; border-radius: 99px; background: white; transition: width 0.4s; }
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .nav-btn {
+    background: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #444;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .nav-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .progress { font-size: 0.9rem; color: #777; min-width: 70px; text-align: center; }
+  .shuffle-btn {
+    margin-top: 1rem;
+    background: white;
+    border: none;
+    border-radius: 12px;
+    padding: 8px 18px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: #666;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .shuffle-btn:hover { background: #f5f5f5; }
+  .final-score {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: #888;
+  }
+</style>
+</head>
+<body>
+
+<h1>🔢 Quiz Matematica</h1>
+<p class="subtitle">Prima elementare — 30 domande</p>
+
+<div class="card" id="card"></div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev-btn" onclick="goTo(current-1)">← Indietro</button>
+  <span class="progress" id="progress"></span>
+  <button class="nav-btn" id="next-btn" onclick="goTo(current+1)">Avanti →</button>
+</div>
+
+<button class="shuffle-btn" onclick="shuffle()">🔀 Mescola le carte</button>
+<p class="final-score" id="final-score"></p>
+
+<script>
+const allCards = [
+  {q:"3 + 4 = ?", opts:["5","6","7","8"], ans:2, emoji:"⭐", color:"#7F77DD"},
+  {q:"9 − 3 = ?", opts:["4","5","6","7"], ans:2, emoji:"🌈", color:"#1D9E75"},
+  {q:"5 + 7 = ?", opts:["10","11","12","13"], ans:2, emoji:"🎯", color:"#D85A30"},
+  {q:"14 − 6 = ?", opts:["6","7","8","9"], ans:2, emoji:"🚀", color:"#D4537E"},
+  {q:"8 + 8 = ?", opts:["14","15","16","17"], ans:2, emoji:"🌟", color:"#185FA5"},
+  {q:"20 − 5 = ?", opts:["13","14","15","16"], ans:2, emoji:"🎉", color:"#639922"},
+  {q:"6 + 9 = ?", opts:["13","14","15","16"], ans:2, emoji:"🦄", color:"#BA7517"},
+  {q:"17 − 9 = ?", opts:["6","7","8","9"], ans:2, emoji:"🐬", color:"#7F77DD"},
+  {q:"4 + 4 = ?", opts:["6","7","8","9"], ans:2, emoji:"🎈", color:"#1D9E75"},
+  {q:"12 − 7 = ?", opts:["3","4","5","6"], ans:2, emoji:"🍎", color:"#D85A30"},
+  {q:"7 + 6 = ?", opts:["11","12","13","14"], ans:2, emoji:"⭐", color:"#D4537E"},
+  {q:"18 − 9 = ?", opts:["7","8","9","10"], ans:2, emoji:"🌈", color:"#185FA5"},
+  {q:"2 + 9 = ?", opts:["9","10","11","12"], ans:2, emoji:"🎯", color:"#639922"},
+  {q:"16 − 8 = ?", opts:["6","7","8","9"], ans:2, emoji:"🚀", color:"#BA7517"},
+  {q:"5 + 5 = ?", opts:["8","9","10","11"], ans:2, emoji:"🌟", color:"#7F77DD"},
+  {q:"13 − 4 = ?", opts:["7","8","9","10"], ans:2, emoji:"🎉", color:"#1D9E75"},
+  {q:"8 + 4 = ?", opts:["10","11","12","13"], ans:2, emoji:"🦄", color:"#D85A30"},
+  {q:"11 − 6 = ?", opts:["3","4","5","6"], ans:2, emoji:"🐬", color:"#D4537E"},
+  {q:"3 + 8 = ?", opts:["9","10","11","12"], ans:2, emoji:"🎈", color:"#185FA5"},
+  {q:"15 − 7 = ?", opts:["6","7","8","9"], ans:2, emoji:"🍎", color:"#639922"},
+  {q:"6 + 7 = ?", opts:["11","12","13","14"], ans:2, emoji:"⭐", color:"#BA7517"},
+  {q:"19 − 4 = ?", opts:["13","14","15","16"], ans:2, emoji:"🌈", color:"#7F77DD"},
+  {q:"9 + 9 = ?", opts:["16","17","18","19"], ans:2, emoji:"🎯", color:"#1D9E75"},
+  {q:"10 − 3 = ?", opts:["5","6","7","8"], ans:2, emoji:"🚀", color:"#D85A30"},
+  {q:"4 + 7 = ?", opts:["9","10","11","12"], ans:2, emoji:"🌟", color:"#D4537E"},
+  {q:"20 − 11 = ?", opts:["7","8","9","10"], ans:2, emoji:"🎉", color:"#185FA5"},
+  {q:"6 + 6 = ?", opts:["10","11","12","13"], ans:2, emoji:"🦄", color:"#639922"},
+  {q:"14 − 5 = ?", opts:["7","8","9","10"], ans:2, emoji:"🐬", color:"#BA7517"},
+  {q:"7 + 8 = ?", opts:["13","14","15","16"], ans:2, emoji:"🎈", color:"#7F77DD"},
+  {q:"16 − 7 = ?", opts:["7","8","9","10"], ans:2, emoji:"🍎", color:"#1D9E75"},
+];
+
+let cards = [...allCards];
+let current = 0;
+const answers = {};
+const labels = ["A","B","C","D"];
+
+function lighten(hex, amt) {
+  const n = parseInt(hex.replace('#',''),16);
+  const r = Math.min(255,(n>>16)+amt);
+  const g = Math.min(255,((n>>8)&0xff)+amt);
+  const b = Math.min(255,(n&0xff)+amt);
+  return `rgb(${r},${g},${b})`;
+}
+
+function render() {
+  const c = cards[current];
+  const answered = answers[current] !== undefined ? answers[current] : null;
+  const score = Object.keys(answers).filter(k => answers[k] === cards[k].ans).length;
+  const answeredCount = Object.keys(answers).length;
+
+  let optBtns = c.opts.map((opt, i) => {
+    let cls = 'opt-btn';
+    let extra = '';
+    if (answered !== null) {
+      if (i === c.ans) cls += ' correct';
+      else if (i === answered) cls += ' wrong';
+      else cls += ' dimmed';
+      extra = 'disabled';
+    }
+    return `<button class="${cls}" ${extra} onclick="pick(${i})"><span style="font-size:0.75rem;opacity:0.8">${labels[i]}) </span>${opt}</button>`;
+  }).join('');
+
+  let resultMsg = '';
+  if (answered !== null) {
+    resultMsg = answered === c.ans
+      ? '✅ Corretto! Bravo!'
+      : `❌ La risposta giusta era ${labels[c.ans]}) ${c.opts[c.ans]}`;
+  }
+
+  const scoreW = answeredCount > 0 ? Math.round(score/answeredCount*100) : 0;
+
+  document.getElementById('card').style.background = `linear-gradient(135deg, ${c.color}, ${lighten(c.color,40)})`;
+  document.getElementById('card').innerHTML = `
+    <div class="card-number">Carta ${current+1} di ${cards.length}</div>
+    <div class="emoji">${c.emoji}</div>
+    <div class="question">${c.q}</div>
+    <div class="options">${optBtns}</div>
+    <div class="result-msg">${resultMsg}</div>
+    <div class="score-wrap" style="${answeredCount>0?'':'opacity:0'}">
+      <div class="score-label">Punteggio: ${score} / ${answeredCount}</div>
+      <div class="score-bar-bg"><div class="score-bar-fill" style="width:${scoreW}%"></div></div>
+    </div>
+  `;
+
+  document.getElementById('progress').textContent = `${current+1} / ${cards.length}`;
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === cards.length-1;
+
+  const allDone = Object.keys(answers).length === cards.length;
+  if (allDone) {
+    const total = Object.keys(answers).filter(k => answers[k] === cards[k].ans).length;
+    document.getElementById('final-score').textContent = `🏆 Hai risposto a tutte le domande! Risultato finale: ${total} / ${cards.length}`;
+  } else {
+    document.getElementById('final-score').textContent = '';
+  }
+}
+
+function pick(i) {
+  if (answers[current] !== undefined) return;
+  answers[current] = i;
+  render();
+}
+
+function goTo(n) {
+  if (n < 0 || n >= cards.length) return;
+  current = n;
+  render();
+}
+
+function shuffle() {
+  if (!confirm('Vuoi mescolare le carte? I progressi andranno persi.')) return;
+  cards = [...allCards].sort(() => Math.random()-0.5);
+  for (const k in answers) delete answers[k];
+  current = 0;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
