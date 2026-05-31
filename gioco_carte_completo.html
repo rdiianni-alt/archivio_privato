@@ -163,7 +163,7 @@ function choose(type){
   sym.className='sym-box '+(ok?'correct':'wrong');
   const fb=document.getElementById('feedback');
   fb.className='feedback '+(ok?'correct':'wrong');
-  fb.textContent=ok?(streak>=3?'🔥 '+streak+' di fila! Bravissimo!':'✅ Corretto!'):'❌ Ops! '+left.val+' '+labels[ans]+' '+right.val;
+  fb.textContent=ok?(streak>=3?'🔥 '+streak+' di fila! Bravissimo o bravissima!':'✅ Corretto!'):'❌ Ops! '+left.val+' '+labels[ans]+' '+right.val;
   document.querySelectorAll('.sym-btn').forEach(b=>{if(b.textContent.trim()===labels[type])b.classList.add('selected');});
   document.getElementById('btn-row').style.display='none';
   document.getElementById('next-btn').style.display='block';
