@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Maggiore, Minore o Uguale? – Matematiche non si nasce</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#fdf8f2;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:18px 10px}
+.logo{width:100px;height:100px;border-radius:50%;object-fit:contain;margin-bottom:8px;box-shadow:0 2px 12px rgba(0,0,0,0.13)}
+h1{font-size:20px;color:#333;margin-bottom:3px;text-align:center}
+.subtitle{font-size:13px;color:#999;margin-bottom:18px;text-align:center}
+.score-bar{display:flex;gap:28px;justify-content:center;margin-bottom:18px}
+.score-box{text-align:center}
+.score-label{font-size:12px;color:#aaa}
+.score-val{font-size:24px;font-weight:700;color:#333}
+.game-area{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px}
+/* Card */
+.card{width:120px;height:170px;background:#fff;border-radius:10px;border:1.5px solid #ccc;box-shadow:2px 3px 10px rgba(0,0,0,0.13);position:relative;display:block}
+.card svg{width:100%;height:100%}
+/* Symbol box */
+.sym-box{width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:700;border:2px dashed #ddd;border-radius:10px;background:#fafafa;color:#ccc;transition:all .2s;flex-shrink:0}
+.sym-box.chosen{border-color:#2980b9;background:#d6eaf8;color:#1a5276}
+.sym-box.correct{border-color:#27ae60;background:#eafaf1;color:#27ae60}
+.sym-box.wrong{border-color:#e74c3c;background:#fdedec;color:#e74c3c}
+/* Buttons */
+.btn-row{display:flex;gap:12px;justify-content:center;margin-bottom:14px}
+.sym-btn{width:68px;height:68px;font-size:34px;font-weight:700;border-radius:12px;border:2px solid #bbb;background:#f8f8f8;color:#555;cursor:pointer;transition:all .15s}
+.sym-btn:hover{background:#e8f4fd;border-color:#2980b9;color:#1a5276;transform:scale(1.08)}
+.sym-btn.selected{border:3px solid #2980b9;background:#d6eaf8;color:#1a5276;transform:scale(1.12)}
+.feedback{text-align:center;font-size:17px;font-weight:600;min-height:26px;margin-bottom:12px;color:transparent}
+.feedback.correct{color:#1e8449}
+.feedback.wrong{color:#c0392b}
+.next-btn{display:block;margin:0 auto 8px;padding:11px 34px;font-size:16px;font-weight:600;border-radius:10px;border:none;background:#e8306a;color:#fff;cursor:pointer}
+.next-btn:hover{background:#c0275a}
+.hint{font-size:12px;color:#bbb;text-align:center;margin-top:6px}
+</style>
+</head>
+<body>
+
+<img class="logo" id="logoImg" alt="Matematiche non si nasce"/>
+
+<h1>Maggiore, Minore o Uguale?</h1>
+<p class="subtitle">Scegli il simbolo giusto tra le due carte!</p>
+
+<div class="score-bar">
+  <div class="score-box">
+    <div class="score-label">Punteggio</div>
+    <div class="score-val" id="score">0/0</div>
+  </div>
+  <div class="score-box" id="streak-box" style="display:none">
+    <div class="score-label">Serie</div>
+    <div class="score-val" id="streak">🔥0</div>
+  </div>
+</div>
+
+<div class="game-area">
+  <div class="card" id="card-left"></div>
+  <div class="sym-box" id="sym-box">?</div>
+  <div class="card" id="card-right"></div>
+</div>
+
+<div class="feedback" id="feedback"></div>
+
+<div class="btn-row" id="btn-row">
+  <button class="sym-btn" onclick="choose('lt')">&lt;</button>
+  <button class="sym-btn" onclick="choose('eq')">=</button>
+  <button class="sym-btn" onclick="choose('gt')">&gt;</button>
+</div>
+
+<button class="next-btn" id="next-btn" style="display:none" onclick="newRound()">Carta successiva ▶</button>
+<p class="hint">Scegli &lt; &nbsp;=&nbsp; o &gt; tra le due carte</p>
+
+<script>
+/* ── Logo base64 ── */
+const LOGO_B64 = "SOSTITUISCI_QUI_CON_BASE64";
+document.getElementById('logoImg').src = 'data:image/png;base64,' + LOGO_B64;
+
+/* ── Pip layouts ──
+   Each entry: array of [cx, cy, rotate180?]
+   cx/cy in a 120×170 card coordinate space
+   Two columns: left=36, right=84  center=60
+   Rows top zone: 32,55,78   bottom zone (mirrored): 92,115,138
+*/
+const PIPS = {
+  1: [[60,85,false]],
+  2: [[60,38,false],[60,132,true]],
+  3: [[60,32,false],[60,85,false],[60,138,true]],
+  4: [[36,38,false],[84,38,false],[36,132,true],[84,132,true]],
+  5: [[36,32,false],[84,32,false],[60,85,false],[36,138,true],[84,138,true]],
+  6: [[36,32,false],[84,32,false],[36,85,false],[84,85,false],[36,138,true],[84,138,true]],
+  7: [[36,28,false],[84,28,false],[60,54,false],[36,80,false],[84,80,false],[36,138,true],[84,138,true]],
+  8: [[36,28,false],[84,28,false],[60,52,false],[36,76,false],[84,76,false],[60,100,true],[36,138,true],[84,138,true]],
+  9: [[36,26,false],[84,26,false],[36,52,false],[84,52,false],[60,85,false],[36,110,true],[84,110,true],[36,144,true],[84,144,true]],
+  10:[[36,26,false],[84,26,false],[60,46,false],[36,66,false],[84,66,false],[36,104,true],[84,104,true],[60,124,true],[36,144,true],[84,144,true]]
+};
+
+const SUITS = ['♠','♥','♦','♣'];
+const RED = {'♥':true,'♦':true};
+
+function rnd(n){return Math.floor(Math.random()*n)}
+function randomCard(){return{val:rnd(10)+1,suit:SUITS[rnd(4)]}}
+
+function pipSvgPath(suit){
+  // Simple unicode glyph rendered as SVG text
+  return suit;
+}
+
+function buildCardSVG(card){
+  const color = RED[card.suit] ? '#c0392b' : '#1a1a1a';
+  const lbl = card.val===1?'A':card.val===11?'J':card.val===12?'Q':card.val===13?'K':card.val;
+  const pips = PIPS[card.val]||[];
+
+  let pipsSVG = pips.map(([cx,cy,flip])=>{
+    const rot = flip ? `rotate(180,${cx},${cy})` : '';
+    return `<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="18" fill="${color}" transform="${rot}">${card.suit}</text>`;
+  }).join('');
+
+  return `<svg viewBox="0 0 120 170" xmlns="http://www.w3.org/2000/svg" font-family="serif">
+    <rect width="120" height="170" rx="10" fill="white" stroke="#ccc" stroke-width="1.5"/>
+    <!-- top-left corner -->
+    <text x="8" y="18" font-size="15" font-weight="bold" fill="${color}" font-family="sans-serif">${lbl}</text>
+    <text x="8" y="33" font-size="13" fill="${color}">${card.suit}</text>
+    <!-- bottom-right corner (rotated) -->
+    <text x="112" y="152" font-size="15" font-weight="bold" fill="${color}" font-family="sans-serif" text-anchor="end" transform="rotate(180,112,152)">${lbl}</text>
+    <text x="112" y="167" font-size="13" fill="${color}" text-anchor="end" transform="rotate(180,112,167)">${card.suit}</text>
+    <!-- pips -->
+    ${pipsSVG}
+  </svg>`;
+}
+
+let left,right,answered=false,score=0,total=0,streak=0;
+
+function newRound(){
+  left=randomCard(); right=randomCard();
+  answered=false;
+  document.getElementById('card-left').innerHTML=buildCardSVG(left);
+  document.getElementById('card-right').innerHTML=buildCardSVG(right);
+  const sb=document.getElementById('sym-box');
+  sb.textContent='?'; sb.className='sym-box';
+  const fb=document.getElementById('feedback');
+  fb.textContent=''; fb.className='feedback';
+  document.getElementById('btn-row').style.display='flex';
+  document.getElementById('next-btn').style.display='none';
+  document.querySelectorAll('.sym-btn').forEach(b=>b.classList.remove('selected'));
+}
+
+function getCorrect(l,r){return l<r?'lt':l>r?'gt':'eq'}
+
+function choose(type){
+  if(answered)return;
+  answered=true;
+  const labels={lt:'<',eq:'=',gt:'>'};
+  const ans=getCorrect(left.val,right.val);
+  const ok=type===ans;
+  total++; if(ok){score++;streak++;}else{streak=0;}
+  document.getElementById('score').textContent=score+'/'+total;
+  const sbox=document.getElementById('streak-box');
+  if(streak>=2){sbox.style.display='';document.getElementById('streak').textContent='🔥'+streak;}
+  else sbox.style.display='none';
+  const sym=document.getElementById('sym-box');
+  sym.textContent=labels[type];
+  sym.className='sym-box '+(ok?'correct':'wrong');
+  const fb=document.getElementById('feedback');
+  fb.className='feedback '+(ok?'correct':'wrong');
+  fb.textContent=ok?(streak>=3?'🔥 '+streak+' di fila! Bravissimo!':'✅ Corretto!'):'❌ Ops! '+left.val+' '+labels[ans]+' '+right.val;
+  document.querySelectorAll('.sym-btn').forEach(b=>{if(b.textContent.trim()===labels[type])b.classList.add('selected');});
+  document.getElementById('btn-row').style.display='none';
+  document.getElementById('next-btn').style.display='block';
+}
+
+newRound();
+</script>
+</body>
+</html>
