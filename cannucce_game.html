@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cannucce</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: #f0ebe0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 10px; }
+  .logo-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 4px; cursor: pointer; text-decoration: none; }
+  .logo-wrap img { width: 70px; height: 70px; object-fit: contain; border-radius: 50%; }
+  .logo-wrap span { font-family: 'Georgia', serif; font-style: italic; font-size: 15px; color: #555; letter-spacing: 0.3px; }
+  h1 { font-size: 21px; font-weight: 600; color: #333; margin: 8px 0 3px; }
+  .subtitle { font-size: 13px; color: #888; margin-bottom: 18px; }
+  .card {
+    background: #faf8f3;
+    border-radius: 14px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.09);
+    padding: 20px 18px 22px;
+    width: 100%; max-width: 480px;
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  .grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .col-label {
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    font-size: 22px;
+    font-weight: normal;
+    color: #222;
+    text-align: center;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #444;
+  }
+  .col-label.da { border-right: 1.5px solid #555; }
+  .col-content {
+    height: 120px;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 8px 6px 4px;
+  }
+  .col-content.da { border-right: 1.5px solid #555; gap: 4px; }
+  .col-content.u  { gap: 5px; }
+
+  .input-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+  input[type=number] {
+    width: 86px; height: 46px; font-size: 26px; font-weight: 700;
+    text-align: center; border: 2px solid #ccc; border-radius: 10px;
+    outline: none; color: #222; background: #fff;
+    -moz-appearance: textfield;
+  }
+  input::-webkit-inner-spin-button, input::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input:focus { border-color: #4a90d9; }
+  .btn-check {
+    background: #4a90d9; color: #fff; border: none; border-radius: 10px;
+    padding: 11px 22px; font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  .btn-check:hover { background: #357abd; }
+  .btn-next {
+    background: #5cb85c; color: #fff; border: none; border-radius: 10px;
+    padding: 11px 22px; font-size: 15px; font-weight: 600; cursor: pointer;
+    display: none;
+  }
+  .btn-next:hover { background: #449d44; }
+  .feedback { font-size: 17px; font-weight: 600; min-height: 24px; text-align: center; }
+  .feedback.ok  { color: #2e7d2e; }
+  .feedback.err { color: #b02020; }
+  .score { font-size: 13px; color: #999; }
+</style>
+</head>
+<body>
+
+<a class="logo-wrap" href="https://matematicaconlemani.wordpress.com/" target="_blank">
+  <img src="logo.png" alt="Logo">
+  <span>Matematiche non si nasce</span>
+</a>
+
+<h1>Quante cannucce?</h1>
+<p class="subtitle">Scrivi il numero rappresentato dai mazzetti (decine) e dalle cannucce sciolte (unità)</p>
+
+<div class="card">
+  <div class="grid">
+    <div class="col-label da">da</div>
+    <div class="col-label u">u</div>
+    <div class="col-content da" id="tens-area"></div>
+    <div class="col-content u"  id="units-area"></div>
+  </div>
+
+  <div class="input-row">
+    <input type="number" id="answer" placeholder="?" min="0" max="99" />
+    <button class="btn-check" onclick="checkAnswer()">Verifica</button>
+    <button class="btn-next"  id="btn-next" onclick="nextRound()">Avanti ▶</button>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="score"    id="score">Punti: 0 / 0</div>
+</div>
+
+<script>
+const BW = 10;  // bundle width (px)
+const BH = 90;  // bundle height (px)
+const UW = 3;   // single straw width
+const UH = 90;  // single straw height
+
+let target=0, tens=0, units=0, correct=0, total=0;
+function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+
+function drawBundle(parent){
+  const cv = document.createElement('canvas');
+  cv.width = BW; cv.height = BH;
+  cv.style.display = 'block';
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, BW, BH);
+  // rubber band line
+  ctx.strokeStyle = '#c8860a';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(0, Math.round(BH*0.58));
+  ctx.lineTo(BW, Math.round(BH*0.58));
+  ctx.stroke();
+  parent.appendChild(cv);
+}
+
+function drawLoose(parent){
+  const cv = document.createElement('canvas');
+  cv.width = UW + 2; cv.height = UH;
+  cv.style.display = 'block';
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#111';
+  ctx.fillRect(1, 0, UW, UH);
+  parent.appendChild(cv);
+}
+
+function generateRound(){
+  tens  = rnd(0,9);
+  units = rnd(0,9);
+  if(tens===0 && units===0) units = rnd(1,9);
+  target = tens*10 + units;
+
+  const tA = document.getElementById('tens-area');
+  const uA = document.getElementById('units-area');
+  tA.innerHTML = ''; uA.innerHTML = '';
+
+  for(let i=0;i<tens;i++)  drawBundle(tA);
+  for(let i=0;i<units;i++) drawLoose(uA);
+}
+
+function checkAnswer(){
+  const val = parseInt(document.getElementById('answer').value);
+  const fb  = document.getElementById('feedback');
+  if(isNaN(val)){ fb.textContent='Inserisci un numero!'; fb.className='feedback err'; return; }
+  total++;
+  if(val===target){
+    correct++;
+    fb.textContent='✓ Esatto! Era '+target;
+    fb.className='feedback ok';
+  } else {
+    fb.textContent='✗ Era '+target+' — '+tens+' decine e '+units+' unità';
+    fb.className='feedback err';
+  }
+  document.getElementById('score').textContent='Punti: '+correct+' / '+total;
+  document.querySelector('.btn-check').style.display='none';
+  document.getElementById('btn-next').style.display='inline-block';
+}
+
+function nextRound(){
+  document.getElementById('answer').value='';
+  document.getElementById('feedback').textContent='';
+  document.querySelector('.btn-check').style.display='inclusive-block';
+  document.querySelector('.btn-check').style.display='inline-block';
+  document.getElementById('btn-next').style.display='none';
+  document.getElementById('answer').focus();
+  generateRound();
+}
+
+document.getElementById('answer').addEventListener('keydown', e=>{
+  if(e.key!=='Enter') return;
+  if(document.getElementById('btn-next').style.display==='inline-block') nextRound();
+  else checkAnswer();
+});
+
+generateRound();
+</script>
+</body>
+</html>
