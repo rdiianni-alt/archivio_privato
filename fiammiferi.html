@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gioco dei fiammiferi</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #fdf8f2; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 18px 12px 40px; }
+
+  header { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
+  header a { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; border: 2px solid #e0d4c0; }
+  .blog-name { font-size: 15px; font-weight: 600; color: #6b4c1e; line-height: 1.3; max-width: 180px; }
+
+  .card { background: #fff; border-radius: 18px; box-shadow: 0 4px 24px #0001; padding: 28px 28px 24px; max-width: 680px; width: 100%; }
+  h1 { font-size: 20px; color: #3a2a0e; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; color: #8b7355; margin-bottom: 20px; }
+
+  #svg-area { width: 100%; overflow-x: auto; background: #fffdf7; border-radius: 12px; border: 1.5px dashed #e0c98a; padding: 20px 10px; margin-bottom: 22px; text-align: center; }
+
+  .domanda { font-size: 18px; color: #3a2a0e; margin-bottom: 16px; }
+  .input-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  input[type=number] { width: 90px; font-size: 22px; text-align: center; padding: 8px; border: 2px solid #e0c98a; border-radius: 10px; background: #fffdf7; color: #3a2a0e; outline: none; }
+  input[type=number]:focus { border-color: #c8860a; }
+  button { padding: 10px 22px; border-radius: 10px; border: none; cursor: pointer; font-size: 16px; font-weight: 600; transition: transform .1s, background .15s; }
+  button:active { transform: scale(.97); }
+  #btn-controlla { background: #e8a020; color: #fff; }
+  #btn-controlla:hover { background: #c8860a; }
+  #btn-next { background: #4caf50; color: #fff; display: none; }
+  #btn-next:hover { background: #388e3c; }
+
+  #feedback { font-size: 17px; font-weight: 600; min-height: 26px; margin-bottom: 8px; }
+  .corretto { color: #2e7d32; }
+  .sbagliato { color: #c62828; }
+
+  .suggerimento { font-size: 13px; color: #8b7355; background: #fdf3e0; border-radius: 8px; padding: 10px 14px; display: none; line-height: 1.6; }
+
+  .punteggio { display: flex; gap: 18px; margin-top: 18px; flex-wrap: wrap; }
+  .pill { background: #fdf3e0; border-radius: 20px; padding: 6px 16px; font-size: 14px; color: #6b4c1e; font-weight: 500; }
+
+  #livello-label { font-size: 13px; color: #aaa; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="https://matematicaconlemani.wordpress.com/" target="_blank" rel="noopener">
+    <div class="logo">
+      <img src="https://matematicaconlemani.wordpress.com/wp-content/uploads/2023/01/cropped-logo-matematica-con-le-mani.png"
+           onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='flex';"
+           alt="Logo Matematica con le mani">
+      <div id="logo-fallback" style="display:none; width:60px; height:60px; border-radius:50%; background:#e8a020; align-items:center; justify-content:center; font-size:22px;">🔥</div>
+    </div>
+    <span class="blog-name">Matematiche<br>non si nasce</span>
+  </a>
+</header>
+
+<div class="card">
+  <h1>Quanti fiammiferi?</h1>
+  <p class="subtitle">Conta i fiammiferi che formano la figura!</p>
+
+  <div id="livello-label"></div>
+  <div id="svg-area"></div>
+
+  <p class="domanda">Quanti fiammiferi vedi?</p>
+  <div class="input-row">
+    <input type="number" id="risposta" min="1" max="99" placeholder="?">
+    <button id="btn-controlla" onclick="controlla()">Controlla</button>
+    <button id="btn-next" onclick="nuovaFigura()">Prossima ▶</button>
+  </div>
+  <div id="feedback"></div>
+  <div class="suggerimento" id="sug"></div>
+
+  <div class="punteggio">
+    <span class="pill" id="pill-punti">⭐ Punti: 0</span>
+    <span class="pill" id="pill-tot">🔢 Esercizi: 0</span>
+  </div>
+</div>
+
+<script>
+const W = 54, H = 54, THICK = 5, HEAD = 10, PAD = 20;
+let nQuadrati = 1, punti = 0, totale = 0, risposto = false;
+
+function fiammiferiPerN(n) { return n === 0 ? 0 : 3 * n + 1; }
+
+function disegnaFiammifero(x1, y1, x2, y2, colore) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx*dx + dy*dy);
+  const ux = dx/len, uy = dy/len;
+  const hx = x2 - ux*HEAD, hy = y2 - uy*HEAD;
+
+  return `
+    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+      stroke="#c8860a" stroke-width="${THICK}" stroke-linecap="round"/>
+    <ellipse cx="${x2}" cy="${y2}" rx="${HEAD*0.7}" ry="${HEAD*0.55}"
+      fill="${colore}" stroke="#a05000" stroke-width="1"
+      transform="rotate(${Math.atan2(dy,dx)*180/Math.PI},${x2},${y2})"/>
+  `;
+}
+
+function genera() {
+  const svgW = PAD*2 + nQuadrati * W;
+  const svgH = PAD*2 + H;
+  let svg = `<svg viewBox="0 0 ${svgW} ${svgH}" width="${Math.min(svgW, 640)}" height="${svgH}" xmlns="http://www.w3.org/2000/svg">`;
+
+  const RED = '#e53935';
+
+  for (let i = 0; i <= nQuadrati; i++) {
+    const x = PAD + i * W;
+    const y0 = PAD, y1 = PAD + H;
+    svg += disegnaFiammifero(x, y1, x, y0, RED);
+  }
+
+  for (let i = 0; i < nQuadrati; i++) {
+    const x0 = PAD + i * W, x1 = PAD + (i+1) * W;
+    const yBottom = PAD + H, yTop = PAD;
+    svg += disegnaFiammifero(x0, yBottom, x1, yBottom, RED);
+    svg += disegnaFiammifero(x0, yTop, x1, yTop, RED);
+  }
+
+  svg += '</svg>';
+  return svg;
+}
+
+function nuovaFigura() {
+  nQuadrati = Math.floor(Math.random() * 10) + 1;
+  document.getElementById('livello-label').textContent = `Figura con ${nQuadrati} quadrat${nQuadrati===1?'o':'i'}`;
+  document.getElementById('svg-area').innerHTML = genera();
+  document.getElementById('risposta').value = '';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('sug').style.display = 'none';
+  document.getElementById('btn-next').style.display = 'none';
+  document.getElementById('btn-controlla').style.display = 'inline-block';
+  document.getElementById('risposta').focus();
+  risposto = false;
+}
+
+function controlla() {
+  if (risposto) return;
+  const val = parseInt(document.getElementById('risposta').value);
+  if (isNaN(val)) { document.getElementById('feedback').textContent = 'Inserisci un numero!'; return; }
+  const corretto = fiammiferiPerN(nQuadrati);
+  totale++;
+  risposto = true;
+  document.getElementById('pill-tot').textContent = `🔢 Esercizi: ${totale}`;
+
+  const fb = document.getElementById('feedback');
+  const sug = document.getElementById('sug');
+
+  if (val === corretto) {
+    punti++;
+    fb.textContent = '✅ Esatto!';
+    fb.className = 'corretto';
+    sug.style.display = 'none';
+  } else {
+    fb.textContent = `❌ Non proprio… la risposta è ${corretto}.`;
+    fb.className = 'sbagliato';
+    sug.style.display = 'block';
+    const formula = nQuadrati === 1
+      ? `1 quadrato → 4 fiammiferi`
+      : `Primo quadrato: 4 fiammiferi. Ogni quadrato aggiunto porta altri 3. Quindi: 4 + ${nQuadrati-1}×3 = ${corretto}.`;
+    sug.innerHTML = `<strong>Come si conta:</strong> ${formula}`;
+  }
+
+  document.getElementById('pill-punti').textContent = `⭐ Punti: ${punti}`;
+  document.getElementById('btn-controlla').style.display = 'none';
+  document.getElementById('btn-next').style.display = 'inline-block';
+}
+
+document.getElementById('risposta').addEventListener('keydown', e => { if (e.key === 'Enter') controlla(); });
+
+nuovaFigura();
+</script>
+</body>
+</html>
