@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Somme Parlate - Facile</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #fff8e1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  .logo { margin: 10px auto 4px; text-align: center; }
+  .logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+  h1 { font-size: 1.6rem; color: #e65100; margin-bottom: 4px; text-align: center; }
+  .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 20px; text-align: center; }
+  .card {
+    background: white; border-radius: 20px; padding: 30px 24px 24px;
+    max-width: 420px; width: 100%;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center;
+  }
+  .domanda {
+    font-size: 1.4rem; font-weight: bold; color: #222;
+    line-height: 2; margin-bottom: 24px; min-height: 100px;
+    display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px;
+  }
+  .domanda span { color: #e65100; }
+  .input-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 16px; }
+  input[type=number] {
+    width: 130px; font-size: 2rem; text-align: center;
+    border: 3px solid #ffcc80; border-radius: 12px; padding: 10px;
+    outline: none; color: #e65100; transition: border-color 0.2s;
+  }
+  input[type=number]:focus { border-color: #e65100; }
+  .btn {
+    background: #e65100; color: white; border: none;
+    border-radius: 12px; padding: 12px 32px; font-size: 1rem;
+    cursor: pointer; margin: 6px; transition: background 0.2s;
+  }
+  .btn:hover { background: #bf360c; }
+  .btn-secondary { background: #fff3e0; color: #e65100; }
+  .btn-secondary:hover { background: #ffe0b2; }
+  .feedback { font-size: 1.3rem; font-weight: bold; margin: 14px 0 6px; min-height: 36px; }
+  .corretto { color: #27ae60; }
+  .sbagliato { color: #e74c3c; }
+  .spiegazione { font-size: 0.95rem; color: #555; margin-bottom: 10px; min-height: 24px; }
+  .punteggio { margin-top: 16px; font-size: 0.95rem; color: #888; }
+  .stelle { font-size: 1.4rem; }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+</style>
+</head>
+<body>
+
+<div class="logo">
+  <img src="logo.png" alt="logo" onerror="this.style.display='none'">
+</div>
+
+<h1>🔢 Somme Parlate</h1>
+<p class="subtitle">Solo unità e decine — trova il numero nascosto!</p>
+
+<div class="card">
+  <div class="domanda" id="domanda">Caricamento...</div>
+  <div class="input-row">
+    <input type="number" id="risposta" placeholder="?" min="0" max="999">
+  </div>
+  <div>
+    <button class="btn" onclick="verifica()">✅ Controlla</button>
+    <button class="btn btn-secondary" onclick="nuovaDomanda()">⏭ Salta</button>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="spiegazione" id="spiegazione"></div>
+  <div class="punteggio">
+    Punteggio: <span id="punti">0</span> &nbsp;|&nbsp; Domande: <span id="totale">0</span>
+    <div class="stelle" id="stelle"></div>
+  </div>
+</div>
+
+<script>
+const domande = [
+  { t:["3 UNITÀ","2 DECINE"], r:23, s:"3 + 20 = 23" },
+  { t:["5 DECINE","4 UNITÀ"], r:54, s:"50 + 4 = 54" },
+  { t:["7 UNITÀ","1 DECINA"], r:17, s:"7 + 10 = 17" },
+  { t:["6 DECINE","3 UNITÀ"], r:63, s:"60 + 3 = 63" },
+  { t:["12 UNITÀ","3 DECINE"], r:42, s:"12 + 30 = 42" },
+  { t:["4 DECINE","15 UNITÀ"], r:55, s:"40 + 15 = 55" },
+  { t:["8 UNITÀ","5 DECINE"], r:58, s:"8 + 50 = 58" },
+  { t:["2 DECINE","9 UNITÀ"], r:29, s:"20 + 9 = 29" },
+  { t:["11 UNITÀ","4 DECINE"], r:51, s:"11 + 40 = 51" },
+  { t:["7 DECINE","6 UNITÀ"], r:76, s:"70 + 6 = 76" },
+  { t:["13 UNITÀ","2 DECINE"], r:33, s:"13 + 20 = 33" },
+  { t:["5 UNITÀ","8 DECINE"], r:85, s:"5 + 80 = 85" },
+  { t:["9 DECINE","4 UNITÀ"], r:94, s:"90 + 4 = 94" },
+  { t:["16 UNITÀ","3 DECINE"], r:46, s:"16 + 30 = 46" },
+  { t:["2 UNITÀ","7 DECINE"], r:72, s:"2 + 70 = 72" },
+  { t:["14 UNITÀ","5 DECINE"], r:64, s:"14 + 50 = 64" },
+  { t:["3 DECINE","18 UNITÀ"], r:48, s:"30 + 18 = 48" },
+  { t:["6 UNITÀ","4 DECINE"], r:46, s:"6 + 40 = 46" },
+  { t:["8 DECINE","11 UNITÀ"], r:91, s:"80 + 11 = 91" },
+  { t:["7 UNITÀ","6 DECINE"], r:67, s:"7 + 60 = 67" },
+  { t:["15 UNITÀ","1 DECINA"], r:25, s:"15 + 10 = 25" },
+  { t:["4 UNITÀ","9 DECINE"], r:94, s:"4 + 90 = 94" },
+  { t:["12 UNITÀ","6 DECINE"], r:72, s:"12 + 60 = 72" },
+  { t:["3 DECINE","7 UNITÀ"], r:37, s:"30 + 7 = 37" },
+  { t:["9 UNITÀ","5 DECINE"], r:59, s:"9 + 50 = 59" },
+  { t:["2 DECINE","13 UNITÀ"], r:33, s:"20 + 13 = 33" },
+  { t:["6 DECINE","8 UNITÀ"], r:68, s:"60 + 8 = 68" },
+  { t:["17 UNITÀ","4 DECINE"], r:57, s:"17 + 40 = 57" },
+  { t:["1 DECINA","19 UNITÀ"], r:29, s:"10 + 19 = 29" },
+  { t:["5 DECINE","12 UNITÀ"], r:62, s:"50 + 12 = 62" },
+];
+
+// Deduplica
+const viste = new Set();
+const domandeUniche = domande.filter(d => {
+  const k = d.r + '|' + [...d.t].sort().join('|');
+  if (viste.has(k)) return false;
+  viste.add(k); return true;
+});
+
+let usate = [], punti = 0, totale = 0, corrente = null;
+
+function shuffle(arr) {
+  return arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
+}
+
+function nuovaDomanda() {
+  if (usate.length >= domandeUniche.length) usate = [];
+  const disp = domandeUniche.filter((_,i) => !usate.includes(i));
+  const idx = domandeUniche.indexOf(disp[Math.floor(Math.random()*disp.length)]);
+  usate.push(idx);
+  corrente = domandeUniche[idx];
+
+  const termini = shuffle([...corrente.t]);
+  document.getElementById('domanda').innerHTML =
+    termini.map(t=>`<span>${t}</span>`).join(' &nbsp;+&nbsp; ');
+  document.getElementById('risposta').value = '';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('spiegazione').textContent = '';
+  document.getElementById('risposta').focus();
+}
+
+function verifica() {
+  const val = parseInt(document.getElementById('risposta').value);
+  if (isNaN(val)) return;
+  totale++;
+  document.getElementById('totale').textContent = totale;
+
+  if (val === corrente.r) {
+    punti++;
+    document.getElementById('feedback').textContent = '🎉 Esatto!';
+    document.getElementById('feedback').className = 'feedback corretto';
+    document.getElementById('spiegazione').textContent = corrente.s;
+    document.getElementById('punti').textContent = punti;
+    const p = punti/totale;
+    document.getElementById('stelle').textContent = p>=0.9?'⭐⭐⭐':p>=0.7?'⭐⭐':'⭐';
+    setTimeout(nuovaDomanda, 1500);
+  } else {
+    document.getElementById('feedback').textContent = '❌ Riprova!';
+    document.getElementById('feedback').className = 'feedback sbagliato';
+    document.getElementById('risposta').value = '';
+    document.getElementById('risposta').focus();
+  }
+}
+
+document.getElementById('risposta').addEventListener('keydown', e => {
+  if (e.key === 'Enter') verifica();
+});
+
+nuovaDomanda();
+</script>
+</body>
+</html>
