@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spesa al Supermercato</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; background: #f0f7e6; min-height: 100vh; }
+
+  .header { text-align: center; padding: 18px 0 10px; }
+  .logo-wrap { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 4px; }
+  .logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+  .blog-title { font-size: 20px; font-weight: 700; color: #2e7d32; }
+  .game-title { font-size: 26px; font-weight: 800; color: #1b5e20; margin-top: 2px; }
+
+  .level-btns { display: flex; gap: 10px; justify-content: center; margin: 12px 0 0; flex-wrap: wrap; }
+  .level-btn { padding: 8px 20px; border-radius: 20px; border: 2px solid #388e3c; background: #fff; color: #388e3c; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .level-btn.active { background: #388e3c; color: #fff; }
+
+  .container { max-width: 700px; margin: 0 auto; padding: 16px; }
+
+  .score-bar { display: flex; gap: 20px; justify-content: center; margin-bottom: 10px; }
+  .score-item { font-size: 15px; color: #555; }
+  .score-item span { font-weight: 700; color: #2e7d32; }
+
+  /* STEP INDICATOR */
+  .steps { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 18px; }
+  .step-dot { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; border: 2px solid #a5d6a7; background: #fff; color: #aaa; transition: all .3s; }
+  .step-dot.active { background: #2e7d32; color: #fff; border-color: #2e7d32; }
+  .step-dot.done { background: #a5d6a7; color: #fff; border-color: #a5d6a7; }
+  .step-line { width: 40px; height: 3px; background: #c8e6c9; }
+  .step-line.done { background: #a5d6a7; }
+  .step-label { font-size: 12px; color: #888; text-align: center; margin-top: 4px; }
+  .steps-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 18px; }
+  .steps-labels { display: flex; gap: 0; justify-content: center; }
+  .step-lbl { width: 80px; text-align: center; font-size: 12px; color: #888; }
+  .step-lbl.active { color: #2e7d32; font-weight: 700; }
+
+  /* CARRELLO */
+  .carrello { background: #fff; border-radius: 16px; border: 2px solid #a5d6a7; padding: 16px; margin-bottom: 14px; }
+  .carrello h2 { font-size: 17px; color: #2e7d32; margin-bottom: 12px; }
+  .items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+  .item-card { background: #f1f8e9; border-radius: 12px; border: 1.5px solid #c8e6c9; padding: 10px; text-align: center; }
+  .item-emoji { font-size: 36px; line-height: 1; }
+  .item-name { font-size: 13px; color: #555; margin: 4px 0 2px; }
+  .item-price { font-size: 15px; font-weight: 700; color: #2e7d32; }
+
+  /* BOX GENERICI */
+  .box { background: #fff; border-radius: 16px; border: 2px solid #a5d6a7; padding: 16px; margin-bottom: 14px; }
+  .box h2 { font-size: 17px; color: #2e7d32; margin-bottom: 12px; }
+  .box.disabled { opacity: 0.4; pointer-events: none; }
+
+  .input-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .input-row label { font-size: 15px; color: #555; }
+  .num-input { width: 110px; padding: 8px 12px; border-radius: 8px; border: 2px solid #a5d6a7; font-size: 18px; font-weight: 700; color: #1b5e20; text-align: center; }
+  .ok-btn { padding: 10px 28px; border-radius: 20px; background: #2e7d32; color: #fff; border: none; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .ok-btn:hover { background: #1b5e20; }
+
+  /* BANCONOTE */
+  .banconote-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .banconota { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+  .bill { border-radius: 10px; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; min-width: 72px; height: 42px; border: 2px solid rgba(0,0,0,0.12); transition: transform .15s; user-select: none; position: relative; }
+  .bill:active { transform: scale(0.93); }
+  .b1  { background: #fffde7; color: #f9a825; border-color: #f9a825; }
+  .b2  { background: #e8f5e9; color: #388e3c; border-color: #388e3c; }
+  .b5  { background: #e3f2fd; color: #1565c0; border-color: #1565c0; }
+  .b10 { background: #fce4ec; color: #c62828; border-color: #c62828; }
+  .b20 { background: #f3e5f5; color: #6a1b9a; border-color: #6a1b9a; }
+  .b50 { background: #fff3e0; color: #e65100; border-color: #e65100; }
+  .banconota-lbl { font-size: 11px; color: #aaa; }
+
+  .pagato-box { background: #f9f9f9; border-radius: 12px; border: 1.5px solid #ddd; padding: 10px 16px; margin: 10px 0; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+  .pagato-info { font-size: 15px; color: #555; }
+  .pagato-info span { font-weight: 700; color: #1b5e20; }
+  .reset-btn { padding: 6px 16px; border-radius: 10px; border: 1.5px solid #bbb; background: #fff; color: #888; font-size: 13px; cursor: pointer; }
+
+  /* FEEDBACK */
+  .feedback { border-radius: 14px; padding: 14px 18px; margin-bottom: 14px; font-size: 16px; font-weight: 700; text-align: center; display: none; }
+  .feedback.ok  { background: #e8f5e9; color: #2e7d32; border: 2px solid #a5d6a7; }
+  .feedback.err { background: #ffebee; color: #c62828; border: 2px solid #ef9a9a; }
+
+  .nuovo-btn { display: block; margin: 0 auto; padding: 12px 40px; border-radius: 24px; background: #43a047; color: #fff; border: none; font-size: 17px; font-weight: 700; cursor: pointer; }
+  .nuovo-btn:hover { background: #2e7d32; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-wrap">
+    <div class="logo">
+      <img src="https://raw.githubusercontent.com/matematicanosinace/matematicanosinace.github.io/main/logo.png"
+           onerror="this.style.display='none'" alt="Logo">
+    </div>
+    <div>
+      <div class="blog-title">Matematiche Non Si Nasce</div>
+      <div class="game-title">🛒 Spesa al Supermercato</div>
+    </div>
+  </div>
+  <div class="level-btns">
+    <button class="level-btn active" onclick="setLevel(1)">Livello 1 — Prezzi interi</button>
+    <button class="level-btn" onclick="setLevel(2)">Livello 2 — Con i ,50</button>
+    <button class="level-btn" onclick="setLevel(3)">Livello 3 — Con i centesimi</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="score-bar">
+    <div class="score-item">✅ Corrette: <span id="s-ok">0</span></div>
+    <div class="score-item">❌ Errori: <span id="s-err">0</span></div>
+  </div>
+
+  <!-- STEP INDICATOR -->
+  <div class="steps-wrap">
+    <div class="steps">
+      <div class="step-dot active" id="sd1">1</div>
+      <div class="step-line" id="sl1"></div>
+      <div class="step-dot" id="sd2">2</div>
+      <div class="step-line" id="sl2"></div>
+      <div class="step-dot" id="sd3">3</div>
+    </div>
+    <div class="steps-labels">
+      <div class="step-lbl active" id="slbl1">Calcola totale</div>
+      <div class="step-lbl" id="slbl2">Paga</div>
+      <div class="step-lbl" id="slbl3">Calcola resto</div>
+    </div>
+  </div>
+
+  <!-- CARRELLO -->
+  <div class="carrello">
+    <h2>🧺 Articoli nel carrello</h2>
+    <div class="items-grid" id="items-grid"></div>
+  </div>
+
+  <!-- STEP 1: TOTALE -->
+  <div class="box" id="box-step1">
+    <h2>📝 Step 1 — Quanto spendi in totale?</h2>
+    <div class="input-row">
+      <label>Totale: €</label>
+      <input type="number" id="totale-input" class="num-input" min="0" step="0.50" placeholder="0,00">
+      <button class="ok-btn" onclick="verificaTotale()">Controlla ✓</button>
+    </div>
+    <div class="feedback" id="fb-step1"></div>
+  </div>
+
+  <!-- STEP 2: BANCONOTE -->
+  <div class="box disabled" id="box-step2">
+    <h2>💶 Step 2 — Scegli le banconote per pagare</h2>
+    <div class="banconote-grid" id="banconote-grid"></div>
+    <div class="pagato-box">
+      <div class="pagato-info">Hai dato: <span id="dato-val">€ 0,00</span></div>
+      <div class="pagato-info">Totale: <span id="tot-ref">€ —</span></div>
+      <button class="reset-btn" onclick="resetBanconote()">↺ Azzera</button>
+    </div>
+    <div class="input-row" style="margin-top:8px;">
+      <button class="ok-btn" onclick="confermaPagamento()">Conferma pagamento ✓</button>
+    </div>
+    <div class="feedback" id="fb-step2"></div>
+  </div>
+
+  <!-- STEP 3: RESTO -->
+  <div class="box disabled" id="box-step3">
+    <h2>💰 Step 3 — Quanto resto ti dà la cassiera?</h2>
+    <div class="input-row">
+      <label>Resto: €</label>
+      <input type="number" id="resto-input" class="num-input" min="0" step="0.50" placeholder="0,00">
+      <button class="ok-btn" onclick="verificaResto()">Controlla ✓</button>
+    </div>
+    <div class="feedback" id="fb-step3"></div>
+  </div>
+
+  <button class="nuovo-btn" onclick="nuovoRound()">🔄 Nuova spesa</button>
+</div>
+
+<script>
+const PRODOTTI = [
+  {n:'Gelato',e:'🍦'},{n:'Pane',e:'🍞'},{n:'Latte',e:'🥛'},{n:'Mela',e:'🍎'},
+  {n:'Banana',e:'🍌'},{n:'Cioccolato',e:'🍫'},{n:'Succo',e:'🧃'},{n:'Acqua',e:'💧'},
+  {n:'Biscotti',e:'🍪'},{n:'Formaggio',e:'🧀'},{n:'Yogurt',e:'🥣'},{n:'Uova',e:'🥚'},
+  {n:'Pizza',e:'🍕'},{n:'Pasta',e:'🍝'},{n:'Pomodori',e:'🍅'},{n:'Arance',e:'🍊'},
+  {n:'Fragole',e:'🍓'},{n:'Burro',e:'🧈'},{n:'Succo arancia',e:'🍹'},{n:'Miele',e:'🍯'}
+];
+const BANCONOTE = [1,2,5,10,20,50];
+const CLASSI = {1:'b1',2:'b2',5:'b5',10:'b10',20:'b20',50:'b50'};
+
+let livello=1, totale=0, datoGiven=0, selBanconote={};
+let scoreOk=0, scoreErr=0, step=1;
+
+function r(n){ return Math.round(n*100)/100; }
+function fmt(n){ return n.toFixed(2).replace('.',','); }
+
+function setLevel(l){
+  livello=l;
+  document.querySelectorAll('.level-btn').forEach((b,i)=>b.classList.toggle('active',i===l-1));
+  nuovoRound();
+}
+
+function prezzoRandom(){
+  let base=Math.floor(Math.random()*9)+1;
+  if(livello===2 && Math.random()<0.6) return base+0.5;
+  if(livello===3){
+    let cent=[0,0.10,0.20,0.30,0.40,0.50,0.60,0.70,0.80,0.90][Math.floor(Math.random()*10)];
+    return r(base+cent);
+  }
+  return base;
+}
+
+function setStep(s){
+  step=s;
+  [1,2,3].forEach(i=>{
+    let dot=document.getElementById('sd'+i);
+    let lbl=document.getElementById('slbl'+i);
+    let box=document.getElementById('box-step'+i);
+    dot.className='step-dot'+(i<s?' done':i===s?' active':'');
+    lbl.className='step-lbl'+(i===s?' active':'');
+    box.classList.toggle('disabled', i>s);
+  });
+  document.getElementById('sl1').className='step-line'+(s>1?' done':'');
+  document.getElementById('sl2').className='step-line'+(s>2?' done':'');
+}
+
+function nuovoRound(){
+  ['fb-step1','fb-step2','fb-step3'].forEach(id=>{
+    let el=document.getElementById(id);
+    el.style.display='none'; el.className='feedback';
+  });
+  document.getElementById('totale-input').value='';
+  document.getElementById('resto-input').value='';
+  resetBanconote(true);
+  setStep(1);
+
+  let n=[3,5,7][Math.floor(Math.random()*3)];
+  let pool=[...PRODOTTI].sort(()=>Math.random()-0.5).slice(0,n);
+  pool.forEach(p=>p.prezzo=prezzoRandom());
+  totale=r(pool.reduce((s,p)=>s+p.prezzo,0));
+
+  document.getElementById('items-grid').innerHTML=pool.map(p=>`
+    <div class="item-card">
+      <div class="item-emoji">${p.e}</div>
+      <div class="item-name">${p.n}</div>
+      <div class="item-price">€ ${fmt(p.prezzo)}</div>
+    </div>`).join('');
+
+  document.getElementById('tot-ref').textContent='€ '+fmt(totale);
+  renderBanconote();
+}
+
+function verificaTotale(){
+  let val=parseFloat(document.getElementById('totale-input').value.replace(',','.'));
+  let fb=document.getElementById('fb-step1');
+  fb.style.display='block';
+  if(isNaN(val)){
+    fb.className='feedback err';
+    fb.textContent='✏️ Inserisci il totale!';
+    return;
+  }
+  if(Math.abs(val-totale)<0.01){
+    fb.className='feedback ok';
+    fb.textContent='🎉 Esatto! Il totale è € '+fmt(totale)+'. Ora scegli come pagare!';
+    scoreOk++;
+    document.getElementById('s-ok').textContent=scoreOk;
+    setTimeout(()=>setStep(2),800);
+  } else {
+    fb.className='feedback err';
+    fb.textContent='❌ Non è corretto. Riprova! Somma bene tutti i prezzi.';
+    scoreErr++;
+    document.getElementById('s-err').textContent=scoreErr;
+  }
+}
+
+function renderBanconote(){
+  let html='';
+  BANCONOTE.forEach(v=>{
+    let cls=CLASSI[v], cnt=selBanconote[v]||0;
+    html+=`<div class="banconota">
+      <div class="bill ${cls}" onclick="addBanconota(${v})">€ ${v}
+        ${cnt>0?`<div style="position:absolute;top:-8px;right:-8px;background:#c62828;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">${cnt}</div>`:''}
+      </div>
+      <span class="banconota-lbl">tocca per aggiungere</span>
+    </div>`;
+  });
+  document.getElementById('banconote-grid').innerHTML=html;
+  document.getElementById('dato-val').textContent='€ '+fmt(datoTotale());
+}
+
+function addBanconota(v){
+  selBanconote[v]=(selBanconote[v]||0)+1;
+  renderBanconote();
+}
+
+function resetBanconote(silent){
+  BANCONOTE.forEach(v=>selBanconote[v]=0);
+  datoGiven=0;
+  if(!silent) renderBanconote();
+}
+
+function datoTotale(){
+  return r(BANCONOTE.reduce((s,v)=>s+v*(selBanconote[v]||0),0));
+}
+
+function confermaPagamento(){
+  let dato=datoTotale();
+  let fb=document.getElementById('fb-step2');
+  fb.style.display='block';
+  if(dato<totale){
+    fb.className='feedback err';
+    fb.textContent='⚠️ Hai dato € '+fmt(dato)+' ma il totale è € '+fmt(totale)+'. Aggiungi ancora qualche banconota!';
+    return;
+  }
+  datoGiven=dato;
+  fb.className='feedback ok';
+  fb.textContent='✅ Hai dato € '+fmt(dato)+'. Ora calcola il resto!';
+  setTimeout(()=>setStep(3),800);
+}
+
+function verificaResto(){
+  let atteso=r(datoGiven-totale);
+  let ris=parseFloat(document.getElementById('resto-input').value.replace(',','.'));
+  let fb=document.getElementById('fb-step3');
+  fb.style.display='block';
+  if(isNaN(ris)){
+    fb.className='feedback err';
+    fb.textContent='✏️ Inserisci il resto!';
+    return;
+  }
+  if(Math.abs(ris-atteso)<0.01){
+    scoreOk++;
+    fb.className='feedback ok';
+    fb.textContent='🎉 Perfetto! Hai dato € '+fmt(datoGiven)+', pagavi € '+fmt(totale)+'. Il resto è € '+fmt(atteso)+'. Bravo!';
+  } else {
+    scoreErr++;
+    fb.className='feedback err';
+    fb.textContent='❌ Quasi! Hai dato € '+fmt(datoGiven)+', il totale era € '+fmt(totale)+'. Il resto giusto è € '+fmt(atteso)+'.';
+  }
+  document.getElementById('s-ok').textContent=scoreOk;
+  document.getElementById('s-err').textContent=scoreErr;
+}
+
+nuovoRound();
+</script>
+</body>
+</html>
