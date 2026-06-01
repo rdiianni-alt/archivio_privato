@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Il Bruco Mangianumeri</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+    background: linear-gradient(135deg, #e0f7fa, #f1f8e9);
+    min-height: 100vh;
+    padding: 10px;
+  }
+  header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 12px;
+  }
+  .logo a { display: block; }
+  .logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+  .blog-title { font-size: 14px; color: #555; font-style: italic; }
+
+  h1 { text-align: center; color: #2e7d32; font-size: 26px; margin-bottom: 10px; }
+
+  .speech-area { text-align: center; margin: 10px 0; min-height: 60px; }
+  .bubble {
+    display: inline-block; background: #fff9c4;
+    border: 3px solid #f9a825; border-radius: 20px;
+    padding: 10px 24px; font-size: 22px; color: #e65100;
+    font-weight: bold; position: relative;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .bubble::after {
+    content: ''; position: absolute;
+    bottom: -18px; left: 50%; transform: translateX(-50%);
+    border: 9px solid transparent; border-top-color: #f9a825;
+  }
+  .sub-hint { margin-top: 22px; font-size: 15px; color: #555; font-style: italic; }
+
+  .numbers-area {
+    display: flex; justify-content: center;
+    flex-wrap: wrap; gap: 14px; margin: 18px 0 10px;
+  }
+  .num-card {
+    background: #fff; border: 3px solid #66bb6a;
+    border-radius: 16px; padding: 12px 18px;
+    font-size: 34px; font-weight: bold; color: #1b5e20;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    display: flex; gap: 2px;
+  }
+  .digit {
+    padding: 4px 6px; border-radius: 8px;
+    transition: all 0.2s; cursor: default; user-select: none;
+  }
+  .digit.clickable {
+    cursor: pointer; border: 2px dashed #43a047;
+    animation: pulse 0.7s ease-in-out infinite alternate;
+  }
+  .digit.clickable:hover { background: #c8e6c9; transform: scale(1.15); }
+  @keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.12); box-shadow: 0 0 8px #66bb6a; }
+  }
+  .digit.eaten {
+    color: transparent; background: #a5d6a7;
+    cursor: default; animation: none;
+    position: relative; border: none;
+  }
+  .digit.eaten::after {
+    content: '😋'; position: absolute;
+    left: 50%; top: 50%; transform: translate(-50%, -50%);
+    font-size: 20px;
+  }
+  .digit.wrong-click { background: #ffcdd2; animation: shake 0.3s; }
+  @keyframes shake {
+    0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)}
+  }
+
+  .controls { text-align: center; margin: 12px 0; }
+  .btn {
+    background: #43a047; color: white; border: none;
+    border-radius: 30px; padding: 12px 28px; font-size: 18px;
+    font-family: inherit; cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: transform 0.1s, background 0.2s; margin: 6px;
+  }
+  .btn:hover { background: #2e7d32; transform: scale(1.05); }
+  .btn.red { background: #e53935; }
+  .btn.red:hover { background: #b71c1c; }
+  .btn.blue { background: #1e88e5; }
+  .btn.blue:hover { background: #1565c0; }
+
+  .final-area { text-align: center; margin: 14px 0; }
+  .final-area label { font-size: 20px; color: #4a148c; font-weight: bold; }
+  .final-input {
+    font-size: 22px; padding: 8px 14px;
+    border: 3px solid #7b1fa2; border-radius: 12px;
+    width: 100px; text-align: center;
+    font-family: inherit; margin: 0 10px;
+  }
+  .result-msg { font-size: 22px; font-weight: bold; margin-top: 10px; min-height: 34px; }
+  .correct { color: #2e7d32; }
+  .wrong { color: #c62828; }
+
+  .step-log {
+    max-width: 440px; margin: 10px auto;
+    background: rgba(255,255,255,0.7);
+    border-radius: 12px; padding: 10px 16px;
+    font-size: 15px; color: #333;
+  }
+  .step-log ul { padding-left: 20px; }
+  .step-log li { margin: 3px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <a href="https://matematicaconlemani.wordpress.com/" target="_blank">
+      <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+    </a>
+  </div>
+  <div class="blog-title">Matematiche non si nasce</div>
+</header>
+
+<h1>🐛 Il Bruco Mangianumeri</h1>
+
+<div class="speech-area">
+  <div class="bubble" id="bubble">Ciao! Premi "Nuova partita" per giocare! 🎉</div>
+  <div class="sub-hint" id="subHint"></div>
+</div>
+
+<div class="numbers-area" id="numbersArea"></div>
+
+<div class="step-log" id="stepLog" style="display:none">
+  <strong>Cosa ha mangiato il bruco:</strong>
+  <ul id="stepList"></ul>
+</div>
+
+<div class="final-area" id="finalArea" style="display:none">
+  <label>Quanto rimane? </label>
+  <input type="number" class="final-input" id="finalInput" placeholder="?">
+  <button class="btn blue" onclick="checkAnswer()">Controlla ✅</button>
+  <div class="result-msg" id="resultMsg"></div>
+</div>
+
+<div class="controls">
+  <button class="btn red" onclick="newGame()">Nuova partita 🔄</button>
+</div>
+
+<script>
+// Converti numero in parola italiana
+const unita = ['','uno','due','tre','quattro','cinque','sei','sette','otto','nove',
+                'dieci','undici','dodici','tredici','quattordici','quindici',
+                'sedici','diciassette','diciotto','diciannove'];
+const decine = ['','','venti','trenta','quaranta','cinquanta','sessanta','settanta','ottanta','novanta'];
+
+function toWords(n) {
+  if (n === 0) return 'zero';
+  if (n < 20) return unita[n];
+  const d = Math.floor(n / 10), u = n % 10;
+  let base = decine[d];
+  if (u === 1 || u === 8) base = base.slice(0,-1); // venti+uno → ventuno, venti+otto → ventotto
+  return u === 0 ? base : base + unita[u];
+}
+
+// Genera una partita casuale
+function generateGame() {
+  // Genera 5 numeri a due cifre tutti diversi, evitando numeri con cifre ripetute (es. 11,22)
+  const nums = [];
+  while (nums.length < 5) {
+    const n = Math.floor(Math.random() * 89) + 11; // 11-99
+    const d0 = Math.floor(n / 10), d1 = n % 10;
+    if (d1 === 0) continue; // evita multipli di 10 (cifra unità = 0, banale)
+    if (!nums.includes(n)) nums.push(n);
+  }
+
+  // Costruisci tutti i morsi possibili: per ogni numero, decina e unità
+  const allBites = [];
+  nums.forEach((n, ni) => {
+    allBites.push({ val: Math.floor(n / 10) * 10, numIdx: ni, digitPos: 0 });
+    allBites.push({ val: n % 10,                  numIdx: ni, digitPos: 1 });
+  });
+
+  // Scegli una cifra a caso da NON mangiare (deve valere > 0, già garantito)
+  const skipIdx = Math.floor(Math.random() * allBites.length);
+  const bites = allBites.filter((_, i) => i !== skipIdx);
+
+  // Fisher-Yates shuffle
+  for (let i = bites.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [bites[i], bites[j]] = [bites[j], bites[i]];
+  }
+
+  return { nums, steps: bites };
+}
+
+let game = null, stepIdx = 0, logLines = [], waitingClick = false;
+
+function newGame() {
+  game = generateGame();
+  stepIdx = 0; logLines = []; waitingClick = false;
+  document.getElementById('finalArea').style.display = 'none';
+  document.getElementById('resultMsg').textContent = '';
+  document.getElementById('stepLog').style.display = 'none';
+  document.getElementById('stepList').innerHTML = '';
+  document.getElementById('finalInput').value = '';
+  document.getElementById('subHint').textContent = '';
+  renderNumbers();
+  setBubble('Cominciamo! 🐛');
+  setTimeout(showCurrentStep, 700);
+}
+
+function renderNumbers() {
+  const area = document.getElementById('numbersArea');
+  area.innerHTML = '';
+  game.nums.forEach((n, ni) => {
+    const digits = String(n).split('');
+    const card = document.createElement('div');
+    card.className = 'num-card';
+    digits.forEach((d, di) => {
+      const span = document.createElement('span');
+      span.className = 'digit';
+      span.id = `d-${ni}-${di}`;
+      span.textContent = d;
+      span.onclick = () => onDigitClick(ni, di);
+      card.appendChild(span);
+    });
+    area.appendChild(card);
+  });
+}
+
+function setBubble(txt) { document.getElementById('bubble').textContent = txt; }
+function setHint(txt) { document.getElementById('subHint').textContent = txt; }
+
+function showCurrentStep() {
+  if (!game || stepIdx >= game.steps.length) return;
+  const s = game.steps[stepIdx];
+  const word = toWords(s.val);
+  setBubble(`Mangio ${word}! Tocca la cifra giusta! 👆`);
+  setHint('Trova la cifra che vale ' + word);
+  makeAllClickable();
+  waitingClick = true;
+}
+
+function makeAllClickable() {
+  game.nums.forEach((n, ni) => {
+    String(n).split('').forEach((d, di) => {
+      const el = document.getElementById(`d-${ni}-${di}`);
+      if (el && !el.classList.contains('eaten')) el.classList.add('clickable');
+    });
+  });
+}
+
+function clearClickable() {
+  document.querySelectorAll('.digit.clickable').forEach(el => el.classList.remove('clickable'));
+}
+
+function onDigitClick(ni, di) {
+  if (!waitingClick) return;
+  const s = game.steps[stepIdx];
+  const el = document.getElementById(`d-${ni}-${di}`);
+  if (!el || el.classList.contains('eaten')) return;
+
+  const digits = String(game.nums[ni]).split('');
+  const place = digits.length - 1 - di;
+  const digitVal = parseInt(digits[di]) * Math.pow(10, place);
+
+  if (digitVal === s.val) {
+    waitingClick = false;
+    clearClickable();
+    el.classList.add('eaten');
+    logLines.push(`Ho mangiato il <strong>${digits[di]}</strong> (vale ${toWords(s.val)}) dal numero <strong>${game.nums[ni]}</strong>`);
+    stepIdx++;
+    setHint('');
+    if (stepIdx >= game.steps.length) {
+      setBubble('Ho mangiato tutto! 🎉');
+      showLog();
+      showFinal();
+    } else {
+      setBubble('Esatto! 🌟');
+      setTimeout(showCurrentStep, 900);
+    }
+  } else {
+    el.classList.add('wrong-click');
+    const word = toWords(s.val);
+    setBubble(`Ops! Quella cifra non vale ${word}! Riprova 🤔`);
+    setTimeout(() => {
+      el.classList.remove('wrong-click');
+      setBubble(`Mangio ${word}! Tocca la cifra giusta! 👆`);
+    }, 900);
+  }
+}
+
+function showLog() {
+  document.getElementById('stepList').innerHTML = logLines.map(l => `<li>${l}</li>`).join('');
+  document.getElementById('stepLog').style.display = 'block';
+}
+
+function showFinal() {
+  document.getElementById('finalArea').style.display = 'block';
+}
+
+function calcResiduo() {
+  let tot = 0;
+  game.nums.forEach((n, ni) => {
+    String(n).split('').forEach((d, di) => {
+      const el = document.getElementById(`d-${ni}-${di}`);
+      if (el && !el.classList.contains('eaten')) {
+        const place = String(n).length - 1 - di;
+        tot += parseInt(d) * Math.pow(10, place);
+      }
+    });
+  });
+  return tot;
+}
+
+function checkAnswer() {
+  const val = parseInt(document.getElementById('finalInput').value);
+  const correct = calcResiduo();
+  const msg = document.getElementById('resultMsg');
+  if (isNaN(val)) { msg.textContent = 'Inserisci un numero! 🔢'; msg.className = 'result-msg wrong'; return; }
+  if (val === correct) {
+    msg.innerHTML = '🎉 Esatto! Rimane <strong>' + correct + '</strong>';
+    msg.className = 'result-msg correct';
+  } else {
+    msg.innerHTML = '❌ Quasi! Rimane <strong>' + correct + '</strong>. Riprova!';
+    msg.className = 'result-msg wrong';
+  }
+}
+</script>
+</body>
+</html>
