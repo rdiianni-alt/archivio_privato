@@ -55,6 +55,13 @@
     <p>Osserva la carta e scrivi quanti pallini vedi!</p>
   </div>
 </header>
+  
+  .logo img {
+width: 60px;
+height: 60px;
+object-fit: contain;
+border-radius: 50%;
+}
 
 <div class="controls">
   <label>Da <input type="number" id="minVal" value="1" min="1" max="49"> a <input type="number" id="maxVal" value="10" min="2" max="50"> pallini</label>
@@ -175,6 +182,7 @@ function checkAnswer() {
   }
   rb.style.display = 'block';
 }
+  
 
 function reveal() {
   if (answered) return;
@@ -191,12 +199,6 @@ const logoImg = document.getElementById('logoImg');
   logoImg.onerror = () => { logoImg.style.display='none'; };
   logoImg.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABEAAAAQACAYAAAA+pKTtAAAACXBIWXMAAC4jAAAuIwF4pT92AAAgAElEQVR4nOy9d5xdV3nv/13r9D5z+oz6SNW2ZEuyZVuucAMXMMWAA4Zgg8GEGkJC7o+SXEi7JCEJpIckkNBCCS3UUAIGjHHBHcuWZfU+mhnNaHo7Z/+x9z5n1GRH87uyzud5Ppqdo7P3Xnudvddez3re530cIYTAgAEDBgwYMGDAgAEDBgwYMHCWwz3VDTBgwIABAwYMGDBgwIABAwYMPN9gEBAGDBgwYMCAw";
 
-  .logo img {
-width: 60px;
-height: 60px;
-object-fit: contain;
-border-radius: 50%;
-}
   
 window.onload = () => newCard();
 </script>
