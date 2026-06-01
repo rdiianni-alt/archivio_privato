@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Il Gioco delle Mattonelle</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    padding: 16px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .logo img {
+    width: 60px; height: 60px;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+  header h1 { font-size: 1.3rem; color: #333; line-height: 1.2; }
+  header h1 span { display: block; font-size: 0.85rem; color: #777; font-style: italic; }
+
+  .intro {
+    text-align: center;
+    color: #555;
+    font-size: 0.88rem;
+    margin-bottom: 14px;
+  }
+
+  .pattern-btns {
+    display: flex; gap: 8px; justify-content: center;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .pattern-btns button {
+    padding: 6px 14px; font-size: 0.82rem;
+    border: none; border-radius: 8px;
+    background: #ddd; color: #444;
+    cursor: pointer; font-weight: 600;
+    transition: background 0.2s;
+  }
+  .pattern-btns button.active { background: #4a90d9; color: white; }
+
+  .game-area {
+    display: flex; flex-wrap: wrap;
+    gap: 24px; justify-content: center; align-items: flex-start;
+  }
+  .panel {
+    background: white; border-radius: 14px;
+    padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  .panel h2 {
+    font-size: 0.9rem; color: #555; margin-bottom: 10px;
+    text-align: center; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+
+  .grid {
+    display: grid; gap: 2px;
+  }
+  /* cells */
+  .target-cell { cursor: default; }
+  .play-cell {
+    border: 2px dashed #ccc; border-radius: 5px;
+    cursor: pointer; transition: border-color 0.15s;
+    position: relative; overflow: hidden;
+  }
+  .play-cell:hover { border-color: #4a90d9; }
+  .play-cell canvas { display: block; }
+
+  .controls {
+    display: flex; flex-wrap: wrap;
+    gap: 10px; justify-content: center; margin-top: 18px;
+  }
+  button.btn {
+    padding: 9px 22px; border: none; border-radius: 8px;
+    font-size: 0.9rem; cursor: pointer; font-weight: 600;
+    transition: background 0.2s, transform 0.1s;
+  }
+  button.btn:active { transform: scale(0.97); }
+  .btn-check { background: #4a90d9; color: white; }
+  .btn-check:hover { background: #357abd; }
+  .btn-reset { background: #e8e8e8; color: #555; }
+  .btn-reset:hover { background: #ccc; }
+
+  #feedback {
+    text-align: center; font-size: 1.15rem;
+    font-weight: bold; margin-top: 14px; min-height: 30px;
+  }
+  .ok { color: #5cb85c; }
+  .no { color: #e74c3c; }
+
+  /* size toggle */
+  .size-btns {
+    display: flex; gap: 8px; justify-content: center;
+    margin-bottom: 12px;
+  }
+  .size-btns button {
+    padding: 5px 14px; font-size: 0.8rem;
+    border: none; border-radius: 8px;
+    background: #ddd; color: #444;
+    cursor: pointer; font-weight: 600;
+  }
+  .size-btns button.active { background: #f0a500; color: white; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+  </div>
+  <h1>
+    Il Gioco delle Mattonelle
+    <span>Matematiche non si nasce</span>
+  </h1>
+</header>
+
+<div class="intro">
+  📌 Clicca le mattonelline per ruotarle e riprodurre il modello!
+</div>
+
+<!-- Griglia: 3×3 o 4×4 -->
+<div class="size-btns">
+  <button id="s3" onclick="setSize(3)">3 × 3</button>
+  <button id="s4" onclick="setSize(4)">4 × 4</button>
+</div>
+
+<!-- Scegli pattern -->
+<div class="pattern-btns" id="patternBtns"></div>
+
+<div class="game-area">
+  <div class="panel">
+    <h2>🎯 Modello</h2>
+    <div class="grid" id="targetGrid"></div>
+  </div>
+  <div class="panel">
+    <h2>🧩 La tua risposta</h2>
+    <div class="grid" id="playGrid"></div>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="btn btn-check" onclick="checkSolution()">✅ Controlla</button>
+  <button class="btn btn-reset" onclick="resetGrid()">🔄 Ricomincia</button>
+</div>
+<div id="feedback"></div>
+
+<script>
+// ── TILE ──────────────────────────────────────────────────────────────────
+// La mattonella è sempre la stessa: triangolo nero in basso-sinistra,
+// bianco in alto-destra, divisi da diagonale top-right → bottom-left.
+// rotation 0,1,2,3 = 0°,90°,180°,270°
+
+function drawTile(canvas, rotation) {
+  const s = canvas.width;
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, s, s);
+  ctx.save();
+  ctx.translate(s/2, s/2);
+  ctx.rotate(rotation * Math.PI / 2);
+  ctx.translate(-s/2, -s/2);
+
+  // white background
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, s, s);
+  // black triangle (bottom-left)
+  ctx.fillStyle = "#111";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(s, s);
+  ctx.lineTo(0, s);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
+
+// ── PATTERNS ──────────────────────────────────────────────────────────────
+// Ogni cella: rotation 0-3
+// 0 = nero in basso-sinistra  (▟)
+// 1 = nero in alto-sinistra   (▙)  (ruotato 90° CW)
+// 2 = nero in alto-destra     (▛)  (ruotato 180°)
+// 3 = nero in basso-destra    (▜)  (ruotato 270°)
+
+const PATTERNS_3 = [
+  {
+    name:"Freccia ↗",
+    grid:[
+      [3,2,2],
+      [0,3,2],
+      [0,0,3],
+    ]
+  },
+  {
+    name:"Cornice",
+    grid:[
+      [1,2,2],
+      [1,0,2], // center free = 0 ok
+      [0,0,3],
+    ]
+  },
+  {
+    name:"X",
+    grid:[
+      [0,1,0],
+      [3,0,1],
+      [0,3,0],
+    ]
+  },
+  {
+    name:"Zig-zag",
+    grid:[
+      [0,3,0],
+      [1,0,3],
+      [0,1,0],
+    ]
+  },
+  {
+    name:"Spirale",
+    grid:[
+      [0,1,2],
+      [3,0,2],
+      [3,3,2],
+    ]
+  },
+];
+
+const PATTERNS_4 = [
+  {
+    name:"Strisce",
+    grid:[
+      [0,0,0,0],
+      [0,0,0,0],
+      [0,0,0,0],
+      [0,0,0,0],
+    ]
+  },
+  {
+    name:"Cornice",
+    grid:[
+      [1,2,2,2],
+      [1,0,0,2],
+      [1,0,0,2],
+      [0,0,0,3],
+    ]
+  },
+  {
+    name:"Farfalla",
+    grid:[
+      [0,1,0,1],
+      [3,0,3,0],
+      [0,1,0,1],
+      [3,0,3,0],
+    ]
+  },
+  {
+    name:"Spirale",
+    grid:[
+      [0,1,1,2],
+      [3,0,1,2],
+      [3,3,0,2],
+      [3,3,3,2],
+    ]
+  },
+  {
+    name:"Rombo",
+    grid:[
+      [0,0,1,1],
+      [0,0,1,1],
+      [3,3,2,2],
+      [3,3,2,2],
+    ]
+  },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+let N = 3;
+let currentPatternIdx = 0;
+let playerGrid = [];
+let patterns = PATTERNS_3;
+let CELL = 70; // px for play; target smaller
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+setSize(3);
+
+function setSize(n) {
+  N = n;
+  patterns = n === 3 ? PATTERNS_3 : PATTERNS_4;
+  currentPatternIdx = 0;
+  document.getElementById("s3").classList.toggle("active", n===3);
+  document.getElementById("s4").classList.toggle("active", n===4);
+  buildPatternButtons();
+  loadPattern(0);
+}
+
+function buildPatternButtons() {
+  const div = document.getElementById("patternBtns");
+  div.innerHTML = "";
+  patterns.forEach((p, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = `${i+1}. ${p.name}`;
+    btn.id = `pb${i}`;
+    btn.onclick = () => loadPattern(i);
+    div.appendChild(btn);
+  });
+}
+
+function loadPattern(idx) {
+  currentPatternIdx = idx;
+  document.getElementById("feedback").textContent = "";
+  patterns.forEach((_, i) => {
+    const b = document.getElementById(`pb${i}`);
+    if(b) b.classList.toggle("active", i===idx);
+  });
+  playerGrid = Array.from({length:N}, () => Array(N).fill(0));
+  renderTarget();
+  renderPlayGrid();
+}
+
+function renderTarget() {
+  const pat = patterns[currentPatternIdx];
+  const container = document.getElementById("targetGrid");
+  container.innerHTML = "";
+  const cs = N===3 ? 80 : 65;
+  container.style.gridTemplateColumns = `repeat(${N}, ${cs}px)`;
+  container.style.gridTemplateRows = `repeat(${N}, ${cs}px)`;
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      const cell = document.createElement("div");
+      cell.className = "target-cell";
+      cell.style.cssText = `width:${cs}px;height:${cs}px;overflow:hidden;`;
+      const canvas = document.createElement("canvas");
+      canvas.width = cs; canvas.height = cs;
+      drawTile(canvas, pat.grid[r][c]);
+      cell.appendChild(canvas);
+      container.appendChild(cell);
+    }
+  }
+}
+
+function renderPlayGrid() {
+  const container = document.getElementById("playGrid");
+  container.innerHTML = "";
+  const cs = N===3 ? 80 : 68;
+  container.style.gridTemplateColumns = `repeat(${N}, ${cs}px)`;
+  container.style.gridTemplateRows = `repeat(${N}, ${cs}px)`;
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      const cell = document.createElement("div");
+      cell.className = "play-cell";
+      cell.style.cssText = `width:${cs}px;height:${cs}px;`;
+      const canvas = document.createElement("canvas");
+      canvas.width = cs; canvas.height = cs;
+      drawTile(canvas, playerGrid[r][c]);
+      cell.appendChild(canvas);
+      const rr = r, cc = c;
+      cell.addEventListener("click", () => {
+        playerGrid[rr][cc] = (playerGrid[rr][cc] + 1) % 4;
+        drawTile(canvas, playerGrid[rr][cc]);
+        document.getElementById("feedback").textContent = "";
+      });
+      container.appendChild(cell);
+    }
+  }
+}
+
+function checkSolution() {
+  const pat = patterns[currentPatternIdx];
+  let ok = true;
+  outer: for (let r = 0; r < N; r++)
+    for (let c = 0; c < N; c++)
+      if (playerGrid[r][c] !== pat.grid[r][c]) { ok = false; break outer; }
+  const fb = document.getElementById("feedback");
+  fb.textContent = ok ? "🎉 Perfetto! Hai risolto il puzzle!" : "❌ Non ancora… riprova!";
+  fb.className = ok ? "ok" : "no";
+}
+
+function resetGrid() {
+  playerGrid = Array.from({length:N}, () => Array(N).fill(0));
+  document.getElementById("feedback").textContent = "";
+  renderPlayGrid();
+}
+</script>
+</body>
+</html>
