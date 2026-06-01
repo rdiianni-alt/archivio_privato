@@ -16,38 +16,35 @@
     padding: 20px;
   }
 
-  /* LOGO */
-  .logo {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  .logo-circle {
-    width: 90px; height: 90px;
-    border: 3px solid #222;
-    border-radius: 50%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 9px;
-    color: #222;
-    text-align: center;
-    padding: 6px;
-    position: relative;
-    background: #fdf6e3;
-  }
-  .logo-face { font-size: 28px; line-height: 1; }
-  .logo-symbols { font-size: 8px; letter-spacing: 1px; color: #555; }
-  .logo-text {
-    font-size: 11px;
-    font-style: italic;
-    color: #444;
-    margin-top: 3px;
-    letter-spacing: 1px;
-  }
+  .logo { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; }
+  .logo img { width: 90px; height: 90px; object-fit: contain; }
+  .logo-text { font-size: 11px; font-style: italic; color: #444; margin-top: 3px; letter-spacing: 1px; }
   .logo-text span { text-decoration: line-through; color: #c0392b; }
+
+  h1 { font-size: 1.6rem; color: #5d3a1a; margin-bottom: 4px; letter-spacing: 2px; }
+  .subtitle { font-size: 0.85rem; color: #888; margin-bottom: 16px; }
+
+  .setup {
+    background: white; border-radius: 16px; padding: 20px 28px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.1); width: 100%; max-width: 520px; margin-bottom: 20px;
+  }
+  .setup h2 { font-size: 1rem; color: #5d3a1a; margin-bottom: 14px; }
+  .setup-row { margin-bottom: 14px; }
+  .setup-row label { display: block; font-size: 0.85rem; color: #555; margin-bottom: 6px; font-weight: bold; }
+  .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .btn-opt {
+    padding: 7px 14px; border: 2px solid #c8a97e; border-radius: 20px;
+    background: white; color: #5d3a1a; font-size: 0.85rem; cursor: pointer;
+    transition: all 0.2s; font-family: Georgia, serif;
+  }
+  .btn-opt.active { background: #c8a97e; color: white; border-color: #a07850; }
+  .btn-opt:hover { background: #f0e0c8; }
+  .btn-start {
+    width: 100%; padding: 12px; background: #5d3a1a; color: white;
+    border: none; border-radius: 12px; font-size: 1.1rem; font-family: Georgia, serif;
+    cursor: pointer; margin-top: 8px; letter-spacing: 1px; transition: background 0.2s;
+  }
+  .btn-start:hover { background: #7a4f2a; }
 
   h1 {
     font-size: 1.6rem;
