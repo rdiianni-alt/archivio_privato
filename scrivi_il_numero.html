@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scrivi il numero in lettere</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f4ff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 30px;
+    width: 100%;
+    max-width: 500px;
+  }
+  .logo img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+  h1 { font-size: 1.4rem; color: #2c3e7a; }
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 36px 28px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+  }
+  .number-display {
+    font-size: 5rem;
+    font-weight: 800;
+    color: #2c3e7a;
+    margin-bottom: 24px;
+    line-height: 1;
+  }
+  .boxes {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .box {
+    width: 36px;
+    height: 44px;
+    border: 2px solid #2c3e7a;
+    border-radius: 6px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    color: #2c3e7a;
+    background: #f0f4ff;
+    outline: none;
+    transition: border-color 0.2s;
+    caret-color: transparent;
+  }
+  .box:focus { border-color: #5b7cff; background: #e8eeff; }
+  .box.correct { border-color: #27ae60; background: #eafaf1; color: #27ae60; }
+  .box.wrong { border-color: #e74c3c; background: #fdecea; color: #e74c3c; }
+  .feedback {
+    font-size: 1.1rem;
+    font-weight: 700;
+    min-height: 28px;
+    margin-bottom: 16px;
+    color: #27ae60;
+  }
+  .feedback.error { color: #e74c3c; }
+  .btn {
+    background: #2c3e7a;
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin: 4px;
+  }
+  .btn:hover { background: #5b7cff; }
+  .btn.secondary { background: #aaa; }
+  .btn.secondary:hover { background: #888; }
+  .score {
+    margin-top: 20px;
+    font-size: 0.95rem;
+    color: #888;
+  }
+  .score span { font-weight: 700; color: #2c3e7a; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <img src="logo.png" alt="logo">
+  </div>
+  <h1>Scrivi il numero in lettere!</h1>
+</header>
+
+<div class="card">
+  <div class="number-display" id="numDisplay">?</div>
+  <div class="boxes" id="boxesContainer"></div>
+  <div class="feedback" id="feedback"></div>
+  <button class="btn" id="checkBtn" onclick="checkAnswer()">Controlla</button>
+  <button class="btn secondary" onclick="newNumber()">Nuovo numero</button>
+  <div class="score">Corretti: <span id="correct">0</span> &nbsp;|&nbsp; Tentativi: <span id="attempts">0</span></div>
+</div>
+
+<script>
+const numeri = {
+  1:"UNO",2:"DUE",3:"TRE",4:"QUATTRO",5:"CINQUE",6:"SEI",7:"SETTE",8:"OTTO",9:"NOVE",10:"DIECI",
+  11:"UNDICI",12:"DODICI",13:"TREDICI",14:"QUATTORDICI",15:"QUINDICI",16:"SEDICI",17:"DICIASSETTE",
+  18:"DICIOTTO",19:"DICIANNOVE",20:"VENTI",21:"VENTUNO",22:"VENTIDUE",23:"VENTITRE",24:"VENTIQUATTRO",
+  25:"VENTICINQUE",26:"VENTISEI",27:"VENTISETTE",28:"VENTOTTO",29:"VENTINOVE",30:"TRENTA",
+  31:"TRENTUNO",32:"TRENTADUE",33:"TRENTATRE",34:"TRENTAQUATTRO",35:"TRENTACINQUE",36:"TRENTASEI",
+  37:"TRENTASETTE",38:"TRENTOTTO",39:"TRENTANOVE",40:"QUARANTA",41:"QUARANTUNO",42:"QUARANTADUE",
+  43:"QUARANTATRE",44:"QUARANTAQUATTRO",45:"QUARANTACINQUE",46:"QUARANTASEI",47:"QUARANTASETTE",
+  48:"QUARANTOTTO",49:"QUARANTANOVE",50:"CINQUANTA",51:"CINQUANTUNO",52:"CINQUANTADUE",
+  53:"CINQUANTATRE",54:"CINQUANTAQUATTRO",55:"CINQUANTACINQUE",56:"CINQUANTASEI",57:"CINQUANTASETTE",
+  58:"CINQUANTOTTO",59:"CINQUANTANOVE",60:"SESSANTA",61:"SESSANTUNO",62:"SESSANTADUE",
+  63:"SESSANTATRE",64:"SESSANTAQUATTRO",65:"SESSANTACINQUE",66:"SESSANTASEI",67:"SESSANTASETTE",
+  68:"SESSANTOTTO",69:"SESSANTANOVE",70:"SETTANTA",71:"SETTANTUNO",72:"SETTANTADUE",
+  73:"SETTANTATRE",74:"SETTANTAQUATTRO",75:"SETTANTACINQUE",76:"SETTANTASEI",77:"SETTANTASETTE",
+  78:"SETTANTOTTO",79:"SETTANTANOVE",80:"OTTANTA",81:"OTTANTUNO",82:"OTTANTADUE",83:"OTTANTATRE",
+  84:"OTTANTAQUATTRO",85:"OTTANTACINQUE",86:"OTTANTASEI",87:"OTTANTASETTE",88:"OTTANTOTTO",
+  89:"OTTANTANOVE",90:"NOVANTA",91:"NOVANTUNO",92:"NOVANTADUE",93:"NOVANTATRE",94:"NOVANTAQUATTRO",
+  95:"NOVANTACINQUE",96:"NOVANTASEI",97:"NOVANTASETTE",98:"NOVANTOTTO",99:"NOVANTANOVE",100:"CENTO"
+};
+
+let current = 1, correctCount = 0, attemptCount = 0;
+
+function newNumber() {
+  current = Math.floor(Math.random() * 100) + 1;
+  document.getElementById('numDisplay').textContent = current;
+  const word = numeri[current];
+  const container = document.getElementById('boxesContainer');
+  container.innerHTML = '';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+
+  for (let i = 0; i < word.length; i++) {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.maxLength = 1;
+    inp.className = 'box';
+    inp.dataset.index = i;
+    inp.addEventListener('input', (e) => {
+      const val = e.target.value.toUpperCase().replace(/[^A-Z]/g,'');
+      e.target.value = val;
+      if (val && i < word.length - 1) {
+        container.children[i+1].focus();
+      }
+    });
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !e.target.value && i > 0) {
+        container.children[i-1].focus();
+      }
+      if (e.key === 'Enter') checkAnswer();
+    });
+    container.appendChild(inp);
+  }
+  container.children[0].focus();
+}
+
+function checkAnswer() {
+  const word = numeri[current];
+  const container = document.getElementById('boxesContainer');
+  const boxes = container.querySelectorAll('.box');
+  let answer = '';
+  boxes.forEach(b => answer += b.value.toUpperCase());
+
+  if (answer.length < word.length) {
+    document.getElementById('feedback').textContent = 'Completa tutti gli spazi!';
+    document.getElementById('feedback').className = 'feedback error';
+    return;
+  }
+
+  attemptCount++;
+  document.getElementById('attempts').textContent = attemptCount;
+
+  let allCorrect = true;
+  boxes.forEach((b, i) => {
+    if (b.value.toUpperCase() === word[i]) {
+      b.classList.add('correct');
+    } else {
+      b.classList.add('wrong');
+      allCorrect = false;
+    }
+  });
+
+  const fb = document.getElementById('feedback');
+  if (allCorrect) {
+    correctCount++;
+    document.getElementById('correct').textContent = correctCount;
+    fb.textContent = 'Esatto!';
+    fb.className = 'feedback';
+    setTimeout(newNumber, 1200);
+  } else {
+    fb.textContent = 'Riprova!';
+    fb.className = 'feedback error';
+    setTimeout(() => {
+      boxes.forEach(b => { b.classList.remove('correct','wrong'); b.value=''; });
+      fb.textContent='';
+      container.children[0].focus();
+    }, 1000);
+  }
+}
+
+newNumber();
+</script>
+</body>
+</html>
