@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scrivi il numero in lettere</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f4ff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 30px;
+    width: 100%;
+    max-width: 600px;
+  }
+  .logo img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+  h1 { font-size: 1.4rem; color: #2c3e7a; }
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 36px 28px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+  }
+  .number-display {
+    font-size: 4rem;
+    font-weight: 800;
+    color: #2c3e7a;
+    margin-bottom: 24px;
+    line-height: 1;
+  }
+  .boxes {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .box {
+    width: 30px;
+    height: 40px;
+    border: 2px solid #2c3e7a;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    color: #2c3e7a;
+    background: #f0f4ff;
+    outline: none;
+    transition: border-color 0.2s;
+    caret-color: transparent;
+  }
+  .box:focus { border-color: #5b7cff; background: #e8eeff; }
+  .box.correct { border-color: #27ae60; background: #eafaf1; color: #27ae60; }
+  .box.wrong { border-color: #e74c3c; background: #fdecea; color: #e74c3c; }
+  .feedback {
+    font-size: 1.1rem;
+    font-weight: 700;
+    min-height: 28px;
+    margin-bottom: 16px;
+    color: #27ae60;
+  }
+  .feedback.error { color: #e74c3c; }
+  .btn {
+    background: #2c3e7a;
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin: 4px;
+  }
+  .btn:hover { background: #5b7cff; }
+  .btn.secondary { background: #aaa; }
+  .btn.secondary:hover { background: #888; }
+  .score {
+    margin-top: 20px;
+    font-size: 0.95rem;
+    color: #888;
+  }
+  .score span { font-weight: 700; color: #2c3e7a; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <img src="logo.png" alt="logo">
+  </div>
+  <h1>Scrivi il numero in lettere!</h1>
+</header>
+
+<div class="card">
+  <div class="number-display" id="numDisplay">?</div>
+  <div class="boxes" id="boxesContainer"></div>
+  <div class="feedback" id="feedback"></div>
+  <button class="btn" onclick="checkAnswer()">Controlla</button>
+  <button class="btn secondary" onclick="newNumber()">Nuovo numero</button>
+  <div class="score">Corretti: <span id="correct">0</span> &nbsp;|&nbsp; Tentativi: <span id="attempts">0</span></div>
+</div>
+
+<script>
+// --- Generatore di numeri in lettere (italiano) ---
+const u = ["","UNO","DUE","TRE","QUATTRO","CINQUE","SEI","SETTE","OTTO","NOVE",
+           "DIECI","UNDICI","DODICI","TREDICI","QUATTORDICI","QUINDICI","SEDICI",
+           "DICIASSETTE","DICIOTTO","DICIANNOVE"];
+const dec = ["","","VENTI","TRENTA","QUARANTA","CINQUANTA","SESSANTA","SETTANTA","OTTANTA","NOVANTA"];
+
+function decine(n) {
+  if (n < 20) return u[n];
+  const d = Math.floor(n / 10), r = n % 10;
+  // se la unità è 1 o 8, si elimina la vocale finale della decina
+  let base = dec[d];
+  if (r === 1 || r === 8) base = base.slice(0,-1);
+  return base + u[r];
+}
+
+function centinaia(n) {
+  if (n < 100) return decine(n);
+  const c = Math.floor(n / 100), r = n % 100;
+  let base = (c === 1 ? "" : u[c]) + "CENTO";
+  // se resto inizia con 8, elimina la O finale di CENTO
+  if (r >= 80 && r < 90) base = base.slice(0,-1);
+  return base + (r > 0 ? decine(r) : "");
+}
+
+function migliaia(n) {
+  const m = Math.floor(n / 1000), r = n % 1000;
+  let base;
+  if (m === 1) base = "MILLE";
+  else base = centinaia(m) + "MILA";
+  return base + (r > 0 ? centinaia(r) : "");
+}
+
+function toItalian(n) {
+  if (n < 1000) return centinaia(n);
+  return migliaia(n);
+}
+
+// Genera numeri "puliti" tra 1000 e 90000:
+// multipli di 100 per non avere parole troppo lunghe, ma con varietà
+function randomNumber() {
+  // scegliamo tra: multipli di 1000, o numeri con centinaia e decine
+  const type = Math.random();
+  let n;
+  if (type < 0.4) {
+    // multiplo di 1000: da 1000 a 90000
+    n = (Math.floor(Math.random() * 90) + 1) * 1000;
+  } else if (type < 0.7) {
+    // migliaia + centinaia: es. 3400, 15600
+    const m = (Math.floor(Math.random() * 90) + 1) * 1000;
+    const c = (Math.floor(Math.random() * 9) + 1) * 100;
+    n = m + c;
+    if (n > 90000) n = m;
+  } else {
+    // numero completo: es. 23456
+    n = Math.floor(Math.random() * 89001) + 1000;
+  }
+  return Math.min(n, 90000);
+}
+
+let current = 1000, correctCount = 0, attemptCount = 0;
+
+function newNumber() {
+  current = randomNumber();
+  document.getElementById('numDisplay').textContent = current.toLocaleString('it-IT');
+  const word = toItalian(current);
+  const container = document.getElementById('boxesContainer');
+  container.innerHTML = '';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+
+  for (let i = 0; i < word.length; i++) {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.maxLength = 1;
+    inp.className = 'box';
+    inp.dataset.index = i;
+    inp.addEventListener('input', (e) => {
+      const val = e.target.value.toUpperCase().replace(/[^A-Z]/g,'');
+      e.target.value = val;
+      if (val && i < word.length - 1) container.children[i+1].focus();
+    });
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !e.target.value && i > 0) container.children[i-1].focus();
+      if (e.key === 'Enter') checkAnswer();
+    });
+    container.appendChild(inp);
+  }
+  container.children[0].focus();
+}
+
+function checkAnswer() {
+  const word = toItalian(current);
+  const container = document.getElementById('boxesContainer');
+  const boxes = container.querySelectorAll('.box');
+  let answer = '';
+  boxes.forEach(b => answer += b.value.toUpperCase());
+
+  if (answer.length < word.length) {
+    document.getElementById('feedback').textContent = 'Completa tutti gli spazi!';
+    document.getElementById('feedback').className = 'feedback error';
+    return;
+  }
+
+  attemptCount++;
+  document.getElementById('attempts').textContent = attemptCount;
+
+  let allCorrect = true;
+  boxes.forEach((b, i) => {
+    if (b.value.toUpperCase() === word[i]) b.classList.add('correct');
+    else { b.classList.add('wrong'); allCorrect = false; }
+  });
+
+  const fb = document.getElementById('feedback');
+  if (allCorrect) {
+    correctCount++;
+    document.getElementById('correct').textContent = correctCount;
+    fb.textContent = 'Esatto!';
+    fb.className = 'feedback';
+    setTimeout(newNumber, 1200);
+  } else {
+    fb.textContent = 'Riprova!';
+    fb.className = 'feedback error';
+    setTimeout(() => {
+      boxes.forEach(b => { b.classList.remove('correct','wrong'); b.value=''; });
+      fb.textContent='';
+      container.children[0].focus();
+    }, 1000);
+  }
+}
+
+newNumber();
+</script>
+</body>
+</html>
