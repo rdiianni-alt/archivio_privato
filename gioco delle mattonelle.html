@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
- 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Il Gioco delle Mattonelle</title>
@@ -27,18 +26,24 @@
     width: 60px; height: 60px;
     object-fit: contain;
     border-radius: 50%;
+    display: block;
   }
+  .logo { text-decoration: none; }
   header h1 {
     font-size: 1.4rem;
     color: #333;
     line-height: 1.3;
   }
-  header h1 span {
-    display: block;
+  .blogname {
     font-size: 0.85rem;
-    color: #777;
     font-style: italic;
+    margin-top: 2px;
   }
+  .blogname a {
+    color: #4a90d9;
+    text-decoration: none;
+  }
+  .blogname a:hover { text-decoration: underline; }
 
   .intro {
     text-align: center;
@@ -131,13 +136,13 @@
 <body>
 
 <header>
-  <div class="logo">
-    <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+  <a href="https://matematicaconlemani.wordpress.com/" target="_blank" class="logo">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Matematiche non si nasce">
+  </a>
+  <div>
+    <h1>Il Gioco delle Mattonelle</h1>
+    <p class="blogname"><a href="https://matematicaconlemani.wordpress.com/" target="_blank">Matematiche non si nasce</a></p>
   </div>
-  <h1>
-    Il Gioco delle Mattonelle
-    <span>Matematiche non si nasce</span>
-  </h1>
 </header>
 
 <div class="intro">📌 Clicca le mattonelline per ruotarle e riprodurre il modello!</div>
