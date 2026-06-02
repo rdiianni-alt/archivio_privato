@@ -20,6 +20,11 @@
 
   .logo {
     margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
   }
   .logo img {
     width: 60px;
@@ -27,11 +32,9 @@
     object-fit: contain;
     border-radius: 50%;
   }
-
-  h1 {
+  .logo span {
     font-size: 1rem;
     color: #555;
-    margin-bottom: 24px;
     letter-spacing: 0.03em;
     font-style: italic;
   }
@@ -141,12 +144,10 @@
 </head>
 <body>
 
-<body>
-<div class="logo">
-  <img src="logo.png" alt="logo">
-  <div class="logo-text">Matematiche non si nasce</div>
-</div>
-
+<a class="logo" href="https://matematicaconlemani.wordpress.com/" target="_blank">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="logo">
+  <span>Matematiche non si nasce</span>
+</a>
 
 <div class="abaco">
   <!-- Migliaia -->
