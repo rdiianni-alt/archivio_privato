@@ -74,12 +74,13 @@ h1{font-size:20px;font-weight:700;color:#2a5a2a;text-align:center;margin-bottom:
   </div>
 </div>
 
-<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;align-items:center;">
   <button class="btn btn-add" onclick="aggiungi(1)">+1</button>
   <button class="btn btn-add" onclick="aggiungi(5)">+5</button>
   <button class="btn btn-add" onclick="aggiungi(10)">+10</button>
+  <button class="btn" style="background:#e53935;color:#fff;margin-left:8px;" onclick="reset()">↺ Ricomincia</button>
 </div>
-<div class="warn" id="warn-msg">⚠️ Non puoi avere più di 20 cannucce sfuse sul tavolo!</div>
+<div class="warn" id="warn-msg">⚠️ Che caos! Troppo disordine sul tavolo… lega qualche mazzetto prima di aggiungerne altre!</div>
 
 <div style="display:grid;grid-template-columns:1fr 120px;gap:12px;align-items:start;">
   <div>
@@ -117,6 +118,20 @@ let dragIdx=null;
 function nextStato(s){return s===0?1:s===1?2:0;}
 function statoClass(s){return s===0?'neutro':s===1?'col-a':'col-b';}
 
+function coloraClick(){
+  // conta quante sono già colorate (stato 1 o 2)
+  const colorate=sfuse.filter(s=>s.stato>0).length;
+  if(colorate>=sfuse.length) {
+    // tutte già colorate, resetta colori
+    sfuse.forEach(s=>s.stato=0);
+  } else {
+    // colora la prossima: fino a 5 → gialla (1), oltre → rossa (2)
+    const idx=colorate;
+    sfuse[idx].stato = idx<5 ? 1 : 2;
+  }
+  render();
+}
+
 function render(){
   const ta=document.getElementById('tavolo-area');
   ta.innerHTML='';
@@ -128,7 +143,7 @@ function render(){
       d.className='straw '+statoClass(s.stato);
       d.draggable=true;
       d.title='Clicca per colorare · trascina sul barattolo';
-      d.onclick=()=>{s.stato=nextStato(s.stato);render();};
+      d.onclick=()=>coloraClick();
       d.ondragstart=(e)=>{dragIdx=i;e.dataTransfer.effectAllowed='move';setTimeout(()=>d.classList.add('dragging'),0);};
       d.ondragend=()=>render();
       ta.appendChild(d);
@@ -218,6 +233,7 @@ function dropInBarattolo(e){
   }
 }
 
+function reset(){sfuse=[];mazzetti=0;barattolo=0;dragIdx=null;render();}
 function svuotaBarattolo(){barattolo=0;render();}
 
 function showWarn(){
