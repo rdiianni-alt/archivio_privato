@@ -135,7 +135,8 @@
 <div class="actions">
   <button class="btn btn-new" onclick="newCard()">🔄 Nuova carta</button>
   <div class="answer-box">
-    <input type="number" id="userAnswer" min="0" max="50" placeholder="?" oninput="checkAnswer()">
+    <input type="number" id="userAnswer" min="0" max="50" placeholder="?" onkeydown="if(event.key==='Enter') checkAnswer()">
+    <button class="btn" onclick="checkAnswer()" style="border-color:#43a047;color:#2e7d32;">✓ Conferma</button>
     <div class="result" id="resultBox"></div>
   </div>
   <button class="btn btn-reveal" onclick="reveal()">👁 Mostra risposta</button>
