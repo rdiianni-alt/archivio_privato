@@ -4,21 +4,82 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Subitizing – Matematiche non si nasce</title>
- <img src="logo.png" alt="Logo" style="width: 150px; display: block; margin: 10px auto;">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-  header { display: flex; align-items: center; gap: 16px; background: #fff; border-radius: 16px; padding: 14px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); width: 100%; max-width: 700px; margin-bottom: 16px; }
-  header img { width: 72px; height: 72px; object-fit: contain; }
-  header h1 { font-size: 20px; font-weight: 600; color: #222; }
-  header p { font-size: 13px; color: #777; margin-top: 2px; }
 
-  .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: #fff; border-radius: 12px; padding: 12px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); width: 100%; max-width: 700px; margin-bottom: 16px; }
+  /* HEADER centrato */
+  header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .logo a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .logo img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+
+  .logo .blog-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    letter-spacing: 0.3px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: #777;
+    margin-top: 2px;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 16px;
+  }
   .controls label { font-size: 13px; color: #555; display: flex; align-items: center; gap: 6px; }
   .controls input[type=number] { width: 54px; border: 1.5px solid #ddd; border-radius: 6px; padding: 4px 6px; font-size: 14px; text-align: center; }
   .controls select { border: 1.5px solid #ddd; border-radius: 6px; padding: 4px 8px; font-size: 13px; }
 
-  .card-wrap { width: 100%; max-width: 700px; background: #fff; border-radius: 20px; border: 2.5px solid #e0e0e0; overflow: hidden; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+  .card-wrap {
+    width: 100%;
+    max-width: 700px;
+    background: #fff;
+    border-radius: 20px;
+    border: 2.5px solid #e0e0e0;
+    overflow: hidden;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+  }
   canvas { display: block; width: 100%; }
 
   .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; width: 100%; max-width: 700px; margin-bottom: 10px; }
@@ -44,12 +105,13 @@
 <body>
 
 <header>
- <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
-  <img id="logoImg" src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/main/logo.png" alt="Logo Matematiche non si nasce">
-  <div>
-    <h1>Subitizing</h1>
-    <p>Osserva la carta e scrivi quanti pallini vedi!</p>
+  <div class="logo">
+    <a href="https://matematicaconlemani.wordpress.com/" target="_blank">
+      <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/main/logo.png" alt="Logo Matematiche non si nasce">
+      <span class="blog-name">Matematiche non si nasce</span>
+    </a>
   </div>
+  <p class="subtitle">Osserva la carta e scrivi quanti pallini vedi!</p>
 </header>
 
 <div class="controls">
@@ -181,12 +243,6 @@ function reveal() {
   rb.className = 'result show-answer';
   rb.style.display = 'block';
 }
-
-// Carica il logo dal file immagine locale (se presente) o usa testo
-const logoImg = document.getElementById('logoImg');
-  logoImg.onerror = () => { logoImg.style.display='none'; };
-  logoImg.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABEAAAAQACAYAAAA+pKTtAAAACXBIWXMAAC4jAAAuIwF4pT92AAAgAElEQVR4nOy9d5xdV3nv/13r9D5z+oz6SNW2ZEuyZVuucAMXMMWAA4Zgg8GEGkJC7o+SXEi7JCEJpIckkNBCCS3UUAIGjHHBHcuWZfU+mhnNaHo7Z/+x9z5n1GRH87uyzud5Ppqdo7P3Xnudvddez3re530cIYTAgAEDBgwYMGDAgAEDBgwYMHCWwz3VDTBgwIABAwYMGDBgwIABAwYMPN9gEBAGDBgwYMCAw";
-
 
 window.onload = () => newCard();
 </script>
