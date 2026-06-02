@@ -8,33 +8,41 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100vh; }
 
-/* HEADER */
 .header {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 18px; background: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; padding: 14px 18px; background: #fff;
   border-bottom: 1.5px solid #e0d9f7;
 }
-.logo-link { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-.logo-link img { width: 46px; height: 46px; border-radius: 50%; object-fit: contain; }
-.blog-name { font-size: 13px; font-weight: 600; color: #5a3dbf; line-height: 1.3; max-width: 160px; }
+.logo-link { display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; }
+.logo-link img { width: 54px; height: 54px; border-radius: 50%; object-fit: contain; }
+.blog-name { font-size: 14px; font-weight: 600; color: #5a3dbf; line-height: 1.4; text-align: center; }
 
-/* MAIN */
-.main { padding: 18px 14px 30px; max-width: 640px; margin: 0 auto; }
+.main { padding: 14px 14px 30px; max-width: 640px; margin: 0 auto; }
 
-/* CARTA */
+/* DIFFICOLTÀ */
+.diff-bar {
+  display: flex; gap: 8px; justify-content: center;
+  margin-bottom: 16px; flex-wrap: wrap;
+}
+.diff-btn {
+  border: 2px solid #b3a0ee; background: #f3efff; color: #4a2ea0;
+  font-size: 13px; font-weight: 700; border-radius: 20px;
+  padding: 6px 16px; cursor: pointer; transition: background .15s;
+}
+.diff-btn.active { background: #7c5cbf; color: #fff; border-color: #7c5cbf; }
+.diff-btn:hover:not(.active) { background: #e0d6ff; }
+
 .card-wrap { display: flex; justify-content: center; margin-bottom: 18px; }
 .card {
   background: #fff; border: 3px solid #7c5cbf; border-radius: 20px;
   padding: 20px 36px; text-align: center;
   box-shadow: 0 4px 16px #7c5cbf22;
 }
-.card-eq { font-size: 36px; font-weight: 700; color: #2d1a6e; display: flex; align-items: center; gap: 12px; }
+.card-eq { font-size: 34px; font-weight: 700; color: #2d1a6e; display: flex; align-items: center; gap: 12px; }
 .ghost-icon { font-size: 40px; }
 .eq-op { color: #7c5cbf; }
-.eq-eq { color: #444; }
 .card-hint { font-size: 13px; color: #888; margin-top: 6px; }
 
-/* PERCORSO */
 .percorso-title { font-size: 15px; font-weight: 600; color: #5a3dbf; margin-bottom: 10px; text-align: center; }
 
 .number-row {
@@ -43,12 +51,12 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
   min-height: 60px; background: #fff;
   border: 1.5px solid #d4c8f5; border-radius: 14px;
   padding: 10px 12px; margin-bottom: 14px;
-  position: relative;
 }
 .num-bubble {
-  width: 54px; height: 54px; border-radius: 50%;
+  min-width: 54px; height: 54px; border-radius: 27px;
+  padding: 0 10px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 18px; font-weight: 700; flex-shrink: 0;
+  font-size: 16px; font-weight: 700; flex-shrink: 0;
 }
 .num-start { background: #7c5cbf; color: #fff; }
 .num-end   { background: #2d1a6e; color: #fff; }
@@ -60,18 +68,19 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
 }
 .arrow-line {
   height: 3px; background: #b3a0ee; border-radius: 2px;
-  position: relative; min-width: 44px;
+  position: relative; min-width: 36px;
 }
 .arrow-line::after {
   content: ''; position: absolute; right: -7px; top: -4px;
   border: 6px solid transparent; border-left: 10px solid #b3a0ee;
 }
+.arrow-line.neg { background: #f0a0c0; }
+.arrow-line.neg::after { border-left-color: #f0a0c0; }
 .step-label {
-  font-size: 13px; font-weight: 700; color: #7c5cbf;
+  font-size: 12px; font-weight: 700; color: #7c5cbf;
   margin-bottom: 4px; white-space: nowrap;
 }
 
-/* PANNELLO AGGIUNGI */
 .add-panel {
   background: #fff; border: 1.5px solid #d4c8f5; border-radius: 14px;
   padding: 14px; margin-bottom: 14px;
@@ -80,8 +89,8 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
 .quick-btns { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
 .qbtn {
   border: 2px solid #b3a0ee; background: #f3efff; color: #4a2ea0;
-  font-size: 14px; font-weight: 700; border-radius: 10px;
-  padding: 6px 12px; cursor: pointer; transition: background .15s;
+  font-size: 13px; font-weight: 700; border-radius: 10px;
+  padding: 6px 10px; cursor: pointer; transition: background .15s;
 }
 .qbtn:hover { background: #e0d6ff; }
 .qbtn.neg { border-color: #f0a0c0; background: #fff0f5; color: #a02060; }
@@ -89,27 +98,24 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
 
 .custom-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .custom-row input[type=number] {
-  width: 80px; padding: 7px 10px; border: 1.5px solid #b3a0ee;
+  width: 90px; padding: 7px 10px; border: 1.5px solid #b3a0ee;
   border-radius: 8px; font-size: 15px; font-weight: 600; color: #2d1a6e;
 }
 .btn-add {
   background: #7c5cbf; color: #fff; border: none;
   border-radius: 10px; padding: 8px 16px; font-size: 14px;
-  font-weight: 700; cursor: pointer; transition: background .15s;
+  font-weight: 700; cursor: pointer;
 }
 .btn-add:hover { background: #5a3dbf; }
 .btn-add.neg { background: #c0406a; }
 .btn-add.neg:hover { background: #a02050; }
-.sign-toggle {
-  display: flex; border: 1.5px solid #b3a0ee; border-radius: 8px; overflow: hidden;
-}
+.sign-toggle { display: flex; border: 1.5px solid #b3a0ee; border-radius: 8px; overflow: hidden; }
 .sign-toggle button {
   padding: 7px 14px; border: none; font-size: 16px; font-weight: 700;
-  cursor: pointer; background: #f3efff; color: #4a2ea0; transition: background .15s;
+  cursor: pointer; background: #f3efff; color: #4a2ea0;
 }
 .sign-toggle button.active { background: #7c5cbf; color: #fff; }
 
-/* STATO */
 .stato {
   text-align: center; padding: 10px; border-radius: 12px;
   font-size: 15px; font-weight: 600; margin-bottom: 12px;
@@ -119,11 +125,9 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
 .stato.err { background: #ffe8f0; color: #a02060; border: 1.5px solid #f0a0c0; }
 .stato.hidden { display: none; }
 
-/* RISPOSTA */
 .risposta-box {
   background: #2d1a6e; color: #fff; border-radius: 16px;
-  padding: 18px; text-align: center; margin-bottom: 14px;
-  display: none;
+  padding: 18px; text-align: center; margin-bottom: 14px; display: none;
 }
 .risposta-box.show { display: block; }
 .risposta-ghost { font-size: 48px; }
@@ -131,12 +135,10 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
 .risposta-label { font-size: 14px; opacity: .8; margin-top: 4px; }
 .strade-count { font-size: 13px; color: #c4a0ff; margin-top: 6px; }
 
-/* AZIONI */
 .azioni { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 6px; }
 .btn-azione {
   border-radius: 12px; padding: 10px 20px; font-size: 14px;
   font-weight: 700; cursor: pointer; border: 2px solid transparent;
-  transition: background .15s;
 }
 .btn-reset { background: #fff; border-color: #b3a0ee; color: #5a3dbf; }
 .btn-reset:hover { background: #f0ebff; }
@@ -145,7 +147,6 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
 .btn-salva { background: #e0f7ea; border-color: #7adda4; color: #1a7a4a; }
 .btn-salva:hover { background: #c4f0d8; }
 
-/* STRADE SALVATE */
 .strade-wrap { margin-top: 14px; }
 .strade-wrap h3 { font-size: 14px; color: #5a3dbf; margin-bottom: 8px; }
 .strada {
@@ -161,39 +162,40 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <a class="logo-link" href="https://matematicaconlemani.wordpress.com/" target="_blank" rel="noopener">
     <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo blog">
-    <span class="blog-name">Matematiche<br>non si nasce</span>
+    <span class="blog-name">Matematiche non si nasce</span>
   </a>
 </div>
 
-<!-- MAIN -->
 <div class="main">
+
+  <!-- DIFFICOLTÀ -->
+  <div class="diff-bar">
+    <button class="diff-btn active" onclick="setDiff('interi')">🔢 Numeri interi</button>
+    <button class="diff-btn" onclick="setDiff('decimi')">🔟 Decimi (0,1)</button>
+    <button class="diff-btn" onclick="setDiff('centesimi')">💯 Centesimi (0,01)</button>
+  </div>
 
   <!-- CARTA -->
   <div class="card-wrap">
     <div class="card">
       <div class="card-eq">
-        <span id="num-a">34</span>
+        <span id="num-a">3,4</span>
         <span class="eq-op">+</span>
         <span class="ghost-icon">👻</span>
         <span class="eq-eq">=</span>
-        <span id="num-b">76</span>
+        <span id="num-b">7,6</span>
       </div>
       <div class="card-hint">Qual è il numero nascosto sotto al fantasmino?</div>
     </div>
   </div>
 
-  <!-- PERCORSO -->
   <div class="percorso-title">Costruisci il tuo percorso 🗺️</div>
   <div class="number-row" id="number-row"></div>
-
-  <!-- STATO -->
   <div class="stato hidden" id="stato"></div>
 
-  <!-- RISPOSTA -->
   <div class="risposta-box" id="risposta-box">
     <div class="risposta-ghost">👻</div>
     <div class="risposta-val" id="risposta-val"></div>
@@ -201,7 +203,6 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
     <div class="strade-count" id="strade-count"></div>
   </div>
 
-  <!-- AGGIUNGI PASSO -->
   <div class="add-panel" id="add-panel">
     <h3>Aggiungi una tappa</h3>
     <div class="quick-btns" id="quick-btns"></div>
@@ -210,19 +211,17 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
         <button id="btn-plus" class="active" onclick="setSign(1)">+</button>
         <button id="btn-minus" onclick="setSign(-1)">−</button>
       </div>
-      <input type="number" id="custom-val" min="1" max="99" value="10" placeholder="num">
+      <input type="number" id="custom-val" min="0" step="1" value="1" placeholder="num">
       <button class="btn-add" id="btn-add-custom" onclick="addCustomStep()">Aggiungi</button>
     </div>
   </div>
 
-  <!-- AZIONI -->
   <div class="azioni">
     <button class="btn-azione btn-reset" onclick="resetPercorso()">↩ Ricomincia</button>
     <button class="btn-azione btn-salva" id="btn-salva" onclick="salvaStrada()" style="display:none">💾 Salva questa strada</button>
     <button class="btn-azione btn-nuova" onclick="nuovaCarta()">🃏 Nuova carta</button>
   </div>
 
-  <!-- STRADE SALVATE -->
   <div class="strade-wrap" id="strade-wrap" style="display:none">
     <h3>Le mie strade trovate 🌟</h3>
     <div id="strade-list"></div>
@@ -231,87 +230,148 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
 </div>
 
 <script>
+// ---- CONFIGURAZIONE DIFFICOLTÀ ----
+const CONFIGS = {
+  interi: {
+    decimali: 0,
+    step: 1,
+    rangeA: [10, 60],
+    rangeFant: [6, 40],
+    max: 100,
+    quickPos: [1, 2, 5, 10, 20],
+    quickNeg: [1, 2, 5, 10],
+    inputStep: '1',
+    inputMin: '1'
+  },
+  decimi: {
+    decimali: 1,
+    step: 0.1,
+    rangeA: [1, 8],
+    rangeFant: [0.5, 4],
+    max: 10,
+    quickPos: [0.1, 0.2, 0.5, 1, 2],
+    quickNeg: [0.1, 0.2, 0.5, 1],
+    inputStep: '0.1',
+    inputMin: '0.1'
+  },
+  centesimi: {
+    decimali: 2,
+    step: 0.01,
+    rangeA: [1, 8],
+    rangeFant: [0.5, 3],
+    max: 10,
+    quickPos: [0.01, 0.05, 0.1, 0.25, 0.5, 1],
+    quickNeg: [0.01, 0.05, 0.1, 0.25],
+    inputStep: '0.01',
+    inputMin: '0.01'
+  }
+};
+
+let diff = 'interi';
+let cfg = CONFIGS[diff];
 let numA, numB, corretta;
-let steps = [];   // array of {from, to, delta}
+let steps = [];
 let sign = 1;
 let strade = [];
 
-function init() {
-  // genera carta: numA tra 10-60, fantasmino tra 6-40, somma ≤100
-  numA = rnd(10, 60);
-  let fant = rnd(6, 40);
-  numB = numA + fant;
-  if (numB > 100) { numB = 100; fant = numB - numA; }
+function setDiff(d) {
+  diff = d; cfg = CONFIGS[d];
+  document.querySelectorAll('.diff-btn').forEach((b,i)=>{
+    b.classList.toggle('active', ['interi','decimi','centesimi'][i]===d);
+  });
+  // aggiorna input
+  const inp = document.getElementById('custom-val');
+  inp.step = cfg.inputStep;
+  inp.min = cfg.inputMin;
+  inp.value = cfg.quickPos[Math.floor(cfg.quickPos.length/2)];
+  nuovaCarta();
+}
+
+function r(n){ return Math.round(n * 10000) / 10000; }
+
+function fmt(n){
+  return n.toLocaleString('it-IT', {
+    minimumFractionDigits: cfg.decimali,
+    maximumFractionDigits: cfg.decimali
+  });
+}
+
+function rndDec(min, max, step){
+  const steps = Math.floor((max - min) / step);
+  return r(min + Math.floor(Math.random() * steps) * step);
+}
+
+function init(){
+  const [aMin, aMax] = cfg.rangeA;
+  const [fMin, fMax] = cfg.rangeFant;
+  numA = rndDec(aMin, aMax, cfg.step);
+  let fant = rndDec(fMin, fMax, cfg.step);
+  numB = r(numA + fant);
+  if(numB > cfg.max){ numB = cfg.max; fant = r(numB - numA); }
   corretta = fant;
-  steps = [];
-  strade = [];
-  document.getElementById('num-a').textContent = numA;
-  document.getElementById('num-b').textContent = numB;
+  steps = []; strade = [];
+  document.getElementById('num-a').textContent = fmt(numA);
+  document.getElementById('num-b').textContent = fmt(numB);
   document.getElementById('strade-wrap').style.display = 'none';
   document.getElementById('strade-list').innerHTML = '';
   document.getElementById('risposta-box').classList.remove('show');
   document.getElementById('btn-salva').style.display = 'none';
+  document.getElementById('add-panel').style.display = '';
   setStato('hidden','');
   aggiornaQuickBtns();
   renderPercorso();
 }
 
-function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
-
 function current(){ return steps.length ? steps[steps.length-1].to : numA; }
+
+function eq(a,b){ return Math.abs(a-b) < cfg.step * 0.01; }
 
 function aggiornaQuickBtns(){
   const cur = current();
-  const remaining = numB - cur;
+  const rem = r(numB - cur);
   const container = document.getElementById('quick-btns');
-  container.innerHTML='';
-  // suggerimenti positivi
-  const pos = [];
-  if(remaining > 0){
-    // tappa alla decina superiore
-    const toNext10 = (Math.ceil((cur+1)/10)*10) - cur;
-    if(toNext10 > 0 && toNext10 < remaining) pos.push(toNext10);
-    [10,20,30,5,1].forEach(v=>{ if(v <= remaining && !pos.includes(v)) pos.push(v); });
-    pos.sort((a,b)=>a-b);
-    pos.slice(0,5).forEach(v=>{
+  container.innerHTML = '';
+
+  if(rem > 0){
+    cfg.quickPos.filter(v => v <= r(rem + cfg.step * 0.01)).forEach(v=>{
       const b = document.createElement('button');
-      b.className='qbtn';
-      b.textContent='+'+v;
-      b.onclick=()=>addStep(v);
+      b.className = 'qbtn';
+      b.textContent = '+' + fmt(v);
+      b.onclick = ()=>addStep(v);
       container.appendChild(b);
     });
   }
-  // suggerimenti negativi (solo se siamo oltre numB)
   if(cur > numB){
-    const over = cur - numB;
-    [1,2,5,10].filter(v=>v<=over).forEach(v=>{
+    const over = r(cur - numB);
+    cfg.quickNeg.filter(v => v <= r(over + cfg.step * 0.01)).forEach(v=>{
       const b = document.createElement('button');
-      b.className='qbtn neg';
-      b.textContent='−'+v;
-      b.onclick=()=>addStep(-v);
+      b.className = 'qbtn neg';
+      b.textContent = '−' + fmt(v);
+      b.onclick = ()=>addStep(-v);
       container.appendChild(b);
     });
   }
 }
 
 function setSign(s){
-  sign=s;
+  sign = s;
   document.getElementById('btn-plus').classList.toggle('active', s===1);
   document.getElementById('btn-minus').classList.toggle('active', s===-1);
   document.getElementById('btn-add-custom').classList.toggle('neg', s===-1);
 }
 
 function addCustomStep(){
-  const v = parseInt(document.getElementById('custom-val').value)||0;
-  if(v<=0) return;
-  addStep(sign*v);
+  const raw = parseFloat(document.getElementById('custom-val').value);
+  if(!raw || raw <= 0) return;
+  // arrotonda al passo della difficoltà
+  const v = r(Math.round(raw / cfg.step) * cfg.step);
+  addStep(sign * v);
 }
 
 function addStep(delta){
   const from = current();
-  const to = from + delta;
+  const to = r(from + delta);
   if(to < 0){ setStato('err','Non puoi andare sotto zero!'); return; }
-  if(to > 200){ setStato('err','Troppo grande! Riprova.'); return; }
   steps.push({from, to, delta});
   setStato('hidden','');
   renderPercorso();
@@ -321,18 +381,17 @@ function addStep(delta){
 
 function checkArrivo(){
   const cur = current();
-  if(cur === numB){
-    // trovato!
-    const val = numB - numA;
-    document.getElementById('risposta-val').textContent = val;
+  if(eq(cur, numB)){
+    const val = r(numB - numA);
+    document.getElementById('risposta-val').textContent = fmt(val);
     document.getElementById('risposta-box').classList.add('show');
     document.getElementById('btn-salva').style.display = '';
-    document.getElementById('add-panel').style.display='none';
-    setStato('ok', `Perfetto! Hai trovato il percorso! 🎉`);
+    document.getElementById('add-panel').style.display = 'none';
+    setStato('ok','Perfetto! Hai trovato il percorso! 🎉');
     return;
   }
   if(cur > numB){
-    setStato('warn',`Attenzione: sei arrivato a ${cur}, hai superato ${numB}. Puoi sottrarre!`);
+    setStato('warn',`Attenzione: sei a ${fmt(cur)}, hai superato ${fmt(numB)}. Puoi sottrarre!`);
   } else {
     setStato('hidden','');
   }
@@ -340,105 +399,94 @@ function checkArrivo(){
 
 function renderPercorso(){
   const row = document.getElementById('number-row');
-  row.innerHTML='';
-
-  // numero di partenza
-  const bStart = makeBubble(numA, steps.length===0 ? 'num-start' : 'num-start');
-  row.appendChild(bStart);
+  row.innerHTML = '';
+  row.appendChild(makeBubble(numA, 'num-start'));
 
   steps.forEach((s,i)=>{
-    // freccia con etichetta
     const arrowDiv = document.createElement('div');
-    arrowDiv.className='arrow-step';
+    arrowDiv.className = 'arrow-step';
     const lbl = document.createElement('div');
-    lbl.className='step-label';
-    lbl.textContent = (s.delta>0?'+':'')+s.delta;
+    lbl.className = 'step-label';
+    lbl.textContent = (s.delta>0?'+':'') + fmt(s.delta);
     lbl.style.color = s.delta>0 ? '#5a3dbf' : '#a02060';
     const line = document.createElement('div');
-    line.className='arrow-line';
-    if(s.delta<0) line.style.background='#f0a0c0', line.style.setProperty('--ac','#f0a0c0');
+    line.className = 'arrow-line' + (s.delta<0?' neg':'');
     arrowDiv.appendChild(lbl);
     arrowDiv.appendChild(line);
     row.appendChild(arrowDiv);
-
-    // numero tappa
     const isLast = i===steps.length-1;
-    const cls = (s.to===numB && isLast) ? 'num-end' : 'num-mid';
-    const b = makeBubble(s.to, cls);
-    row.appendChild(b);
+    const cls = (eq(s.to, numB) && isLast) ? 'num-end' : 'num-mid';
+    row.appendChild(makeBubble(s.to, cls));
   });
 
-  // se non ancora arrivati, mostra destinazione fantasma
-  if(!steps.length || current()!==numB){
+  if(!steps.length || !eq(current(), numB)){
     const arrowDiv = document.createElement('div');
-    arrowDiv.className='arrow-step';
+    arrowDiv.className = 'arrow-step';
     const lbl = document.createElement('div');
-    lbl.className='step-label';
-    lbl.style.opacity='.35';
-    lbl.textContent='?';
+    lbl.className = 'step-label';
+    lbl.style.opacity = '.35';
+    lbl.textContent = '?';
     const line = document.createElement('div');
-    line.className='arrow-line';
-    line.style.opacity='.3';
+    line.className = 'arrow-line';
+    line.style.opacity = '.3';
     arrowDiv.appendChild(lbl);
     arrowDiv.appendChild(line);
     row.appendChild(arrowDiv);
-    const ghost = document.createElement('div');
-    ghost.className='num-bubble num-end';
-    ghost.style.opacity='.35';
-    ghost.textContent=numB;
+    const ghost = makeBubble(numB, 'num-end');
+    ghost.style.opacity = '.35';
     row.appendChild(ghost);
   }
 }
 
 function makeBubble(n, cls){
   const d = document.createElement('div');
-  d.className='num-bubble '+cls;
-  d.textContent=n;
+  d.className = 'num-bubble ' + cls;
+  d.textContent = fmt(n);
   return d;
 }
 
 function setStato(tipo, msg){
   const el = document.getElementById('stato');
-  el.className='stato '+(tipo==='hidden'?'hidden':tipo);
-  el.textContent=msg;
+  el.className = 'stato ' + (tipo==='hidden'?'hidden':tipo);
+  el.textContent = msg;
 }
 
 function resetPercorso(){
-  steps=[];
+  steps = [];
   document.getElementById('risposta-box').classList.remove('show');
-  document.getElementById('add-panel').style.display='';
-  document.getElementById('btn-salva').style.display='none';
+  document.getElementById('add-panel').style.display = '';
+  document.getElementById('btn-salva').style.display = 'none';
   setStato('hidden','');
   aggiornaQuickBtns();
   renderPercorso();
 }
 
 function salvaStrada(){
-  const descrizione = steps.map(s=>(s.delta>0?'+':'')+s.delta).join(' → ');
-  strade.push({steps:[...steps], descrizione});
+  const desc = steps.map(s=>(s.delta>0?'+':'')+fmt(s.delta)).join(' → ');
+  strade.push(desc);
   const wrap = document.getElementById('strade-wrap');
   const list = document.getElementById('strade-list');
-  wrap.style.display='';
+  wrap.style.display = '';
   const div = document.createElement('div');
-  div.className='strada';
-  div.innerHTML=`<span class="badge">Strada ${strade.length}</span> ${numA} ${descrizione} = <strong>${numB}</strong> → 👻 = <strong>${corretta}</strong>`;
+  div.className = 'strada';
+  div.innerHTML = `<span class="badge">Strada ${strade.length}</span> ${fmt(numA)} ${desc} = <strong>${fmt(numB)}</strong> → 👻 = <strong>${fmt(corretta)}</strong>`;
   list.appendChild(div);
-
-  // aggiorna contatore
   document.getElementById('strade-count').textContent = `Hai trovato ${strade.length} strada${strade.length>1?'':''}!`;
-
-  // resetta per cercare nuova strada
   resetPercorso();
   document.getElementById('risposta-box').classList.remove('show');
   setStato('ok','Strada salvata! Riesci a trovarne un\'altra? 🌟');
 }
 
 function nuovaCarta(){
-  document.getElementById('add-panel').style.display='';
+  document.getElementById('add-panel').style.display = '';
   init();
 }
 
 // avvio
+const inp = document.getElementById('custom-val');
+inp.step = cfg.inputStep;
+inp.min = cfg.inputMin;
+inp.value = cfg.quickPos[Math.floor(cfg.quickPos.length/2)];
 init();
 </script>
 </body>
