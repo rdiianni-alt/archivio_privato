@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Figure Geometriche</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    color: #2d3748;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 20px;
+    background: #ffffff;
+    border-bottom: 2px solid #e2e8f0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .logo a { display: flex; align-items: center; text-decoration: none; }
+  .logo img {
+    width: 60px; height: 60px;
+    object-fit: contain;
+    border-radius: 50%;
+    border: 2px solid #cbd5e0;
+  }
+  .site-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #4a5568;
+    line-height: 1.2;
+    max-width: 160px;
+  }
+  .header-main { margin-left: auto; text-align: right; }
+  .header-main h1 { font-size: 1.2rem; color: #2b6cb0; }
+  .header-main p  { font-size: 0.78rem; color: #718096; }
+
+  .score-bar {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 8px;
+    background: #edf2f7;
+    font-size: 0.9rem;
+    color: #4a5568;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .score-bar span { color: #2b6cb0; font-weight: bold; }
+
+  .game-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 24px 16px;
+  }
+
+  .shape-label {
+    font-size: 0.8rem;
+    color: #718096;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .canvas-wrap { position: relative; display: inline-block; }
+
+  #shapeCanvas {
+    width: 260px; height: 260px;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .level-badge {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: #bee3f8;
+    color: #2b6cb0;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .question {
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 18px;
+    color: #2d3748;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    max-width: 380px;
+  }
+  .opt-btn {
+    padding: 13px 8px;
+    border: 2px solid #bee3f8;
+    background: #ebf8ff;
+    color: #2b6cb0;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-weight: 600;
+  }
+  .opt-btn:hover { background: #bee3f8; border-color: #90cdf4; }
+  .opt-btn.correct { background: #c6f6d5; border-color: #68d391; color: #276749; animation: pulse 0.35s; }
+  .opt-btn.wrong   { background: #fed7d7; border-color: #fc8181; color: #9b2c2c; animation: shake 0.35s; }
+  .opt-btn:disabled { cursor: default; transform: none; }
+
+  .feedback {
+    margin-top: 14px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    min-height: 26px;
+    text-align: center;
+  }
+  .feedback.ok { color: #276749; }
+  .feedback.no { color: #9b2c2c; }
+
+  #nextBtn {
+    display: none;
+    margin-top: 14px;
+    padding: 11px 32px;
+    background: #2b6cb0;
+    border: none;
+    border-radius: 30px;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  #nextBtn:hover { background: #2c5282; }
+
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <a href="https://matematicaconlemani.wordpress.com/" target="_blank" rel="noopener">
+      <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo">
+    </a>
+  </div>
+  <div class="site-title">Matematiche non si nasce</div>
+  <div class="header-main">
+    <h1>🔷 Quiz Figure Geometriche</h1>
+    <p>Impara i nomi delle forme — dai 6 ai 10 anni</p>
+  </div>
+</header>
+
+<div class="score-bar">
+  ✅ Corrette: <span id="scoreOk">0</span> &nbsp;|&nbsp;
+  ❌ Sbagliate: <span id="scoreNo">0</span> &nbsp;|&nbsp;
+  📊 Domanda: <span id="qNum">1</span>
+</div>
+
+<div class="game-area">
+  <div class="shape-label">Che figura è questa?</div>
+  <div class="canvas-wrap">
+    <canvas id="shapeCanvas" width="260" height="260"></canvas>
+    <div class="level-badge" id="levelBadge">Livello 1</div>
+  </div>
+  <div class="question">Quale figura vedi?</div>
+  <div class="options" id="options"></div>
+  <div class="feedback" id="feedback"></div>
+  <button id="nextBtn" onclick="nextQuestion()">Prossima →</button>
+</div>
+
+<script>
+const SHAPES = [
+  { id:'triangolo_equilatero', label:'Triangolo equilatero',    sides:3 },
+  { id:'triangolo_isoscele',   label:'Triangolo isoscele',      sides:3 },
+  { id:'triangolo_scaleno',    label:'Triangolo scaleno',       sides:3 },
+  { id:'quadrato',             label:'Quadrato',                sides:4 },
+  { id:'rettangolo',           label:'Rettangolo',              sides:4 },
+  { id:'rombo',                label:'Rombo',                   sides:4 },
+  { id:'trapezio_isoscele',    label:'Trapezio isoscele',       sides:4 },
+  { id:'trapezio_scaleno',     label:'Trapezio scaleno',        sides:4 },
+  { id:'trapezio_rettangolo',  label:'Trapezio rettangolo',     sides:4 },
+  { id:'pentagono',            label:'Pentagono',               sides:5 },
+  { id:'pentagono_irr',        label:'Pentagono irregolare',    sides:5 },
+  { id:'esagono',              label:'Esagono',                 sides:6 },
+  { id:'esagono_irr',          label:'Esagono irregolare',      sides:6 },
+  { id:'ettagono',             label:'Ettagono',                sides:7 },
+  { id:'ottagono',             label:'Ottagono',                sides:8 },
+  { id:'ennagono',             label:'Ennagono',                sides:9 },
+  { id:'decagono',             label:'Decagono',                sides:10 },
+  { id:'endecagono',           label:'Endecagono',              sides:11 },
+  { id:'dodecagono',           label:'Dodecagono',              sides:12 },
+];
+
+const ALL_LABELS = [...new Set(SHAPES.map(s => s.label))];
+
+let current = null;
+let answered = false;
+let scoreOk = 0, scoreNo = 0, qNum = 1;
+
+const canvas = document.getElementById('shapeCanvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const CX = W/2, CY = H/2;
+
+function drawShape(shape) {
+  ctx.clearRect(0,0,W,H);
+  const pts = getPoints(shape);
+  // random static rotation baked at question start
+  const rot = shape._rot || 0;
+
+  ctx.save();
+  ctx.translate(CX, CY);
+  ctx.rotate(rot);
+
+  ctx.shadowColor = 'rgba(66,153,225,0.25)';
+  ctx.shadowBlur = 10;
+
+  const grad = ctx.createRadialGradient(0,0,8,0,0,85);
+  grad.addColorStop(0, 'rgba(190,227,248,0.7)');
+  grad.addColorStop(1, 'rgba(144,205,244,0.25)');
+  ctx.fillStyle = grad;
+  ctx.strokeStyle = '#3182ce';
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+}
+
+function getPoints(shape) {
+  const r = 88;
+  const id = shape.id;
+
+  if(id === 'triangolo_equilatero') return nGon(3, r, 0);
+  if(id === 'triangolo_isoscele')   return [{x:0,y:-r*0.95},{x:r*0.52,y:r*0.6},{x:-r*0.52,y:r*0.6}];
+  if(id === 'triangolo_scaleno')    return [{x:-r*0.72,y:r*0.55},{x:r*0.85,y:r*0.48},{x:-r*0.1,y:-r*0.88}];
+  if(id === 'quadrato')             { const s=r*0.78; return [{x:-s,y:-s},{x:s,y:-s},{x:s,y:s},{x:-s,y:s}]; }
+  if(id === 'rettangolo')           return [{x:-r,y:-r*0.52},{x:r,y:-r*0.52},{x:r,y:r*0.52},{x:-r,y:r*0.52}];
+  if(id === 'rombo')                return [{x:0,y:-r},{x:r*0.62,y:0},{x:0,y:r},{x:-r*0.62,y:0}];
+  if(id === 'trapezio_isoscele')    return [{x:-r*0.48,y:-r*0.48},{x:r*0.48,y:-r*0.48},{x:r*0.85,y:r*0.52},{x:-r*0.85,y:r*0.52}];
+  if(id === 'trapezio_scaleno')    return [{x:-r*0.7,y:-r*0.45},{x:r*0.35,y:-r*0.45},{x:r*0.85,y:r*0.52},{x:-r*0.82,y:r*0.52}];
+  if(id === 'trapezio_rettangolo') return [{x:-r*0.55,y:-r*0.48},{x:r*0.55,y:-r*0.48},{x:r*0.55,y:r*0.52},{x:-r*0.55-r*0.35,y:r*0.52}];
+  if(shape.id.endsWith('_irr'))     return nGonIrregular(shape.sides, r);
+  return nGon(shape.sides, r, 0);
+}
+
+function nGon(n, r, startAngle) {
+  const pts = [];
+  for(let i=0;i<n;i++) {
+    const a = startAngle + (2*Math.PI*i/n) - Math.PI/2;
+    pts.push({x: r*Math.cos(a), y: r*Math.sin(a)});
+  }
+  return pts;
+}
+
+function nGonIrregular(n, r) {
+  const pts = [];
+  for(let i=0;i<n;i++) {
+    const a = (2*Math.PI*i/n) - Math.PI/2;
+    const noise = 0.72 + 0.36 * Math.sin(n * i * 1.7 + 2.1);
+    pts.push({x: r*noise*Math.cos(a), y: r*noise*Math.sin(a)});
+  }
+  return pts;
+}
+
+function levelOf(s) {
+  return s.sides <= 4 ? 1 : s.sides <= 6 ? 2 : s.sides <= 9 ? 3 : 4;
+}
+
+function pickWrong(correct, count) {
+  const pool = ALL_LABELS.filter(l => l !== correct.label);
+  return pool.sort(() => Math.random()-0.5).slice(0, count);
+}
+
+function buildOptions(shape) {
+  const wrongs = pickWrong(shape, 3);
+  const opts = [shape.label, ...wrongs].sort(() => Math.random()-0.5);
+  const container = document.getElementById('options');
+  container.innerHTML = '';
+  opts.forEach(o => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.textContent = o;
+    btn.onclick = () => answer(btn, o);
+    container.appendChild(btn);
+  });
+}
+
+function answer(btn, chosen) {
+  if(answered) return;
+  answered = true;
+  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedback');
+  if(chosen === current.label) {
+    btn.classList.add('correct');
+    fb.textContent = '✔ Esatto!';
+    fb.className = 'feedback ok';
+    scoreOk++;
+    document.getElementById('scoreOk').textContent = scoreOk;
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt-btn').forEach(b => { if(b.textContent === current.label) b.classList.add('correct'); });
+    fb.textContent = `✘ Era: ${current.label}`;
+    fb.className = 'feedback no';
+    scoreNo++;
+    document.getElementById('scoreNo').textContent = scoreNo;
+  }
+  document.getElementById('nextBtn').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+  answered = false;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('nextBtn').style.display = 'none';
+  startQuestion();
+}
+
+function startQuestion() {
+  current = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+  // random static tilt (non canonical)
+  current._rot = (Math.random() * 2 - 1) * Math.PI; // full random angle
+  document.getElementById('levelBadge').textContent = `Livello ${levelOf(current)}`;
+  document.getElementById('qNum').textContent = qNum++;
+  drawShape(current);
+  buildOptions(current);
+}
+
+startQuestion();
+</script>
+</body>
+</html>
