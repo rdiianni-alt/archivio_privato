@@ -7,7 +7,9 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+    font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
     background: linear-gradient(135deg, #e0f7fa, #f1f8e9);
     min-height: 100vh;
     padding: 10px;
@@ -168,13 +170,24 @@ function toWords(n) {
 
 // Genera una partita casuale
 function generateGame() {
-  // Genera 5 numeri a due cifre tutti diversi, evitando numeri con cifre ripetute (es. 11,22)
-  const nums = [];
-  while (nums.length < 5) {
-    const n = Math.floor(Math.random() * 89) + 11; // 11-99
-    const d0 = Math.floor(n / 10), d1 = n % 10;
-    if (d1 === 0) continue; // evita multipli di 10 (cifra unità = 0, banale)
-    if (!nums.includes(n)) nums.push(n);
+  let nums = [];
+  let attempts = 0;
+  while (true) {
+    attempts++;
+    nums = [];
+    while (nums.length < 5) {
+      const n = Math.floor(Math.random() * 89) + 11;
+      const d0 = Math.floor(n / 10), d1 = n % 10;
+      if (d1 === 0) continue; // evita multipli di 10
+      if (d0 === d1) continue; // evita 11,22,33... (cifre uguali, banali)
+      if (!nums.includes(n)) nums.push(n);
+    }
+    // Verifica che almeno 2 cifre appaiano sia come unità che come decina
+    const asUnits  = new Set(nums.map(n => n % 10));
+    const asTens   = new Set(nums.map(n => Math.floor(n / 10)));
+    const overlap  = [...asUnits].filter(d => asTens.has(d));
+    if (overlap.length >= 2) break; // almeno 2 cifre ambigue → gioco interessante
+    if (attempts > 200) break; // fallback di sicurezza
   }
 
   // Costruisci tutti i morsi possibili: per ogni numero, decina e unità
