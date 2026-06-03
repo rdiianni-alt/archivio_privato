@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;background:linear-gradient(180deg,#b8e8ff 0%,#7dd4f8 50%,#a0e0ff 100%);min-height:100vh;padding:16px}
+
+.header{text-align:center;margin-bottom:14px}
+.header a{display:inline-block;text-decoration:none}
+.header img{width:60px;height:60px;object-fit:contain;border-radius:50%;display:block;margin:0 auto 6px}
+.header .blogname{font-size:13px;font-weight:700;color:#005a8a;text-transform:uppercase;letter-spacing:1px}
+
+h1{text-align:center;font-size:22px;font-weight:700;color:#005a8a;margin-bottom:2px;letter-spacing:1px}
+.subtitle{text-align:center;font-size:13px;color:#0077aa;margin-bottom:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+
+.controls{max-width:780px;margin:0 auto 14px;background:rgba(255,255,255,0.88);border-radius:16px;padding:14px 18px;border:2px solid #60c0f0;box-shadow:0 4px 18px rgba(0,120,200,0.13)}
+.ask-label{font-size:13px;font-weight:700;color:#005a8a;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.ask-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+select{flex:1;min-width:220px;padding:9px 14px;border-radius:24px;border:2px solid #60c0f0;background:#eef8ff;color:#003a60;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.ask-btn{background:#f75048;border:none;border-radius:24px;padding:9px 22px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;text-transform:uppercase;letter-spacing:1px}
+.ask-btn:hover{background:#c02018}
+.answer-box{min-height:30px;font-size:17px;font-weight:700;text-align:center;padding:4px 0;text-transform:uppercase;letter-spacing:1px}
+.si{color:#00a040}.no{color:#dd2010}
+.hint{font-size:13px;font-weight:700;color:#005a8a;text-align:center;margin-top:5px;text-transform:uppercase;letter-spacing:0.5px}
+
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;max-width:780px;margin:0 auto}
+.card{cursor:pointer;border-radius:14px;border:3px solid #fff;aspect-ratio:1.45/1;box-shadow:0 4px 14px rgba(0,80,160,0.18);transition:opacity .3s,transform .15s,box-shadow .15s;background:#c8eeff;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.card:hover:not(.eliminated){transform:scale(1.06);box-shadow:0 6px 22px rgba(0,80,200,0.3);border-color:#f0c000}
+.card.eliminated{opacity:0.12;cursor:default;box-shadow:none;border-color:rgba(180,200,220,0.3)}
+.card-sea{position:absolute;bottom:0;left:0;right:0;height:38%;background:#a8d8f8;border-radius:0 0 10px 10px}
+.card-sand{position:absolute;bottom:0;left:0;right:0;height:18%;background:#c8e0a0;opacity:0.55;border-radius:0 0 10px 10px}
+.fish-emoji{font-size:2em;position:relative;z-index:2;line-height:1;margin-bottom:4px}
+.bubbles{position:absolute;top:8px;right:8px;font-size:0.85em;z-index:2}
+.fondale-el{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:1.1em;z-index:2}
+.gambero-el{position:absolute;bottom:6px;right:6px;font-size:1em;z-index:3}
+
+.bottom-row{display:flex;justify-content:center;gap:12px;margin:14px auto;max-width:780px;flex-wrap:wrap}
+.new-btn{background:#f75048;border:none;border-radius:24px;padding:9px 28px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;text-transform:uppercase;letter-spacing:1px}
+.new-btn:hover{background:#c02018}
+.found-btn{background:#00a040;border:none;border-radius:24px;padding:9px 28px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;text-transform:uppercase;letter-spacing:1px;display:none}
+.found-btn:hover{background:#007a30}
+
+.result-msg{text-align:center;font-size:18px;font-weight:700;margin:10px 0;text-transform:uppercase;letter-spacing:1px;display:none}
+.result-msg.win{color:#007a30}
+.result-msg.lose{color:#cc2010}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="https://matematicaconlemani.wordpress.com/" target="_blank">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo blog">
+    <span class="blogname">MATEMATICHE NON SI NASCE</span>
+  </a>
+</div>
+
+<h1>🦐 DOV'È NASCOSTO GAMBERO ROSSO?</h1>
+<p class="subtitle">Fai una domanda, poi gira le carte da eliminare!</p>
+
+<div class="controls">
+  <div class="ask-label">Fai una domanda:</div>
+  <div class="ask-row">
+    <select id="qsel">
+      <option value="">— SCEGLI UNA DOMANDA —</option>
+      <optgroup label="COLORE DEL PESCIOLINO">
+        <option value="pesce-verde">È DIETRO IL PESCIOLINO VERDE 🐠?</option>
+        <option value="pesce-blu">È DIETRO IL PESCIOLINO BLU 🐟?</option>
+        <option value="pesce-arancione">È DIETRO IL PESCIOLINO ARANCIONE 🐡?</option>
+      </optgroup>
+      <optgroup label="BOLLICINE">
+        <option value="boll-si">È NASCOSTO DOVE CI SONO BOLLICINE 🫧?</option>
+        <option value="boll-no">È NASCOSTO DOVE NON CI SONO BOLLICINE?</option>
+      </optgroup>
+      <optgroup label="FONDALE">
+        <option value="fond-niente">È NASCOSTO DOVE NON C'È NIENTE SUL FONDALE?</option>
+        <option value="fond-conchiglia">È NASCOSTO DOVE C'È UNA CONCHIGLIA 🐚?</option>
+        <option value="fond-stella">È NASCOSTO DOVE C'È UNA STELLA MARINA ⭐?</option>
+        <option value="fond-corallo">È NASCOSTO DOVE C'È UN CORALLO 🪸?</option>
+      </optgroup>
+    </select>
+    <button class="ask-btn" onclick="chiedi()">Chiedi 🦐</button>
+  </div>
+  <div class="answer-box" id="ansbox"></div>
+  <div class="hint" id="hint"></div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="result-msg" id="resultmsg"></div>
+
+<div class="bottom-row">
+  <button class="found-btn" id="foundbtn" onclick="verifica()">HO TROVATO GAMBERO ROSSO! 🦐</button>
+  <button class="new-btn" onclick="newGame()">Nuova partita 🌊</button>
+</div>
+
+<script>
+const PESCI=[
+  {id:'verde',     emoji:'🐠'},
+  {id:'blu',       emoji:'🐟'},
+  {id:'arancione', emoji:'🐡'}
+];
+const FONDALE_MAP={niente:'',conchiglia:'🐚',stella:'⭐',corallo:'🪸'};
+
+function buildAllCards(){
+  const cards=[];
+  for(const p of PESCI)
+    for(const b of [false,true])
+      for(const f of Object.keys(FONDALE_MAP))
+        cards.push({pesce:p,bolle:b,fondale:f});
+  return cards;
+}
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function makeCard(card, showGambero){
+  const div=document.createElement('div');
+  div.className='card';
+  const sea=document.createElement('div');sea.className='card-sea';
+  const sand=document.createElement('div');sand.className='card-sand';
+  const fish=document.createElement('div');fish.className='fish-emoji';fish.textContent=card.pesce.emoji;
+  if(card.bolle){const b=document.createElement('div');b.className='bubbles';b.textContent='🫧';div.appendChild(b);}
+  const fond=FONDALE_MAP[card.fondale];
+  if(fond){const f=document.createElement('div');f.className='fondale-el';f.textContent=fond;div.appendChild(f);}
+  if(showGambero){const g=document.createElement('div');g.className='gambero-el';g.textContent='🦐';div.appendChild(g);}
+  div.appendChild(sea);div.appendChild(sand);div.appendChild(fish);
+  return div;
+}
+
+let cards=[],gamberoIdx=-1,eliminated=new Set(),gameOver=false;
+
+function newGame(){
+  const all=buildAllCards();shuffle(all);
+  cards=all.slice(0,24);
+  gamberoIdx=Math.floor(Math.random()*24);
+  eliminated=new Set();
+  gameOver=false;
+  document.getElementById('ansbox').textContent='';
+  document.getElementById('hint').textContent='';
+  document.getElementById('qsel').value='';
+  const res=document.getElementById('resultmsg');
+  res.style.display='none';res.className='result-msg';res.textContent='';
+  document.getElementById('foundbtn').style.display='none';
+  renderGrid();
+}
+
+function renderGrid(){
+  const grid=document.getElementById('grid');grid.innerHTML='';
+  cards.forEach((card,i)=>{
+    const div=makeCard(card, gameOver && i===gamberoIdx);
+    div.id='c'+i;
+    if(eliminated.has(i))div.classList.add('eliminated');
+    if(!gameOver)div.onclick=()=>toggle(i);
+    grid.appendChild(div);
+  });
+}
+
+function toggle(i){
+  if(gameOver)return;
+  if(eliminated.has(i)) eliminated.delete(i);
+  else eliminated.add(i);
+  const d=document.getElementById('c'+i);
+  if(d)d.className='card'+(eliminated.has(i)?' eliminated':'');
+  // mostra bottone "ho trovato" quando rimane una sola carta
+  const rem=cards.length-eliminated.size;
+  document.getElementById('foundbtn').style.display=(rem===1)?'block':'none';
+}
+
+function verifica(){
+  if(gameOver)return;
+  const last=cards.findIndex((_,j)=>!eliminated.has(j));
+  gameOver=true;
+  const res=document.getElementById('resultmsg');
+  res.style.display='block';
+  if(last===gamberoIdx){
+    res.className='result-msg win';
+    res.textContent='🎉 ESATTO! HAI TROVATO GAMBERO ROSSO! 🦐';
+  } else {
+    res.className='result-msg lose';
+    res.textContent='❌ NO! GAMBERO ROSSO ERA DA UN\'ALTRA PARTE! RITENTA! 🦐';
+  }
+  renderGrid();
+  res.scrollIntoView({behavior:'smooth'});
+}
+
+function matchesQuery(card,q){
+  if(q==='pesce-verde')     return card.pesce.id==='verde';
+  if(q==='pesce-blu')       return card.pesce.id==='blu';
+  if(q==='pesce-arancione') return card.pesce.id==='arancione';
+  if(q==='boll-si')         return card.bolle===true;
+  if(q==='boll-no')         return card.bolle===false;
+  if(q==='fond-niente')     return card.fondale==='niente';
+  if(q==='fond-conchiglia') return card.fondale==='conchiglia';
+  if(q==='fond-stella')     return card.fondale==='stella';
+  if(q==='fond-corallo')    return card.fondale==='corallo';
+  return false;
+}
+
+const HINTS={
+  'pesce-verde':     ['ELIMINA I PESCIOLINI BLU E ARANCIONI!','ELIMINA I PESCIOLINI VERDI!'],
+  'pesce-blu':       ['ELIMINA I PESCIOLINI VERDI E ARANCIONI!','ELIMINA I PESCIOLINI BLU!'],
+  'pesce-arancione': ['ELIMINA I PESCIOLINI VERDI E BLU!','ELIMINA I PESCIOLINI ARANCIONI!'],
+  'boll-si':         ['ELIMINA TUTTE LE CARTE SENZA BOLLICINE!','ELIMINA TUTTE LE CARTE CON LE BOLLICINE!'],
+  'boll-no':         ['ELIMINA TUTTE LE CARTE CON LE BOLLICINE!','ELIMINA TUTTE LE CARTE SENZA BOLLICINE!'],
+  'fond-niente':     ['ELIMINA LE CARTE CON CONCHIGLIA, STELLA O CORALLO!','ELIMINA LE CARTE SENZA NIENTE SUL FONDALE!'],
+  'fond-conchiglia': ['ELIMINA LE CARTE SENZA CONCHIGLIA!','ELIMINA LE CARTE CON LA CONCHIGLIA!'],
+  'fond-stella':     ['ELIMINA LE CARTE SENZA STELLA MARINA!','ELIMINA LE CARTE CON LA STELLA MARINA!'],
+  'fond-corallo':    ['ELIMINA LE CARTE SENZA CORALLO!','ELIMINA LE CARTE CON IL CORALLO!'],
+};
+
+function chiedi(){
+  const q=document.getElementById('qsel').value;
+  if(!q){document.getElementById('ansbox').textContent='SCEGLI PRIMA UNA DOMANDA!';return;}
+  const ans=matchesQuery(cards[gamberoIdx],q);
+  document.getElementById('ansbox').innerHTML=ans?'<span class="si">✅ SÌ!</span>':'<span class="no">❌ NO!</span>';
+  document.getElementById('hint').textContent=HINTS[q][ans?0:1];
+}
+
+newGame();
+</script>
+</body>
+</html>
