@@ -204,7 +204,7 @@ function sopraTubo(b) {
 arena.addEventListener('pointermove', e => {
   if (!drag) return;
   const dx = e.clientX - offX - drag.x, dy = e.clientY - offY - drag.y;
-  if (Math.hypot(dx,dy) > 6) dragMoved = true;
+      if (Math.hypot(dx,dy) > 15) dragMoved = true;
   drag.x = e.clientX - offX; drag.y = e.clientY - offY;
   drag.el.style.left = drag.x + 'px'; drag.el.style.top = drag.y + 'px';
   const suTubo = sopraTubo(drag);
