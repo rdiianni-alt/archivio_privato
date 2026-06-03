@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #dff0fb; font-family: sans-serif; overflow: hidden; width: 100vw; height: 100vh; }
+
+#schermata {
+  position: fixed; inset: 0; z-index: 2000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+  background: #dff0fb;
+}
+#logo-wrap {
+  position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+  z-index: 3000; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; text-decoration: none;
+}
+#logo-wrap img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+#logo-wrap span { font-size: 0.78rem; font-weight: 600; color: #1a5276; letter-spacing: 0.02em; text-align: center; }
+#schermata h1 { font-size: 1.8rem; color: #1a5276; font-weight: 700; }
+.btn-livello {
+  width: 300px; padding: 18px 24px; border-radius: 16px; border: 3px solid #3498db;
+  background: white; color: #1a5276; font-size: 1.1rem; font-weight: 600;
+  cursor: pointer; text-align: left; transition: background 0.15s; line-height: 1.5;
+}
+.btn-livello span { display: block; font-size: 0.82rem; font-weight: 400; color: #5d8aa8; margin-top: 4px; }
+.btn-livello:hover { background: #eaf4fb; }
+#input-l2 { display: none; flex-direction: column; align-items: center; gap: 10px; }
+#input-l2 label { font-size: 0.95rem; color: #1a5276; font-weight: 600; }
+#input-l2 input {
+  width: 300px; padding: 10px 16px; border-radius: 999px; border: 2px solid #3498db;
+  font-size: 1.1rem; color: #1a5276; background: white; outline: none; text-align: center;
+}
+#input-l2 .hint { font-size: 0.78rem; color: #5d8aa8; }
+#btn-vai-l2 {
+  padding: 10px 32px; border-radius: 999px; border: none;
+  background: #3498db; color: white; font-size: 1rem; font-weight: 600; cursor: pointer;
+}
+
+#arena { position: relative; width: 100%; height: 100vh; display: none; }
+
+/* TUBO */
+#tubo-wrap {
+  display: none; position: fixed; right: 0; top: 0; bottom: 0;
+  width: 88px; z-index: 500;
+  flex-direction: column; align-items: center; justify-content: flex-end;
+  padding-bottom: 80px; gap: 0;
+}
+#tubo {
+  width: 62px; border-radius: 8px 8px 0 0;
+  border: 3px solid rgba(100,160,220,0.55);
+  border-bottom: none;
+  background: rgba(200,230,255,0.25);
+  min-height: 180px; flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  padding: 8px 4px; gap: 5px;
+  position: relative; overflow: hidden;
+}
+#tubo.highlight { background: rgba(52,219,100,0.15); border-color: rgba(52,219,100,0.7); }
+#tubo-base {
+  width: 72px; background: rgba(100,160,220,0.35);
+  border-radius: 0 0 10px 10px; border: 3px solid rgba(100,160,220,0.55);
+  border-top: none; padding: 6px 4px 8px;
+  text-align: center;
+}
+#tubo-totale {
+  font-size: 1.2rem; font-weight: 700; color: #1a5276; line-height: 1;
+}
+#tubo-label { font-size: 0.65rem; color: #5d8aa8; margin-top: 2px; }
+#btn-svuota {
+  margin-top: 8px; padding: 5px 10px; font-size: 0.75rem; font-weight: 600;
+  border: 2px solid #e74c3c; color: #e74c3c; background: white;
+  border-radius: 999px; cursor: pointer; transition: background 0.15s;
+}
+#btn-svuota:hover { background: #fdecea; }
+.bolla-tubo {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(135,206,250,0.55); border: 2px solid rgba(100,180,255,0.6);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; color: #1a5276; flex-shrink: 0;
+}
+
+#barra {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  z-index: 1000; display: none; gap: 12px; align-items: center;
+}
+.btn-ui {
+  padding: 10px 24px; font-size: 0.95rem; font-weight: 600;
+  background: white; border: 2px solid #3498db; color: #1a5276;
+  border-radius: 999px; cursor: pointer; white-space: nowrap; transition: background 0.15s;
+}
+.btn-ui:hover { background: #eaf4fb; }
+
+.bolla {
+  position: absolute; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; color: #1a5276; user-select: none;
+  border: 4px solid rgba(100,180,255,0.7);
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.75), rgba(135,206,250,0.45));
+  transition: box-shadow 0.15s;
+}
+.bolla.over { box-shadow: 0 0 24px 8px rgba(52,219,100,0.75); border-color: rgba(52,219,100,0.9); }
+.bolla.in-tubo-preview { box-shadow: 0 0 20px 6px rgba(231,76,60,0.6); border-color: rgba(231,76,60,0.8); }
+</style>
+</head>
+<body>
+
+<a id="logo-wrap" href="https://matematicaconlemani.wordpress.com/" target="_blank">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo Matematica con le mani" />
+  <span>Matematiche non si nasce</span>
+</a>
+<div id="schermata">
+  <h1>🫧 Gioco delle Bolle</h1>
+  <button class="btn-livello" id="btn-l1">
+    Livello 1 — Amici del 10
+    <span>Due coppie che sommano 10, più un numero extra. Trascina per unire!</span>
+  </button>
+  <button class="btn-livello" id="btn-l2-scegli">
+    Livello 2 — Scegli i numeri
+    <span>Inserisci i tuoi numeri. Tocca per scomporre, trascina per unire!</span>
+  </button>
+  <div id="input-l2">
+    <label>Scrivi i numeri separati da spazio o virgola:</label>
+    <input id="campo-numeri" type="text" placeholder="es. 12 8 23 5" />
+    <p class="hint">Puoi inserire quanti numeri vuoi</p>
+    <button id="btn-vai-l2">Inizia ▶</button>
+  </div>
+</div>
+
+<div id="arena"></div>
+
+<div id="tubo-wrap">
+  <div id="tubo"></div>
+  <div id="tubo-base">
+    <div id="tubo-totale">0</div>
+    <div id="tubo-label">tolti</div>
+    <button id="btn-svuota">svuota</button>
+  </div>
+</div>
+
+<div id="barra">
+  <button class="btn-ui" id="btn-ricomincia">↺ Ricomincia</button>
+  <button class="btn-ui" id="btn-menu">☰ Menu</button>
+</div>
+
+<script>
+const arena = document.getElementById('arena');
+const schermata = document.getElementById('schermata');
+const barra = document.getElementById('barra');
+const inputL2 = document.getElementById('input-l2');
+const tuboWrap = document.getElementById('tubo-wrap');
+const tuboEl = document.getElementById('tubo');
+const tuboTotale = document.getElementById('tubo-totale');
+
+let bolle = [], drag = null, offX = 0, offY = 0;
+let livello = 1, numeriScelti = [], dragMoved = false;
+let tuboContenuto = [];
+
+const tutteAmiche = [[0,10],[1,9],[2,8],[3,7],[4,6],[5,5]];
+
+function numeriL1() {
+  const sh = [...tutteAmiche].sort(() => Math.random()-0.5);
+  const c1 = sh[0], c2 = sh[1];
+  const usati = new Set([...c1,...c2]);
+  let extra; do { extra = Math.floor(Math.random()*9)+1; } while(usati.has(extra));
+  return [...c1,...c2,extra].sort(() => Math.random()-0.5);
+}
+
+function taglia(val) {
+  if (livello === 2) return val >= 10 ? 110 : 76;
+  return Math.max(90, 80 + Math.min(val,20)*5);
+}
+
+function crea(val, x, y) {
+  const s = taglia(val);
+  const el = document.createElement('div');
+  el.className = 'bolla';
+  el.textContent = val;
+  el.style.cssText = `width:${s}px;height:${s}px;left:${x}px;top:${y}px;font-size:${Math.max(1,s/52)}rem;cursor:${livello===2?'pointer':'grab'}`;
+  arena.appendChild(el);
+  const obj = { el, val, x, y, size: s };
+  bolle.push(obj);
+  bind(obj);
+  return obj;
+}
+
+function bind(b) {
+  b.el.addEventListener('pointerdown', e => {
+    drag = b; dragMoved = false;
+    const r = b.el.getBoundingClientRect();
+    offX = e.clientX - r.left; offY = e.clientY - r.top;
+    b.el.setPointerCapture(e.pointerId);
+    b.el.style.zIndex = 999;
+    e.preventDefault();
+  });
+}
+
+function sopraTubo(b) {
+  const tuboR = tuboWrap.getBoundingClientRect();
+  const cx = b.x + b.size/2, cy = b.y + b.size/2;
+  return cx > tuboR.left && cy > tuboR.top && cy < tuboR.bottom;
+}
+
+arena.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const dx = e.clientX - offX - drag.x, dy = e.clientY - offY - drag.y;
+  if (Math.hypot(dx,dy) > 6) dragMoved = true;
+  drag.x = e.clientX - offX; drag.y = e.clientY - offY;
+  drag.el.style.left = drag.x + 'px'; drag.el.style.top = drag.y + 'px';
+  const suTubo = sopraTubo(drag);
+  tuboEl.classList.toggle('highlight', suTubo);
+  drag.el.classList.toggle('in-tubo-preview', suTubo);
+  bolle.forEach(b => { if (b !== drag) b.el.classList.toggle('over', !suTubo && overlap(drag,b)); });
+});
+
+arena.addEventListener('pointerup', () => {
+  if (!drag) return;
+  tuboEl.classList.remove('highlight');
+  drag.el.classList.remove('in-tubo-preview');
+  if (sopraTubo(drag)) {
+    mettiInTubo(drag);
+  } else {
+    const target = bolle.find(b => b !== drag && overlap(drag,b));
+    if (target) fondi(drag,target);
+    else {
+      if (!dragMoved && livello === 2) scomponi(drag);
+      else drag.el.style.zIndex = '';
+    }
+  }
+  bolle.forEach(b => b.el.classList.remove('over'));
+  drag = null;
+});
+
+function overlap(a,b) {
+  const ax=a.x+a.size/2,ay=a.y+a.size/2,bx=b.x+b.size/2,by=b.y+b.size/2;
+  return Math.hypot(ax-bx,ay-by) < (a.size/2+b.size/2)*0.6;
+}
+
+function fondi(a,b) {
+  const nv=a.val+b.val, nx=(a.x+b.x)/2, ny=(a.y+b.y)/2;
+  rimuovi(a); rimuovi(b);
+  const nb = crea(nv,nx,ny);
+  nb.el.style.zIndex=''; pulsa(nb.el);
+}
+
+function scomponi(b) {
+  if (b.val<=1) { b.el.style.zIndex=''; return; }
+  const v=b.val, cx=b.x+b.size/2, cy=b.y+b.size/2;
+  const v1 = v>10 ? 10 : 1, v2 = v-v1;
+  rimuovi(b);
+  const ang = Math.random()*Math.PI*2, dist=70;
+  const s1=taglia(v1), s2=taglia(v2);
+  const x1=clampX(cx+Math.cos(ang)*dist-s1/2,s1);
+  const y1=clampY(cy+Math.sin(ang)*dist-s1/2,s1);
+  const x2=clampX(cx-Math.cos(ang)*dist-s2/2,s2);
+  const y2=clampY(cy-Math.sin(ang)*dist-s2/2,s2);
+  pulsa(crea(v1,x1,y1).el); pulsa(crea(v2,x2,y2).el);
+}
+
+function clampX(v,s) { return Math.max(4,Math.min(v,window.innerWidth-s-92)); }
+function clampY(v,s) { return Math.max(4,Math.min(v,window.innerHeight-s-4)); }
+
+function rimuovi(b) { bolle=bolle.filter(x=>x!==b); b.el.remove(); }
+
+function pulsa(el) {
+  el.style.transform='scale(1.3)'; el.style.transition='transform 0.2s';
+  setTimeout(()=>{ el.style.transform='scale(1)'; },220);
+}
+
+function mettiInTubo(b) {
+  tuboContenuto.push(b.val);
+  rimuovi(b);
+  aggiornatubo();
+}
+
+function aggiornatubo() {
+  const tot = tuboContenuto.reduce((a,v)=>a+v,0);
+  tuboTotale.textContent = tot;
+  tuboEl.innerHTML='';
+  const vis = tuboContenuto.slice(-8);
+  vis.forEach(v => {
+    const d = document.createElement('div');
+    d.className='bolla-tubo'; d.textContent=v;
+    tuboEl.appendChild(d);
+  });
+}
+
+document.getElementById('btn-svuota').addEventListener('click', () => {
+  tuboContenuto=[]; aggiornatubo();
+});
+
+function posiziona(numeri) {
+  bolle.forEach(b=>b.el.remove()); bolle=[];
+  const W=window.innerWidth-92, H=window.innerHeight-80;
+  numeri.forEach(v => {
+    const s=taglia(v); let x,y,ok=false,tries=0;
+    while(!ok && tries++<300) {
+      x=Math.random()*(W-s-20)+10; y=Math.random()*(H-s-20)+10;
+      ok=bolle.every(b=>Math.hypot(x+s/2-b.x-b.size/2,y+s/2-b.y-b.size/2)>(s/2+b.size/2)+14);
+    }
+    crea(v,x,y);
+  });
+}
+
+function avvia(numeri) {
+  schermata.style.display='none';
+  arena.style.display='block';
+  barra.style.display='flex';
+  tuboWrap.style.display='flex';
+  tuboContenuto=[]; aggiornatubo();
+  posiziona(numeri);
+}
+
+function ricomincia() {
+  if (livello===1) { posiziona(numeriL1()); }
+  else {
+    schermata.style.display='flex';
+    inputL2.style.display='flex';
+    document.getElementById('btn-l1').style.display='none';
+    document.getElementById('btn-l2-scegli').style.display='none';
+    arena.style.display='none';
+    barra.style.display='none';
+    tuboWrap.style.display='none';
+    bolle.forEach(b=>b.el.remove()); bolle=[];
+    document.getElementById('campo-numeri').value='';
+    document.getElementById('campo-numeri').focus();
+  }
+}
+
+document.getElementById('btn-l1').addEventListener('click',()=>{ livello=1; avvia(numeriL1()); });
+document.getElementById('btn-l2-scegli').addEventListener('click',()=>{
+  document.getElementById('btn-l1').style.display='none';
+  document.getElementById('btn-l2-scegli').style.display='none';
+  document.getElementById('schermata').querySelector('h1').style.display='none';
+  inputL2.style.display='flex';
+});
+document.getElementById('btn-vai-l2').addEventListener('click',()=>{
+  const nums=document.getElementById('campo-numeri').value
+    .split(/[\s,]+/).map(Number).filter(n=>!isNaN(n)&&n>0);
+  if(nums.length<1){alert('Inserisci almeno un numero!');return;}
+  livello=2; numeriScelti=nums; avvia(nums);
+});
+document.getElementById('campo-numeri').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('btn-vai-l2').click(); });
+document.getElementById('btn-ricomincia').addEventListener('click', ricomincia);
+document.getElementById('btn-menu').addEventListener('click',()=>{
+  schermata.style.display='flex';
+  inputL2.style.display='none';
+  arena.style.display='none';
+  barra.style.display='none';
+  tuboWrap.style.display='none';
+  bolle.forEach(b=>b.el.remove()); bolle=[];
+  document.getElementById('btn-l1').style.display='';
+  document.getElementById('btn-l2-scegli').style.display='';
+  document.getElementById('schermata').querySelector('h1').style.display='';
+  document.getElementById('campo-numeri').value='';
+});
+</script>
+</body>
+</html>
