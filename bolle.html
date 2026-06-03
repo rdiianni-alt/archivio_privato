@@ -7,11 +7,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #dff0fb; font-family: sans-serif; overflow: hidden; width: 100vw; height: 100vh; }
 
-#schermata {
-  position: fixed; inset: 0; z-index: 2000;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
-  background: #dff0fb;
-}
 #logo-wrap {
   position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
   z-index: 3000; display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -19,6 +14,12 @@ body { background: #dff0fb; font-family: sans-serif; overflow: hidden; width: 10
 }
 #logo-wrap img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
 #logo-wrap span { font-size: 0.78rem; font-weight: 600; color: #1a5276; letter-spacing: 0.02em; text-align: center; }
+
+#schermata {
+  position: fixed; inset: 0; z-index: 2000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+  background: #dff0fb;
+}
 #schermata h1 { font-size: 1.8rem; color: #1a5276; font-weight: 700; }
 .btn-livello {
   width: 300px; padding: 18px 24px; border-radius: 16px; border: 3px solid #3498db;
@@ -41,7 +42,6 @@ body { background: #dff0fb; font-family: sans-serif; overflow: hidden; width: 10
 
 #arena { position: relative; width: 100%; height: 100vh; display: none; }
 
-/* TUBO */
 #tubo-wrap {
   display: none; position: fixed; right: 0; top: 0; bottom: 0;
   width: 88px; z-index: 500;
@@ -50,30 +50,27 @@ body { background: #dff0fb; font-family: sans-serif; overflow: hidden; width: 10
 }
 #tubo {
   width: 62px; border-radius: 8px 8px 0 0;
-  border: 3px solid rgba(100,160,220,0.55);
-  border-bottom: none;
+  border: 3px solid rgba(100,160,220,0.55); border-bottom: none;
   background: rgba(200,230,255,0.25);
   min-height: 180px; flex: 1;
   display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-  padding: 8px 4px; gap: 5px;
-  position: relative; overflow: hidden;
+  padding: 8px 4px; gap: 5px; overflow: hidden;
 }
 #tubo.highlight { background: rgba(52,219,100,0.15); border-color: rgba(52,219,100,0.7); }
 #tubo-base {
   width: 72px; background: rgba(100,160,220,0.35);
   border-radius: 0 0 10px 10px; border: 3px solid rgba(100,160,220,0.55);
-  border-top: none; padding: 6px 4px 8px;
-  text-align: center;
+  border-top: none; padding: 6px 4px 8px; text-align: center;
 }
-#tubo-totale {
-  font-size: 1.2rem; font-weight: 700; color: #1a5276; line-height: 1;
-}
+#tubo-totale { font-size: 1.2rem; font-weight: 700; color: #1a5276; line-height: 1; }
 #tubo-label { font-size: 0.65rem; color: #5d8aa8; margin-top: 2px; }
-#btn-svuota {
-  margin-top: 8px; padding: 5px 10px; font-size: 0.75rem; font-weight: 600;
-  border: 2px solid #e74c3c; color: #e74c3c; background: white;
-  border-radius: 999px; cursor: pointer; transition: background 0.15s;
+.btn-tubo {
+  margin-top: 6px; padding: 5px 8px; font-size: 0.72rem; font-weight: 600;
+  border-radius: 999px; cursor: pointer; transition: background 0.15s; width: 64px;
 }
+#btn-riporta { border: 2px solid #2980b9; color: #2980b9; background: white; }
+#btn-riporta:hover { background: #eaf4fb; }
+#btn-svuota { border: 2px solid #e74c3c; color: #e74c3c; background: white; }
 #btn-svuota:hover { background: #fdecea; }
 .bolla-tubo {
   width: 36px; height: 36px; border-radius: 50%;
@@ -108,14 +105,15 @@ body { background: #dff0fb; font-family: sans-serif; overflow: hidden; width: 10
 <body>
 
 <a id="logo-wrap" href="https://matematicaconlemani.wordpress.com/" target="_blank">
-  <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo Matematica con le mani" />
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo" />
   <span>Matematiche non si nasce</span>
 </a>
+
 <div id="schermata">
   <h1>🫧 Gioco delle Bolle</h1>
   <button class="btn-livello" id="btn-l1">
     Livello 1 — Amici del 10
-    <span>Due coppie che sommano 10, più un numero extra. Trascina per unire!</span>
+    <span>Due coppie che sommano 10, più un numero extra. Tocca per scomporre, trascina per unire!</span>
   </button>
   <button class="btn-livello" id="btn-l2-scegli">
     Livello 2 — Scegli i numeri
@@ -124,7 +122,7 @@ body { background: #dff0fb; font-family: sans-serif; overflow: hidden; width: 10
   <div id="input-l2">
     <label>Scrivi i numeri separati da spazio o virgola:</label>
     <input id="campo-numeri" type="text" placeholder="es. 12 8 23 5" />
-    <p class="hint">Puoi inserire quanti numeri vuoi</p>
+    <p class="hint">Puoi inserire anche un solo numero</p>
     <button id="btn-vai-l2">Inizia ▶</button>
   </div>
 </div>
@@ -136,7 +134,8 @@ body { background: #dff0fb; font-family: sans-serif; overflow: hidden; width: 10
   <div id="tubo-base">
     <div id="tubo-totale">0</div>
     <div id="tubo-label">tolti</div>
-    <button id="btn-svuota">svuota</button>
+    <button class="btn-tubo" id="btn-riporta">↩ riporta</button>
+    <button class="btn-tubo" id="btn-svuota">svuota</button>
   </div>
 </div>
 
@@ -154,9 +153,8 @@ const tuboWrap = document.getElementById('tubo-wrap');
 const tuboEl = document.getElementById('tubo');
 const tuboTotale = document.getElementById('tubo-totale');
 
-let bolle = [], drag = null, offX = 0, offY = 0;
-let livello = 1, numeriScelti = [], dragMoved = false;
-let tuboContenuto = [];
+let bolle = [], drag = null, offX = 0, offY = 0, dragMoved = false;
+let livello = 1, numeriScelti = [], tuboContenuto = [];
 
 const tutteAmiche = [[0,10],[1,9],[2,8],[3,7],[4,6],[5,5]];
 
@@ -178,7 +176,7 @@ function crea(val, x, y) {
   const el = document.createElement('div');
   el.className = 'bolla';
   el.textContent = val;
-  el.style.cssText = `width:${s}px;height:${s}px;left:${x}px;top:${y}px;font-size:${Math.max(1,s/52)}rem;cursor:${livello===2?'pointer':'grab'}`;
+  el.style.cssText = `width:${s}px;height:${s}px;left:${x}px;top:${y}px;font-size:${Math.max(1,s/52)}rem;cursor:grab`;
   arena.appendChild(el);
   const obj = { el, val, x, y, size: s };
   bolle.push(obj);
@@ -198,9 +196,9 @@ function bind(b) {
 }
 
 function sopraTubo(b) {
-  const tuboR = tuboWrap.getBoundingClientRect();
+  const r = tuboWrap.getBoundingClientRect();
   const cx = b.x + b.size/2, cy = b.y + b.size/2;
-  return cx > tuboR.left && cy > tuboR.top && cy < tuboR.bottom;
+  return cx > r.left && cy > r.top && cy < r.bottom;
 }
 
 arena.addEventListener('pointermove', e => {
@@ -223,73 +221,61 @@ arena.addEventListener('pointerup', () => {
     mettiInTubo(drag);
   } else {
     const target = bolle.find(b => b !== drag && overlap(drag,b));
-    if (target) fondi(drag,target);
-    else {
-      if (!dragMoved && livello === 2) scomponi(drag);
-      else drag.el.style.zIndex = '';
-    }
+    if (target) fondi(drag, target);
+    else if (!dragMoved) scomponi(drag);
+    else drag.el.style.zIndex = '';
   }
   bolle.forEach(b => b.el.classList.remove('over'));
   drag = null;
 });
 
 function overlap(a,b) {
-  const ax=a.x+a.size/2,ay=a.y+a.size/2,bx=b.x+b.size/2,by=b.y+b.size/2;
+  const ax=a.x+a.size/2, ay=a.y+a.size/2, bx=b.x+b.size/2, by=b.y+b.size/2;
   return Math.hypot(ax-bx,ay-by) < (a.size/2+b.size/2)*0.6;
 }
 
 function fondi(a,b) {
   const nv=a.val+b.val, nx=(a.x+b.x)/2, ny=(a.y+b.y)/2;
   rimuovi(a); rimuovi(b);
-  const nb = crea(nv,nx,ny);
-  nb.el.style.zIndex=''; pulsa(nb.el);
+  const nb = crea(nv, nx, ny);
+  nb.el.style.zIndex = ''; pulsa(nb.el);
 }
 
 function scomponi(b) {
-  if (b.val<=1) { b.el.style.zIndex=''; return; }
-  const v=b.val, cx=b.x+b.size/2, cy=b.y+b.size/2;
-  const v1 = v>10 ? 10 : 1, v2 = v-v1;
+  if (b.val <= 1) { b.el.style.zIndex = ''; return; }
+  const v = b.val, cx = b.x+b.size/2, cy = b.y+b.size/2;
+  const v1 = v > 10 ? 10 : 1, v2 = v - v1;
   rimuovi(b);
-  const ang = Math.random()*Math.PI*2, dist=70;
+  const ang = Math.random()*Math.PI*2, dist = 70;
   const s1=taglia(v1), s2=taglia(v2);
-  const x1=clampX(cx+Math.cos(ang)*dist-s1/2,s1);
-  const y1=clampY(cy+Math.sin(ang)*dist-s1/2,s1);
-  const x2=clampX(cx-Math.cos(ang)*dist-s2/2,s2);
-  const y2=clampY(cy-Math.sin(ang)*dist-s2/2,s2);
-  pulsa(crea(v1,x1,y1).el); pulsa(crea(v2,x2,y2).el);
+  const b1 = crea(v1, clampX(cx+Math.cos(ang)*dist-s1/2,s1), clampY(cy+Math.sin(ang)*dist-s1/2,s1));
+  const b2 = crea(v2, clampX(cx-Math.cos(ang)*dist-s2/2,s2), clampY(cy-Math.sin(ang)*dist-s2/2,s2));
+  pulsa(b1.el); pulsa(b2.el);
 }
 
-function clampX(v,s) { return Math.max(4,Math.min(v,window.innerWidth-s-92)); }
-function clampY(v,s) { return Math.max(4,Math.min(v,window.innerHeight-s-4)); }
-
+function clampX(v,s) { return Math.max(4, Math.min(v, window.innerWidth-s-92)); }
+function clampY(v,s) { return Math.max(4, Math.min(v, window.innerHeight-s-4)); }
 function rimuovi(b) { bolle=bolle.filter(x=>x!==b); b.el.remove(); }
-
 function pulsa(el) {
   el.style.transform='scale(1.3)'; el.style.transition='transform 0.2s';
-  setTimeout(()=>{ el.style.transform='scale(1)'; },220);
+  setTimeout(()=>{ el.style.transform='scale(1)'; }, 220);
 }
 
 function mettiInTubo(b) {
   tuboContenuto.push(b.val);
-  rimuovi(b);
-  aggiornatubo();
+  rimuovi(b); aggiornatubo();
 }
 
 function aggiornatubo() {
-  const tot = tuboContenuto.reduce((a,v)=>a+v,0);
+  const tot = tuboContenuto.reduce((a,v)=>a+v, 0);
   tuboTotale.textContent = tot;
-  tuboEl.innerHTML='';
-  const vis = tuboContenuto.slice(-8);
-  vis.forEach(v => {
+  tuboEl.innerHTML = '';
+  tuboContenuto.slice(-8).forEach(v => {
     const d = document.createElement('div');
-    d.className='bolla-tubo'; d.textContent=v;
+    d.className = 'bolla-tubo'; d.textContent = v;
     tuboEl.appendChild(d);
   });
 }
-
-document.getElementById('btn-svuota').addEventListener('click', () => {
-  tuboContenuto=[]; aggiornatubo();
-});
 
 function posiziona(numeri) {
   bolle.forEach(b=>b.el.remove()); bolle=[];
@@ -304,57 +290,76 @@ function posiziona(numeri) {
   });
 }
 
+function mostraMenu(soloL2) {
+  schermata.style.display = 'flex';
+  arena.style.display = 'none';
+  barra.style.display = 'none';
+  tuboWrap.style.display = 'none';
+  bolle.forEach(b=>b.el.remove()); bolle=[];
+  if (soloL2) {
+    document.getElementById('btn-l1').style.display = 'none';
+    document.getElementById('btn-l2-scegli').style.display = 'none';
+    schermata.querySelector('h1').style.display = 'none';
+    inputL2.style.display = 'flex';
+  } else {
+    document.getElementById('btn-l1').style.display = '';
+    document.getElementById('btn-l2-scegli').style.display = '';
+    schermata.querySelector('h1').style.display = '';
+    inputL2.style.display = 'none';
+  }
+  document.getElementById('campo-numeri').value = '';
+}
+
 function avvia(numeri) {
-  schermata.style.display='none';
-  arena.style.display='block';
-  barra.style.display='flex';
-  tuboWrap.style.display='flex';
-  tuboContenuto=[]; aggiornatubo();
+  schermata.style.display = 'none';
+  arena.style.display = 'block';
+  barra.style.display = 'flex';
+  tuboWrap.style.display = 'flex';
+  tuboContenuto = []; aggiornatubo();
   posiziona(numeri);
 }
 
-function ricomincia() {
-  if (livello===1) { posiziona(numeriL1()); }
-  else {
-    schermata.style.display='flex';
-    inputL2.style.display='flex';
-    document.getElementById('btn-l1').style.display='none';
-    document.getElementById('btn-l2-scegli').style.display='none';
-    arena.style.display='none';
-    barra.style.display='none';
-    tuboWrap.style.display='none';
-    bolle.forEach(b=>b.el.remove()); bolle=[];
-    document.getElementById('campo-numeri').value='';
-    document.getElementById('campo-numeri').focus();
-  }
-}
+document.getElementById('btn-l1').addEventListener('click', () => {
+  livello = 1; avvia(numeriL1());
+});
 
-document.getElementById('btn-l1').addEventListener('click',()=>{ livello=1; avvia(numeriL1()); });
-document.getElementById('btn-l2-scegli').addEventListener('click',()=>{
-  document.getElementById('btn-l1').style.display='none';
-  document.getElementById('btn-l2-scegli').style.display='none';
-  document.getElementById('schermata').querySelector('h1').style.display='none';
-  inputL2.style.display='flex';
+document.getElementById('btn-l2-scegli').addEventListener('click', () => {
+  document.getElementById('btn-l1').style.display = 'none';
+  document.getElementById('btn-l2-scegli').style.display = 'none';
+  schermata.querySelector('h1').style.display = 'none';
+  inputL2.style.display = 'flex';
 });
-document.getElementById('btn-vai-l2').addEventListener('click',()=>{
-  const nums=document.getElementById('campo-numeri').value
+
+document.getElementById('btn-vai-l2').addEventListener('click', () => {
+  const nums = document.getElementById('campo-numeri').value
     .split(/[\s,]+/).map(Number).filter(n=>!isNaN(n)&&n>0);
-  if(nums.length<1){alert('Inserisci almeno un numero!');return;}
-  livello=2; numeriScelti=nums; avvia(nums);
+  if (nums.length < 1) { alert('Inserisci almeno un numero!'); return; }
+  livello = 2; numeriScelti = nums; avvia(nums);
 });
-document.getElementById('campo-numeri').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('btn-vai-l2').click(); });
-document.getElementById('btn-ricomincia').addEventListener('click', ricomincia);
-document.getElementById('btn-menu').addEventListener('click',()=>{
-  schermata.style.display='flex';
-  inputL2.style.display='none';
-  arena.style.display='none';
-  barra.style.display='none';
-  tuboWrap.style.display='none';
-  bolle.forEach(b=>b.el.remove()); bolle=[];
-  document.getElementById('btn-l1').style.display='';
-  document.getElementById('btn-l2-scegli').style.display='';
-  document.getElementById('schermata').querySelector('h1').style.display='';
-  document.getElementById('campo-numeri').value='';
+
+document.getElementById('campo-numeri').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('btn-vai-l2').click();
+});
+
+document.getElementById('btn-ricomincia').addEventListener('click', () => {
+  if (livello === 1) posiziona(numeriL1());
+  else mostraMenu(true);
+});
+
+document.getElementById('btn-menu').addEventListener('click', () => mostraMenu(false));
+
+document.getElementById('btn-riporta').addEventListener('click', () => {
+  if (tuboContenuto.length === 0) return;
+  const val = tuboContenuto.pop();
+  const s = taglia(val);
+  const x = Math.random()*(window.innerWidth-92-s-20)+10;
+  const y = Math.random()*(window.innerHeight-s-80)+10;
+  pulsa(crea(val,x,y).el);
+  aggiornatubo();
+});
+
+document.getElementById('btn-svuota').addEventListener('click', () => {
+  tuboContenuto = []; aggiornatubo();
 });
 </script>
 </body>
