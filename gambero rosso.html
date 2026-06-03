@@ -213,7 +213,7 @@ function chiedi(){
   if(!q){document.getElementById('ansbox').textContent='SCEGLI PRIMA UNA DOMANDA!';return;}
   const ans=matchesQuery(cards[gamberoIdx],q);
   document.getElementById('ansbox').innerHTML=ans?'<span class="si">✅ SÌ!</span>':'<span class="no">❌ NO!</span>';
-  document.getElementById('hint').textContent=HINTS[q][ans?0:1];
+  document.getElementById('hint').textContent='';
 }
 
 newGame();
