@@ -200,6 +200,7 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
     <div class="risposta-ghost">👻</div>
     <div class="risposta-val" id="risposta-val"></div>
     <div class="risposta-label">era il numero nascosto!</div>
+    <div class="risposta-percorso" id="risposta-percorso" style="font-size:14px;color:#e0d6ff;margin-top:10px;line-height:1.8;"></div>
     <div class="strade-count" id="strade-count"></div>
   </div>
 
@@ -327,30 +328,23 @@ function current(){ return steps.length ? steps[steps.length-1].to : numA; }
 function eq(a,b){ return Math.abs(a-b) < cfg.step * 0.01; }
 
 function aggiornaQuickBtns(){
-  const cur = current();
-  const rem = r(numB - cur);
   const container = document.getElementById('quick-btns');
   container.innerHTML = '';
-
-  if(rem > 0){
-    cfg.quickPos.filter(v => v <= r(rem + cfg.step * 0.01)).forEach(v=>{
-      const b = document.createElement('button');
-      b.className = 'qbtn';
-      b.textContent = '+' + fmt(v);
-      b.onclick = ()=>addStep(v);
-      container.appendChild(b);
-    });
-  }
-  if(cur > numB){
-    const over = r(cur - numB);
-    cfg.quickNeg.filter(v => v <= r(over + cfg.step * 0.01)).forEach(v=>{
-      const b = document.createElement('button');
-      b.className = 'qbtn neg';
-      b.textContent = '−' + fmt(v);
-      b.onclick = ()=>addStep(-v);
-      container.appendChild(b);
-    });
-  }
+  // Mostra sempre gli stessi strumenti fissi, indipendentemente da dove si è arrivati
+  cfg.quickPos.forEach(v=>{
+    const b = document.createElement('button');
+    b.className = 'qbtn';
+    b.textContent = '+' + fmt(v);
+    b.onclick = ()=>addStep(v);
+    container.appendChild(b);
+  });
+  cfg.quickNeg.forEach(v=>{
+    const b = document.createElement('button');
+    b.className = 'qbtn neg';
+    b.textContent = '−' + fmt(v);
+    b.onclick = ()=>addStep(-v);
+    container.appendChild(b);
+  });
 }
 
 function setSign(s){
@@ -384,10 +378,17 @@ function checkArrivo(){
   if(eq(cur, numB)){
     const val = r(numB - numA);
     document.getElementById('risposta-val').textContent = fmt(val);
+    // esplicita il percorso
+    const tappe = steps.map(s => (s.delta>0?'+':'')+fmt(s.delta)).join(' + ').replace(/\+ \−/g,'− ');
+    const spiegazione = steps.map(s=>(s.delta>0?'+':'')+fmt(s.delta)).join(', ');
+    const eq2 = steps.map(s=>Math.abs(s.delta)).reduce((a,b)=>r(a+b),0);
+    document.getElementById('risposta-percorso').innerHTML =
+      `Hai fatto: ${spiegazione}<br>` +
+      `${steps.map(s=>(s.delta>0?'+':'')+fmt(s.delta)).map(x=>`<strong>${x}</strong>`).join(' ')} = <strong>${fmt(val)}</strong>`;
     document.getElementById('risposta-box').classList.add('show');
     document.getElementById('btn-salva').style.display = '';
     document.getElementById('add-panel').style.display = 'none';
-    setStato('ok','Perfetto! Hai trovato il percorso! 🎉');
+    setStato('ok','Perfetto! Hai trovato una strada! 🎉');
     return;
   }
   if(cur > numB){
@@ -469,7 +470,7 @@ function salvaStrada(){
   wrap.style.display = '';
   const div = document.createElement('div');
   div.className = 'strada';
-  div.innerHTML = `<span class="badge">Strada ${strade.length}</span> ${fmt(numA)} ${desc} = <strong>${fmt(numB)}</strong> → 👻 = <strong>${fmt(corretta)}</strong>`;
+  div.innerHTML = `<span class="badge">Strada ${strade.length}</span> ${desc} → 👻 = <strong>${fmt(corretta)}</strong>`;
   list.appendChild(div);
   document.getElementById('strade-count').textContent = `Hai trovato ${strade.length} strada${strade.length>1?'':''}!`;
   resetPercorso();
