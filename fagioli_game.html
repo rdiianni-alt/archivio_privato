@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Il Gioco dei Fagioli</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Arial', sans-serif;
+    font-weight: normal;
+    text-transform: uppercase;
+    background: #fff9e6;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .logo {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    margin-bottom: 18px; text-decoration: none;
+  }
+  .logo img {
+    width: 60px; height: 60px;
+    object-fit: contain; border-radius: 50%;
+  }
+  .logo-name {
+    font-size: 0.78em; color: #e07b00; letter-spacing: 2px;
+    font-family: 'Arial Black', Arial, sans-serif;
+    text-transform: uppercase; text-align: center;
+  }
+  h1 { color: #e07b00; font-size: 1.6em; font-weight: normal; margin-bottom: 18px; text-align: center; letter-spacing: 3px; }
+
+  #setup {
+    background: white; border-radius: 20px; padding: 30px 40px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center;
+  }
+  #setup p { font-size: 1.2em; color: #555; margin-bottom: 15px; }
+  #setup input {
+    font-size: 2em; width: 80px; text-align: center;
+    border: 3px solid #f0a500; border-radius: 12px; padding: 5px;
+    color: #333; font-family: inherit;
+  }
+  #setup button {
+    display: block; margin: 20px auto 0; background: #f0a500; color: white;
+    border: none; border-radius: 15px; padding: 12px 35px; font-size: 1.1em;
+    cursor: pointer; font-family: inherit; text-transform: uppercase;
+    font-weight: bold; letter-spacing: 1px;
+  }
+  #setup button:hover { background: #d48e00; }
+
+  #game { display: none; width: 100%; max-width: 700px; }
+
+  .bubble {
+    background: white; border: 3px solid #f0a500; border-radius: 20px;
+    padding: 12px 25px; font-size: 1.2em; color: #333; text-align: center;
+    position: relative; margin-bottom: 14px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.08); letter-spacing: 1px;
+  }
+  .bubble::after {
+    content: ''; position: absolute; bottom: -18px; left: 50%;
+    transform: translateX(-50%); border: 10px solid transparent; border-top-color: #f0a500;
+  }
+  .bubble span { color: #e07b00; font-weight: bold; font-size: 1.2em; }
+
+  .hands-row {
+    display: flex; justify-content: center; gap: 40px;
+    margin-top: 28px; align-items: flex-start;
+  }
+
+  .hand-box {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    min-width: 160px;
+  }
+  .hand-label { font-size: 0.72em; color: #aaa; letter-spacing: 1px; margin-top: 4px; }
+
+  /* Container that stacks emoji and beans on top of each other */
+  .hand-visual {
+    position: relative;
+    width: 220px;
+    height: 240px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .hand-emoji {
+    font-size: 210px;
+    line-height: 1;
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    user-select: none;
+  }
+
+  .open-left  { transform: translateX(-50%) rotate(180deg) scaleX(-1); }
+  .open-right { transform: translateX(-50%) rotate(180deg); }
+  .fist-left  { transform: translateX(-50%) rotate(180deg) scaleX(-1); }
+  .fist-right { transform: translateX(-50%) rotate(180deg); }
+
+  .beans-overlay {
+    position: absolute;
+    top: 62px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90px;
+    display: flex; flex-wrap: wrap;
+    justify-content: center; align-items: center;
+    gap: 2px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .bean { font-size: 11px; line-height: 1.1; }
+
+  .fist-q {
+    position: absolute;
+    top: 90px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 3.5em;
+    font-weight: bold;
+    color: #e07b00;
+    z-index: 2;
+    font-family: 'Arial Black', Arial, sans-serif;
+    pointer-events: none;
+  }
+
+  .question { margin-top: 24px; text-align: center; font-size: 1.05em; color: #444; letter-spacing: 1px; }
+
+  .answer-row { display: flex; justify-content: center; gap: 30px; margin-top: 15px; flex-wrap: wrap; }
+  .answer-box { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.85em; color: #555; letter-spacing: 1px; }
+  .answer-box input {
+    width: 65px; font-size: 1.8em; text-align: center;
+    border: 3px solid #ccc; border-radius: 12px; padding: 4px; font-family: inherit;
+  }
+  .answer-box input:focus { outline: none; border-color: #f0a500; }
+
+  .btn-row { display: flex; justify-content: center; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+  .btn {
+    background: #f0a500; color: white; border: none; border-radius: 15px;
+    padding: 11px 22px; font-size: 0.88em; cursor: pointer; font-family: inherit;
+    text-transform: uppercase; font-weight: bold; letter-spacing: 1px;
+  }
+  .btn:hover { background: #d48e00; }
+  .btn.secondary { background: #aaa; } .btn.secondary:hover { background: #888; }
+  .btn.green { background: #4caf50; } .btn.green:hover { background: #388e3c; }
+
+  #feedback { margin-top: 14px; text-align: center; font-size: 1.15em; min-height: 1.8em; font-weight: bold; letter-spacing: 1px; }
+  .correct { color: #4caf50; } .wrong { color: #e53935; }
+  #score { margin-top: 6px; text-align: center; font-size: 0.9em; color: #aaa; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<a class="logo" href="https://matematicaconlemani.wordpress.com/" target="_blank">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo">
+  <span class="logo-name">Matematica non si nasce</span>
+</a>
+<h1>Il Gioco dei Fagioli</h1>
+
+<div id="setup">
+  <p>Con quanti fagioli vuoi giocare?</p>
+  <input type="number" id="totalInput" min="1" max="20" value="5">
+  <button onclick="startGame()">Iniziamo!</button>
+</div>
+
+<div id="game">
+  <div class="bubble">Ho in tutto <span id="bubbleNum">5</span> fagioli. Guardate!</div>
+
+  <div class="hands-row">
+    <div class="hand-box">
+      <div class="hand-visual" id="visualLeft">
+        <span class="hand-emoji" id="emojiLeft">✋</span>
+        <div id="overlayLeft"></div>
+      </div>
+      <div class="hand-label" id="labelLeft"></div>
+    </div>
+    <div class="hand-box">
+      <div class="hand-visual" id="visualRight">
+        <span class="hand-emoji" id="emojiRight">✊</span>
+        <div id="overlayRight"></div>
+      </div>
+      <div class="hand-label" id="labelRight"></div>
+    </div>
+  </div>
+
+  <div class="question">Quanti fagioli ci sono nella mano chiusa?</div>
+
+  <div class="answer-row">
+    <div class="answer-box">
+      <span>Mano aperta</span>
+      <input type="number" id="answerOpen" min="0" max="20" placeholder="?">
+    </div>
+    <div class="answer-box">
+      <span>Mano chiusa</span>
+      <input type="number" id="answerClosed" min="0" max="20" placeholder="?">
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="checkAnswer()">Controlla</button>
+    <button class="btn secondary" onclick="showAnswer()">Mostra risposta</button>
+    <button class="btn green" onclick="nextRound()">Prossimo round</button>
+  </div>
+  <div id="feedback"></div>
+  <div id="score"></div>
+  <div class="btn-row" style="margin-top:16px">
+    <button class="btn secondary" onclick="resetGame()">Cambia numero</button>
+  </div>
+</div>
+
+<script>
+var total=5, openCount=0, closedCount=0, leftIsOpen=true, correct=0, rounds=0;
+
+function startGame(){
+  var v=parseInt(document.getElementById('totalInput').value);
+  if(isNaN(v)||v<1||v>20){alert("Inserisci un numero tra 1 e 20!");return;}
+  total=v;
+  document.getElementById('setup').style.display='none';
+  document.getElementById('game').style.display='block';
+  document.getElementById('bubbleNum').textContent=total;
+  correct=0; rounds=0; updateScore(); nextRound();
+}
+
+function nextRound(){
+  document.getElementById('feedback').textContent='';
+  document.getElementById('answerOpen').value='';
+  document.getElementById('answerClosed').value='';
+  document.getElementById('answerOpen').style.borderColor='#ccc';
+  document.getElementById('answerClosed').style.borderColor='#ccc';
+
+  openCount=Math.floor(Math.random()*(total+1));
+  closedCount=total-openCount;
+  leftIsOpen=Math.random()<0.5;
+
+  setHand('Left',  leftIsOpen, leftIsOpen ? openCount : -1);
+  setHand('Right', !leftIsOpen, !leftIsOpen ? openCount : -1);
+
+  document.getElementById('labelLeft').textContent=leftIsOpen?'(aperta)':'(chiusa)';
+  document.getElementById('labelRight').textContent=leftIsOpen?'(chiusa)':'(aperta)';
+}
+
+// isOpen: true = open hand; beansN: number of beans (-1 = fist, show ?)
+function setHand(side, isOpen, beansN){
+  var emoji=document.getElementById('emoji'+side);
+  var overlay=document.getElementById('overlay'+side);
+  var isLeft=side==='Left';
+
+  if(isOpen){
+    emoji.textContent='✋🏻';
+    emoji.className='hand-emoji '+(isLeft?'open-left':'open-right');
+    // beans overlay on palm
+    var html='<div class="beans-overlay">';
+    for(var i=0;i<beansN;i++) html+='<svg width="16" height="10" viewBox="0 0 16 10" style="display:inline-block;margin:2px"><ellipse cx="8" cy="5" rx="7" ry="4.2" fill="#7a3b10"/><ellipse cx="6" cy="3.5" rx="3" ry="1.8" fill="#a0522d" opacity="0.6"/></svg>';
+    html+='</div>';
+    overlay.innerHTML=html;
+  } else {
+    emoji.textContent='✊🏻';
+    emoji.className='hand-emoji '+(isLeft?'fist-left':'fist-right');
+    overlay.innerHTML='<div class="fist-q">?</div>';
+  }
+}
+
+function checkAnswer(){
+  var aOpen=parseInt(document.getElementById('answerOpen').value);
+  var aClosed=parseInt(document.getElementById('answerClosed').value);
+  var fb=document.getElementById('feedback');
+  if(isNaN(aOpen)||isNaN(aClosed)){fb.textContent='Inserisci entrambe le risposte!';fb.className='wrong';return;}
+  rounds++;
+  var okO=aOpen===openCount, okC=aClosed===closedCount;
+  document.getElementById('answerOpen').style.borderColor=okO?'#4caf50':'#e53935';
+  document.getElementById('answerClosed').style.borderColor=okC?'#4caf50':'#e53935';
+  var msgs=['Esatto! Hai indovinato!','Perfetto! Hai indovinato!','Giusto! Hai indovinato!'];
+  if(okO&&okC){
+    fb.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+    fb.className='correct'; correct++;
+  } else {
+    fb.innerHTML='Non proprio! Aperti: '+openCount+' &nbsp;|&nbsp; Chiusi: '+closedCount;
+    fb.className='wrong';
+  }
+  updateScore();
+}
+
+function showAnswer(){
+  var fb=document.getElementById('feedback');
+  fb.innerHTML='Fagioli aperti: '+openCount+' &nbsp;|&nbsp; Fagioli chiusi: '+closedCount;
+  fb.className='';
+  document.getElementById('answerOpen').value=openCount;
+  document.getElementById('answerClosed').value=closedCount;
+}
+
+function updateScore(){
+  document.getElementById('score').textContent=rounds>0?'Punteggio: '+correct+' / '+rounds:'';
+}
+
+function resetGame(){
+  document.getElementById('game').style.display='none';
+  document.getElementById('setup').style.display='block';
+  document.getElementById('feedback').textContent='';
+}
+</script>
+</body>
+</html>
