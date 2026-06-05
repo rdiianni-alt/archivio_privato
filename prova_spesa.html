@@ -322,106 +322,131 @@ function generaPDF(){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit:'mm', format:'a4' });
   const livNomi = ['Prezzi interi','Con i ,50','Con i centesimi'];
-  const W = 210, margin = 15;
-  let y = 15;
+  const W=210, M=18, CW=W-M*2;
+  let y=16;
 
-  // Titolo
-  doc.setFontSize(16); doc.setFont('helvetica','bold');
-  doc.text('Spesa al Supermercato', W/2, y, {align:'center'}); y+=7;
-  doc.setFontSize(10); doc.setFont('helvetica','normal');
-  doc.text('Livello ' + livello + ' — ' + livNomi[livello-1], W/2, y, {align:'center'}); y+=5;
-  doc.text('Calcola il totale, scegli come pagare e compila lo scontrino!', W/2, y, {align:'center'}); y+=8;
+  // Intestazione
+  doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(30,100,30);
+  doc.text('Matematiche non si nasce', W/2, y, {align:'center'}); y+=7;
+  doc.setFontSize(17); doc.setTextColor(20,70,20);
+  doc.text('Spesa al Supermercato', W/2, y, {align:'center'}); y+=6;
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(80);
+  doc.text('Livello '+livello+' — '+livNomi[livello-1]+'   |   Calcola il totale, scegli come pagare e compila lo scontrino!', W/2, y, {align:'center'}); y+=8;
+
+  // Linea separatrice
+  doc.setDrawColor(180); doc.setLineWidth(0.3); doc.line(M, y, W-M, y); y+=7;
 
   // Nome / Data / Classe
-  doc.setFontSize(10); doc.setFont('helvetica','normal');
-  doc.text('Nome: ______________________________', margin, y);
-  doc.text('Data: ________________', 110, y);
-  y+=5; doc.text('Classe: ___________', margin, y); y+=8;
+  doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(0);
+  doc.text('Nome:', M, y); doc.line(M+14, y, M+80, y);
+  doc.text('Data:', M+85, y); doc.line(M+97, y, M+130, y);
+  doc.text('Classe:', M+135, y); doc.line(M+149, y, CW+M, y);
+  y+=12;
 
-  // Genera 3 spese casuali
-  const spese = [];
-  const usati = new Set();
-  for(let s=0; s<3; s++){
-    let n=[3,5,7][s];
-    let p=[...PRODOTTI].filter(x=>!usati.has(x.n)).sort(()=>Math.random()-0.5).slice(0,n);
-    p.forEach(x=>{ x.prezzoScheda=prezzoRandom(); usati.add(x.n); });
-    spese.push(p);
-  }
+  // Genera 1 spesa casuale
+  let n=[3,5,7][Math.floor(Math.random()*3)];
+  let articoli=[...PRODOTTI].sort(()=>Math.random()-0.5).slice(0,n);
+  articoli.forEach(a=>a.prezzoScheda=prezzoRandom());
+  let tot=r(articoli.reduce((s,a)=>s+a.prezzoScheda,0));
 
-  const SOLDI = ['€ 1','€ 2','€ 5','€ 10','€ 20','€ 50'];
+  // --- STEP 1: Articoli nel carrello ---
+  doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(30,100,30);
+  doc.text('Step 1 — Articoli nel carrello', M, y); y+=5;
 
-  spese.forEach((articoli, idx) => {
-    let tot = r(articoli.reduce((s,a)=>s+a.prezzoScheda,0));
+  // Griglia articoli
+  let cols=Math.min(articoli.length, 4);
+  let cardW=CW/cols - 2;
+  articoli.forEach((a,i)=>{
+    let col=i%cols, row=Math.floor(i/cols);
+    let cx=M+col*(cardW+2), cy=y+row*22;
+    doc.setDrawColor(150,200,150); doc.setLineWidth(0.3);
+    doc.roundedRect(cx, cy, cardW, 18, 2, 2);
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(0);
+    doc.text(a.n, cx+cardW/2, cy+8, {align:'center', maxWidth:cardW-4});
+    doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(30,100,30);
+    doc.text('€ '+fmt(a.prezzoScheda), cx+cardW/2, cy+15, {align:'center'});
+  });
+  let rows=Math.ceil(articoli.length/cols);
+  y+=rows*22+6;
 
-    // Bordo spesa
+  // --- STEP 2: Calcola totale ---
+  doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(30,100,30);
+  doc.text('Step 2 — Calcola il totale da pagare', M, y); y+=7;
+  doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(0);
+  // Operazione somma
+  articoli.forEach((a,i)=>{
+    doc.text((i===0?'':'+ ')+'€ '+fmt(a.prezzoScheda), M+10, y); y+=5;
+  });
+  doc.line(M+10, y, M+50, y); y+=5;
+  doc.setFont('helvetica','bold');
+  doc.text('TOTALE  =  €', M+10, y); doc.line(M+40, y, M+65, y); y+=12;
+
+  // --- STEP 3: Scegli i soldi ---
+  doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(30,100,30);
+  doc.text('Step 3 — Scegli con quali soldi pagare  (metti una ✓)', M, y); y+=7;
+
+  const SOLDI=[{l:'€ 1',w:18},{l:'€ 2',w:18},{l:'€ 5',w:18},{l:'€ 10',w:20},{l:'€ 20',w:20},{l:'€ 50',w:20}];
+  let sx=M;
+  SOLDI.forEach(s=>{
     doc.setDrawColor(100); doc.setLineWidth(0.4);
-    let blockH = 14 + articoli.length*5 + 28 + 28;
-    if(y + blockH > 285){ doc.addPage(); y=15; }
-    doc.roundedRect(margin, y, W-margin*2, blockH, 3, 3);
+    doc.roundedRect(sx, y-5, s.w, 10, 2, 2);
+    doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(0);
+    doc.text(s.l, sx+s.w/2, y+1, {align:'center'});
+    // casella spunta
+    doc.setLineWidth(0.3); doc.rect(sx+s.w/2-3, y+7, 6, 6);
+    sx+=s.w+4;
+  });
+  y+=18;
 
-    let bx = margin+3, by = y+6;
-    doc.setFontSize(11); doc.setFont('helvetica','bold');
-    doc.text('Spesa ' + (idx+1), bx, by); by+=6;
+  doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(0);
+  doc.text('Ho dato in cassa:  €', M, y); doc.line(M+43, y, M+75, y); y+=12;
 
-    // Articoli
-    doc.setFontSize(9); doc.setFont('helvetica','normal');
-    articoli.forEach(a=>{
-      doc.text(a.n + '   € ' + fmt(a.prezzoScheda), bx+2, by); by+=5;
-    });
+  // --- SCONTRINO ---
+  doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(30,100,30);
+  doc.text('Step 4 — Compila il tuo scontrino', M, y); y+=5;
 
-    // Totale da calcolare
-    by+=2;
-    doc.setFont('helvetica','bold'); doc.setFontSize(9);
-    doc.text('1. Calcola il totale:  €', bx, by);
-    doc.line(bx+52, by, bx+75, by); by+=8;
+  // Box scontrino tratteggiato
+  let scH=articoli.length*6+38;
+  doc.setDrawColor(150); doc.setLineWidth(0.3);
+  doc.setLineDashPattern([2,2],0);
+  doc.rect(M+20, y, CW-40, scH);
+  doc.setLineDashPattern([],0);
 
-    // Soldi
-    doc.text('2. Metti una ✓ sui soldi che usi per pagare:', bx, by); by+=5;
-    doc.setFont('helvetica','normal');
-    SOLDI.forEach((s,i)=>{
-      let sx=bx+(i*27), sy=by;
-      doc.rect(sx, sy-4, 18, 7);
-      doc.text(s, sx+9, sy, {align:'center'});
-      doc.rect(sx+5, sy+4, 4, 4);
-    });
-    by+=12;
+  let scx=M+24, scy=y+6, scR=M+CW-24;
+  doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(30,100,30);
+  doc.text('SCONTRINO', W/2, scy, {align:'center'}); scy+=6;
 
-    doc.setFont('helvetica','normal');
-    doc.text('Ho dato in cassa:  €', bx, by);
-    doc.line(bx+42, by, bx+65, by); by+=8;
-
-    // Scontrino
-    doc.setDrawColor(150); doc.setLineDashPattern([1,1],0);
-    doc.rect(bx, by, W-margin*2-6, articoli.length*4+22);
-    doc.setLineDashPattern([],0);
-    let sx=bx+3, sy=by+5;
-    doc.setFont('helvetica','bold'); doc.setFontSize(8);
-    doc.text('SCONTRINO', (bx+(W-margin*2-6)/2), sy, {align:'center'}); sy+=4;
-    doc.setFont('helvetica','normal');
-    articoli.forEach(a=>{
-      doc.text(a.n, sx, sy);
-      doc.text('€ ' + fmt(a.prezzoScheda), bx+W-margin*2-10, sy, {align:'right'}); sy+=4;
-    });
-    doc.line(sx, sy, bx+W-margin*2-9, sy); sy+=3;
-    doc.setFont('helvetica','bold');
-    doc.text('TOTALE', sx, sy);
-    doc.text('€ ________', bx+W-margin*2-10, sy, {align:'right'}); sy+=4;
-    doc.line(sx, sy, bx+W-margin*2-9, sy); sy+=3;
-    doc.setFont('helvetica','normal');
-    doc.text('Soldi dati - Totale = Resto', sx, sy); sy+=4;
-    doc.text('€ _______ - € _______ = € _______', sx, sy); sy+=4;
-    doc.setFont('helvetica','bold');
-    doc.text('RESTO', sx, sy);
-    doc.text('€ ________', bx+W-margin*2-10, sy, {align:'right'});
-
-    y += blockH + 6;
+  doc.setFont('helvetica','normal'); doc.setTextColor(0); doc.setFontSize(9);
+  articoli.forEach(a=>{
+    doc.text(a.n, scx, scy);
+    doc.text('€ '+fmt(a.prezzoScheda), scR, scy, {align:'right'});
+    scy+=6;
   });
 
-  // Footer
-  doc.setFontSize(8); doc.setFont('helvetica','italic'); doc.setTextColor(150);
-  doc.text('Matematiche non si nasce', W/2, 290, {align:'center'});
+  doc.setDrawColor(180); doc.line(scx, scy, scR, scy); scy+=5;
+  doc.setFont('helvetica','bold'); doc.setFontSize(10);
+  doc.text('TOTALE', scx, scy);
+  doc.text('€', scR-18, scy); doc.line(scR-14, scy, scR, scy); scy+=7;
 
-  doc.save('spesa-al-supermercato-livello'+livello+'.pdf');
+  doc.setDrawColor(180); doc.line(scx, scy, scR, scy); scy+=5;
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  doc.text('Soldi dati  -  Totale  =  Resto', scx, scy); scy+=6;
+  doc.text('€', scx, scy); doc.line(scx+4, scy, scx+22, scy);
+  doc.text('-', scx+24, scy);
+  doc.text('€', scx+28, scy); doc.line(scx+32, scy, scx+50, scy);
+  doc.text('=', scx+52, scy);
+  doc.text('€', scx+56, scy); doc.line(scx+60, scy, scx+78, scy); scy+=7;
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(180,0,0);
+  doc.text('RESTO', scx, scy);
+  doc.setTextColor(0); doc.text('€', scR-18, scy); doc.line(scR-14, scy, scR, scy);
+
+  // Footer
+  y=288;
+  doc.setFontSize(7); doc.setFont('helvetica','italic'); doc.setTextColor(180);
+  doc.text('Matematiche non si nasce', W/2, y, {align:'center'});
+
+  doc.save('spesa-supermercato-livello'+livello+'.pdf');
 }
 
 nuovoRound();
