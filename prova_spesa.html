@@ -338,14 +338,10 @@ function generaPDF(){
   doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(100);
   doc.text('Livello '+livello+' — '+livNomi[livello-1], W/2, y, {align:'center'}); y+=7;
 
-  // Linea
-  doc.setDrawColor(200); doc.setLineWidth(0.3); doc.line(M, y, W-M, y); y+=7;
-
-  // Nome / Data / Classe
+  // Nome / Classe
   doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(0);
-  doc.text('Nome:', M, y); doc.line(M+14, y, M+78, y);
-  doc.text('Data:', M+83, y); doc.line(M+95, y, M+128, y);
-  doc.text('Classe:', M+133, y); doc.line(M+147, y, CW+M, y);
+  doc.text('Nome:', M, y); doc.line(M+14, y, M+100, y);
+  doc.text('Classe:', M+105, y); doc.line(M+119, y, CW+M, y);
   y+=12;
 
   // Articoli in orizzontale
@@ -370,8 +366,7 @@ function generaPDF(){
 
   // Domanda 2
   doc.setFont('helvetica','bold'); doc.setTextColor(20,70,20);
-  doc.text(maiusc?'2.  CON QUALI SOLDI SCEGLI DI PAGARE?  (METTI UNA':'2.  Con quali soldi scegli di pagare?  (metti una', M, y);
-  doc.rect(M+139, y-4, 5, 5); doc.text(maiusc?')':')', M+145, y); y+=8;
+  doc.text(maiusc?'2.  CON QUALI SOLDI SCEGLI DI PAGARE?  (METTI UNA CROCETTA)':'2.  Con quali soldi scegli di pagare?  (metti una crocetta)', M, y); y+=8;
 
   const SOLDI=[{l:'1 euro'},{l:'2 euro'},{l:'5 euro'},{l:'10 euro'},{l:'20 euro'},{l:'50 euro'}];
   doc.setFont('helvetica','normal'); doc.setTextColor(0); doc.setFontSize(10);
