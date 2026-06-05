@@ -92,7 +92,8 @@
   <div id="abacus-container">
     <div id="rail">
       <div id="rail-line"></div>
-      <div class="divider" id="divider"></div>
+      <div class="divider" id="divider" style="display:none;"></div>
+
     </div>
     <div class="controls">
       <button class="ctrl-btn" onclick="setLeft(20,true)">◀◀</button>
@@ -230,7 +231,10 @@ function checkOp() {
         opCurrent = null; return;
       }
     }
-    setTimeout(showOp, 800);
+    setTimeout(() => {
+      if (opSeriesLeft > 0) { showOp(); return; }
+      if (confirm('Vuoi fare un\'altra operazione?')) showOp();
+    }, 800);
   } else {
     fb.textContent = '✗ Riprova!';
     fb.className = 'feedback ko';
