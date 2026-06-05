@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Matematòca</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #e8e8e8; color: #333; font-family: 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px 8px; }
+h1 { color: #7a3b00; font-size: 1.5em; margin: 10px 0 4px; letter-spacing: 2px; font-weight: 700; }
+
+#setup { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 20px; width: 100%; max-width: 360px; background:#fff; border-radius:16px; padding:24px; border:1px solid #e0d8cc; }
+#setup label { font-size: 0.85em; color: #888; align-self: flex-start; }
+#setup input[type=text], #setup input[type=number] { padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 1em; width: 100%; background:#f9f6f1; color:#333; }
+.section-title { color: #7a3b00; font-size: 0.82em; font-weight: 700; align-self: flex-start; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+.btn { background: #c0610a; color: #fff; border: none; border-radius: 10px; padding: 10px 18px; font-size: 0.88em; font-weight: 700; cursor: pointer; transition: background 0.15s, transform 0.1s; white-space: nowrap; }
+.btn:hover { background: #a04e07; transform: scale(1.03); }
+.btn:disabled { background: #ccc; color: #999; cursor: default; transform: none; }
+.btn.show-btn { background: #6a3d9a; }
+.btn.show-btn:hover:not(:disabled) { background: #512d78; }
+.btn.next-btn { background: #2e7d52; }
+.btn.next-btn:hover:not(:disabled) { background: #1f5c3a; }
+.radio-group { display:flex; gap:14px; }
+.radio-group label { display:flex; align-items:center; gap:5px; cursor:pointer; font-size:0.9em; color:#555; }
+.row { display:flex; gap:8px; width:100%; align-items:center; }
+.row input { flex:1; }
+.row span { color:#888; font-size:0.83em; white-space:nowrap; }
+
+#game { display:none; flex-direction:column; align-items:center; gap:8px; width:100%; max-width:720px; }
+
+/* BOARD WRAPPER — relative so dice can sit in centre */
+#board-wrap { position:relative; width:100%; }
+#board { display:grid; gap:3px; width:100%; }
+
+.cell {
+  background:#fff8f0; border:2px solid #e0c9a6; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.56em; text-align:center; padding:3px;
+  min-height:52px; position:relative; line-height:1.3; color:#5a3a00;
+}
+.cell.start { border-color:#c0610a; background:#fff3e0; color:#c0610a; font-weight:700; font-size:0.62em; }
+.cell.inner { background:#e8e8e8; border:none; }
+.cell.glow-s1 { box-shadow:inset 0 0 12px 4px rgba(180,30,30,0.35); border-color:#c0392b !important; }
+.cell.glow-s2 { box-shadow:inset 0 0 12px 4px rgba(30,90,180,0.35); border-color:#2980b9 !important; }
+.cell.glow-both { box-shadow:inset 5px 0 10px rgba(180,30,30,0.4),inset -5px 0 10px rgba(30,90,180,0.4); border-color:#7a3b00 !important; }
+
+/* BIG DICE in the centre of the board */
+#big-dice {
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:80px; height:80px;
+  background:#fff;
+  border:3px solid #c0610a;
+  border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:3em;
+  box-shadow: 3px 4px 0 #c0610a;
+  pointer-events:none;
+  z-index:20;
+  transition: transform 0.15s;
+}
+#big-dice.rolling { animation: rollAnim 0.55s ease; }
+@keyframes rollAnim {
+  0%   { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
+  25%  { transform:translate(-50%,-50%) rotate(-18deg) scale(1.12); }
+  55%  { transform:translate(-50%,-50%) rotate(14deg) scale(0.93); }
+  80%  { transform:translate(-50%,-50%) rotate(-8deg) scale(1.06); }
+  100% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
+}
+
+#squads { display:flex; gap:8px; width:100%; }
+.squad-card { flex:1; background:#fff; border:2px solid #e0d8cc; border-radius:12px; padding:8px 10px; text-align:center; transition:border-color 0.3s,box-shadow 0.3s; }
+.squad-card.active-sq { border-color:#c0610a; box-shadow:0 0 0 3px rgba(192,97,10,0.15); }
+.squad-card h3 { font-size:0.85em; margin-bottom:3px; font-weight:700; }
+.squad-card .laps { font-size:0.72em; color:#999; }
+.notebook { margin-top:5px; background:#fdf8f0; border-radius:6px; border:1px solid #e8ddd0; padding:4px 7px; font-size:0.68em; max-height:68px; overflow-y:auto; text-align:left; color:#555; line-height:1.6; font-family:monospace; }
+.s1c { color:#c0392b; }
+.s2c { color:#2980b9; }
+
+#status-box { background:#fff; border:2px solid #c0610a; border-radius:12px; padding:10px 16px; text-align:center; width:100%; font-size:0.88em; min-height:48px; color:#333; }
+#status-box b { color:#c0610a; }
+
+#controls { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center; margin:4px 0; }
+
+#log { background:#fff; border:1px solid #e0d8cc; border-radius:10px; padding:8px 10px; width:100%; font-size:0.76em; max-height:75px; overflow-y:auto; line-height:1.55; color:#555; }
+
+#scoreboard { display:none; flex-direction:column; align-items:center; gap:12px; width:100%; max-width:480px; margin-top:10px; background:#fff; border-radius:16px; padding:24px; border:1px solid #e0d8cc; }
+#scoreboard h2 { color:#7a3b00; font-size:1.2em; }
+.score-table { width:100%; border-collapse:collapse; font-size:0.88em; }
+.score-table th { color:#7a3b00; padding:6px 10px; border-bottom:2px solid #e0d8cc; }
+.score-table td { padding:8px 10px; border-bottom:1px solid #f0e8d8; }
+.winner-row td { background:#fff8f0; font-weight:700; }
+</style>
+</head>
+<body>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px 0 4px;">
+  <a href="https://matematicaconlemani.wordpress.com/" target="_blank" style="display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" style="width:60px;height:60px;object-fit:contain;border-radius:50%;" />
+    <span style="font-size:0.78em;color:#888;font-weight:500;letter-spacing:0.5px;">Matematiche non si nasce</span>
+  </a>
+  <h1>🎲 Matematòca</h1>
+</div>
+
+<div id="setup">
+  <div class="section-title">Squadre</div>
+  <label>Nome Squadra 1 🔴</label>
+  <input type="text" id="n1" value="Squadra 1" />
+  <label>Nome Squadra 2 🔵</label>
+  <input type="text" id="n2" value="Squadra 2" />
+  <div class="section-title">Livello</div>
+  <div class="radio-group">
+    <label><input type="radio" name="level" value="natural" checked> 🟢 Naturale</label>
+    <label><input type="radio" name="level" value="algebraic"> 🔴 Algebrico</label>
+  </div>
+  <div class="section-title">Fine partita</div>
+  <div class="radio-group">
+    <label><input type="radio" name="mode" value="laps" checked> Giri</label>
+    <label><input type="radio" name="mode" value="time"> Tempo</label>
+  </div>
+  <div class="row">
+    <input type="number" id="limit-val" min="1" max="20" value="2" />
+    <span id="limit-label">giri per squadra</span>
+  </div>
+  <button class="btn" onclick="startGame()">Inizia!</button>
+</div>
+
+<div id="game">
+  <div id="squads">
+    <div class="squad-card active-sq" id="sc1">
+      <h3 class="s1c" id="sn1">Squadra 1 🔴</h3>
+      <div class="laps">Giri: <span id="sl1">0</span> &nbsp;|&nbsp; Casella: <span id="sp1">0</span></div>
+      <div class="notebook" id="nb1"></div>
+    </div>
+    <div class="squad-card" id="sc2">
+      <h3 class="s2c" id="sn2">Squadra 2 🔵</h3>
+      <div class="laps">Giri: <span id="sl2">0</span> &nbsp;|&nbsp; Casella: <span id="sp2">0</span></div>
+      <div class="notebook" id="nb2"></div>
+    </div>
+  </div>
+
+  <div id="board-wrap">
+    <div id="board"></div>
+    <div id="big-dice">🎲</div>
+  </div>
+
+  <div id="status-box"><span id="status-text">Premi <b>Lancia il dado</b> per iniziare!</span></div>
+
+  <div id="controls">
+    <button class="btn" id="btn-roll" onclick="doRoll()">🎲 Lancia il dado</button>
+    <button class="btn show-btn" id="btn-show" onclick="doShow()" disabled>🔍 Mostra soluzione</button>
+    <button class="btn next-btn" id="btn-next" onclick="doNext()" disabled>✅ Avanti</button>
+  </div>
+
+  <button class="btn" style="background:#888;margin-top:4px;font-size:0.8em;padding:7px 16px" onclick="goHome()">↩️ Ricomincia</button>
+</div>
+
+<div id="scoreboard">
+  <h2>🏆 Classifica finale</h2>
+  <table class="score-table">
+    <thead><tr><th>Squadra</th><th>Espressioni</th><th>Punteggio</th></tr></thead>
+    <tbody id="score-body"></tbody>
+  </table>
+  <button class="btn" onclick="location.reload()">↩️ Nuova partita</button>
+</div>
+
+<script>
+const CARDS_NATURAL = [
+  // Doc 7
+  {txt:'Aggiungi 4 al punteggio\ndel dado e poi togli 5',   expr:d=>`${d}+4-5`,     fn:d=>d+4-5},
+  {txt:'Raddoppia il punteggio\ndel dado e aggiungi 3',     expr:d=>`${d}×2+3`,     fn:d=>d*2+3},
+  {txt:'Aggiungi 3 al punteggio\ndel dado e moltiplica per 0', expr:d=>`(${d}+3)×0`, fn:d=>0},
+  {txt:'Sottrai 0 al punteggio\ndel dado e moltiplica per 4', expr:d=>`(${d}-0)×4`, fn:d=>d*4},
+  {txt:'Moltiplica per 2 il punteggio\ndel dado e togli 2', expr:d=>`${d}×2-2`,     fn:d=>d*2-2},
+  {txt:'Aggiungi 1 al punteggio\ndel dado e raddoppia',     expr:d=>`(${d}+1)×2`,   fn:d=>(d+1)*2},
+  {txt:'Sottrai il punteggio\ndel dado da 8',               expr:d=>`8-${d}`,        fn:d=>8-d},
+  {txt:'Aggiungi 2 al punteggio del dado\ne poi aggiungi ancora 3', expr:d=>`${d}+2+3`, fn:d=>d+5},
+  {txt:'Aggiungi 1\nal punteggio del dado',                 expr:d=>`${d}+1`,        fn:d=>d+1},
+  {txt:'Togli al doppio di 3\nil punteggio del dado',       expr:d=>`3×2-${d}`,     fn:d=>6-d},
+  {txt:'Aggiungi il punteggio del dado\nal punteggio del dado', expr:d=>`${d}+${d}`, fn:d=>d*2},
+  {txt:'Triplica\nil punteggio del dado',                   expr:d=>`${d}×3`,        fn:d=>d*3},
+  {txt:'Somma 7 al punteggio\ndel dado e sottrai 7',        expr:d=>`${d}+7-7`,     fn:d=>d},
+  {txt:'Sottrai 1 al punteggio\ndel dado e aggiungi 6',     expr:d=>`${d}-1+6`,     fn:d=>d+5},
+  {txt:'Togli 1\nal punteggio del dado',                    expr:d=>`${d}-1`,        fn:d=>d-1},
+  {txt:'Raddoppia il punteggio\ndel dado e togli 2',        expr:d=>`${d}×2-2`,     fn:d=>d*2-2},
+  // Doc 6
+  {txt:'Raddoppia il punteggio\ndel dado e aggiungi 1',     expr:d=>`${d}×2+1`,     fn:d=>d*2+1},
+  {txt:'Moltiplica per 0 il punteggio\ndel dado e aggiungi 4', expr:d=>`${d}×0+4`,  fn:d=>4},
+  {txt:'Aumenta di 2\nil punteggio del dado',               expr:d=>`${d}+2`,        fn:d=>d+2},
+  {txt:'Aggiungi 3\nal punteggio del dado',                 expr:d=>`${d}+3`,        fn:d=>d+3},
+  {txt:'Raddoppia\nil punteggio del dado',                  expr:d=>`${d}×2`,        fn:d=>d*2},
+  {txt:'Togli al punteggio del dado\nil punteggio del dado',expr:d=>`${d}-${d}`,    fn:d=>0},
+  {txt:'Moltiplica per 3\nil punteggio del dado',           expr:d=>`${d}×3`,        fn:d=>d*3},
+  {txt:'Moltiplica per 0\nil punteggio del dado',           expr:d=>`${d}×0`,        fn:d=>0},
+  {txt:'Trova quanto manca al punteggio\ndel dado per arrivare a 10', expr:d=>`10-${d}`, fn:d=>10-d},
+  {txt:'Togli da 6\nil punteggio del dado',                 expr:d=>`6-${d}`,        fn:d=>6-d},
+  {txt:'Aggiungi 5 al punteggio\ndel dado e togli 4',       expr:d=>`${d}+5-4`,     fn:d=>d+1},
+  {txt:'Al punteggio del dado\nsottrai 1',                  expr:d=>`${d}-1`,        fn:d=>d-1},
+  {txt:'Al punteggio del dado\naggiungi 5',                 expr:d=>`${d}+5`,        fn:d=>d+5},
+  {txt:'Moltiplica per 4\nil punteggio del dado',           expr:d=>`${d}×4`,        fn:d=>d*4},
+  {txt:'Moltiplica per 2\nil punteggio del dado',           expr:d=>`${d}×2`,        fn:d=>d*2},
+  {txt:'Togli 1 al punteggio del dado\ne moltiplica per 6', expr:d=>`(${d}-1)×6`,   fn:d=>(d-1)*6},
+  {txt:'Somma il punteggio del dado a 4',                   expr:d=>`${d}+4`,        fn:d=>d+4},
+  {txt:'Sottrai 0\nal punteggio del dado',                  expr:d=>`${d}-0`,        fn:d=>d},
+  {txt:'Sottrai 0\nal punteggio del dado',                  expr:d=>`${d}-0`,        fn:d=>d},
+  {txt:'Fai due volte\nil punteggio del dado',              expr:d=>`${d}×2`,        fn:d=>d*2},
+];
+
+const CARDS_ALGEBRAIC = [
+  // Doc 8
+  {txt:'4 + d',          expr:d=>`4+${d}`,       fn:d=>4+d},
+  {txt:'d + 4 - 5',      expr:d=>`${d}+4-5`,     fn:d=>d+4-5},
+  {txt:'10 - d',         expr:d=>`10-${d}`,       fn:d=>10-d},
+  {txt:'d + d',          expr:d=>`${d}+${d}`,     fn:d=>d+d},
+  {txt:'d - 0',          expr:d=>`${d}-0`,        fn:d=>d},
+  {txt:'(d - 0) × 4',   expr:d=>`(${d}-0)×4`,    fn:d=>d*4},
+  {txt:'d × 2 - 2',     expr:d=>`${d}×2-2`,      fn:d=>d*2-2},
+  {txt:'d - 1',          expr:d=>`${d}-1`,        fn:d=>d-1},
+  {txt:'d + 2 + 3',     expr:d=>`${d}+2+3`,      fn:d=>d+5},
+  {txt:'d × 2 + 3',     expr:d=>`${d}×2+3`,      fn:d=>d*2+3},
+  {txt:'d + 5 - 4',     expr:d=>`${d}+5-4`,      fn:d=>d+1},
+  {txt:'3 × 2 - d',     expr:d=>`3×2-${d}`,      fn:d=>6-d},
+  {txt:'(d - 1) × 6',   expr:d=>`(${d}-1)×6`,    fn:d=>(d-1)*6},
+  {txt:'d - 1 + 6',     expr:d=>`${d}-1+6`,      fn:d=>d+5},
+  {txt:'d + 7 - 7',     expr:d=>`${d}+7-7`,      fn:d=>d},
+  {txt:'d × 0 + 4',     expr:d=>`${d}×0+4`,      fn:d=>4},
+  {txt:'d × 2 - 2',     expr:d=>`${d}×2-2`,      fn:d=>d*2-2},
+  {txt:'d × 3',          expr:d=>`${d}×3`,        fn:d=>d*3},
+  {txt:'d + 3',          expr:d=>`${d}+3`,        fn:d=>d+3},
+  {txt:'d + 1',          expr:d=>`${d}+1`,        fn:d=>d+1},
+  // Doc 9
+  {txt:'d × 0',          expr:d=>`${d}×0`,        fn:d=>0},
+  {txt:'d - 1',          expr:d=>`${d}-1`,        fn:d=>d-1},
+  {txt:'d + 2',          expr:d=>`${d}+2`,        fn:d=>d+2},
+  {txt:'d + 5',          expr:d=>`${d}+5`,        fn:d=>d+5},
+  {txt:'(d + 1) × 2',   expr:d=>`(${d}+1)×2`,    fn:d=>(d+1)*2},
+  {txt:'(d + 3) × 0',   expr:d=>`(${d}+3)×0`,    fn:d=>0},
+  {txt:'d × 2',          expr:d=>`${d}×2`,        fn:d=>d*2},
+  {txt:'d × 4',          expr:d=>`${d}×4`,        fn:d=>d*4},
+  {txt:'8 - d',          expr:d=>`8-${d}`,        fn:d=>8-d},
+  {txt:'d × 3',          expr:d=>`${d}×3`,        fn:d=>d*3},
+  {txt:'d - 0',          expr:d=>`${d}-0`,        fn:d=>d},
+  {txt:'(d + 1) × 2',   expr:d=>`(${d}+1)×2`,    fn:d=>(d+1)*2},
+  {txt:'d × 2',          expr:d=>`${d}×2`,        fn:d=>d*2},
+  {txt:'6 - d',          expr:d=>`6-${d}`,        fn:d=>6-d},
+  {txt:'d × 2',          expr:d=>`${d}×2`,        fn:d=>d*2},
+  {txt:'d × 2 + 1',     expr:d=>`${d}×2+1`,      fn:d=>d*2+1},
+];
+
+let CARDS = CARDS_NATURAL;
+
+const FACES=['⚀','⚁','⚂','⚃','⚄','⚅'];
+const COLS=7, ROWS=5, TOTAL=2*(COLS+ROWS)-4;
+
+let boardCards=[], pos=[0,0], laps=[0,0], skips=[0,0];
+let names=['Squadra 1','Squadra 2'];
+let curSq=0, diceVal=0, phase='roll';
+let notebook=[[],[]], scores=[0,0];
+let mode='laps', limit=2, timerInterval=null;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function perimPos(i){
+  const C=COLS,R=ROWS;
+  if(i<C) return [0,i];
+  let x=i-C; if(x<R-2) return [x+1,C-1];
+  x-=R-2; if(x<C) return [R-1,C-1-x];
+  x-=C; return [R-2-x,0];
+}
+
+document.querySelectorAll('input[name="mode"]').forEach(r=>{
+  r.addEventListener('change',()=>{
+    mode=r.value;
+    document.getElementById('limit-label').textContent=mode==='laps'?'giri per squadra':'minuti totali';
+  });
+});
+
+function startGame(){
+  names[0]=document.getElementById('n1').value||'Squadra 1';
+  names[1]=document.getElementById('n2').value||'Squadra 2';
+  mode=document.querySelector('input[name="mode"]:checked').value;
+  limit=parseInt(document.getElementById('limit-val').value)||2;
+  const level=document.querySelector('input[name="level"]:checked').value;
+  CARDS = level==='algebraic' ? CARDS_ALGEBRAIC : CARDS_NATURAL;
+  let deck=shuffle([...CARDS]);
+  boardCards=[];
+  for(let i=0;i<TOTAL;i++) boardCards.push(deck[i%deck.length]);
+  pos=[0,0]; laps=[0,0]; skips=[0,0];
+  notebook=[[],[]]; scores=[0,0]; curSq=0; phase='roll'; diceVal=0;
+  document.getElementById('setup').style.display='none';
+  document.getElementById('game').style.display='flex';
+  document.getElementById('sn1').textContent=names[0]+' 🔴';
+  document.getElementById('sn2').textContent=names[1]+' 🔵';
+  if(mode==='time'){ const end=Date.now()+limit*60000; timerInterval=setInterval(()=>{if(Date.now()>=end){clearInterval(timerInterval);endGame();}},5000); }
+  renderBoard(); updateUI();
+  setStatus(`Tocca a <b>${names[0]}</b> — premi Lancia il dado!`);
+  addLog(`Partita iniziata! Tocca a ${names[0]}.`);
+}
+
+function renderBoard(){
+  const board=document.getElementById('board');
+  board.style.gridTemplateColumns=`repeat(${COLS},1fr)`;
+  board.innerHTML='';
+  let pm={};
+  for(let i=0;i<TOTAL;i++){let[r,c]=perimPos(i);pm[r+','+c]=i;}
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const div=document.createElement('div');
+      const key=r+','+c;
+      if(pm[key]!==undefined){
+        const pi=pm[key];
+        div.id='cell-'+pi;
+        if(pi===0){ div.className='cell start'; div.textContent='🏁 Partenza'; }
+        else { div.className='cell'; div.innerHTML=boardCards[pi].txt.replace(/\n/g,'<br>'); }
+      } else { div.className='cell inner'; }
+      board.appendChild(div);
+    }
+  }
+  updateGlow();
+}
+
+function updateGlow(){
+  document.querySelectorAll('.cell.glow-s1,.cell.glow-s2,.cell.glow-both').forEach(c=>c.classList.remove('glow-s1','glow-s2','glow-both'));
+  if(pos[0]===pos[1]){ document.getElementById('cell-'+pos[0])?.classList.add('glow-both'); }
+  else { document.getElementById('cell-'+pos[0])?.classList.add('glow-s1'); document.getElementById('cell-'+pos[1])?.classList.add('glow-s2'); }
+}
+
+function updateUI(){
+  document.getElementById('sp1').textContent=pos[0];
+  document.getElementById('sp2').textContent=pos[1];
+  document.getElementById('sl1').textContent=laps[0];
+  document.getElementById('sl2').textContent=laps[1];
+  document.getElementById('sc1').className='squad-card'+(curSq===0?' active-sq':'');
+  document.getElementById('sc2').className='squad-card'+(curSq===1?' active-sq':'');
+  document.getElementById('btn-roll').disabled=phase!=='roll';
+  document.getElementById('btn-show').disabled=phase!=='show';
+  document.getElementById('btn-next').disabled=phase!=='next';
+}
+
+function setStatus(html){ document.getElementById('status-text').innerHTML=html; }
+
+function doRoll(){
+  if(phase!=='roll') return;
+  if(skips[curSq]>0){
+    skips[curSq]--;
+    addLog(`${names[curSq]} salta un turno.`);
+    setStatus(`<b>${names[curSq]}</b> salta il turno!`);
+    nextSquad(); return;
+  }
+  const dice=document.getElementById('big-dice');
+  dice.classList.add('rolling');
+  let ticks=0;
+  const anim=setInterval(()=>{
+    dice.textContent=FACES[Math.floor(Math.random()*6)];
+    if(++ticks>=7){ clearInterval(anim); dice.classList.remove('rolling'); finishRoll(); }
+  },75);
+}
+
+function finishRoll(){
+  diceVal=Math.floor(Math.random()*6)+1;
+  document.getElementById('big-dice').textContent=FACES[diceVal-1];
+  const oldPos=pos[curSq];
+  pos[curSq]=(oldPos+diceVal)%TOTAL;
+  if(pos[curSq]<oldPos||(oldPos===0&&diceVal>0)){
+    laps[curSq]++;
+    addLog(`${names[curSq]} completa il giro ${laps[curSq]}!`);
+    if(mode==='laps'&&laps[curSq]>=limit){ updateGlow(); updateUI(); endGame(); return; }
+  }
+  updateGlow();
+  const card=boardCards[pos[curSq]];
+  addLog(`${names[curSq]} lancia <b>${diceVal}</b> → casella ${pos[curSq]}`);
+  setStatus(`📖 <b>${names[curSq]}</b> legge la carta:<br><em>${card.txt.replace(/\n/g,' ')}</em><br><small style="color:#999">Scrivete sul quaderno, poi premete "Mostra soluzione"</small>`);
+  phase='show'; updateUI();
+}
+
+function doShow(){
+  const card=boardCards[pos[curSq]];
+  const exprStr=card.expr(diceVal);
+  const result=card.fn(diceVal);
+  notebook[curSq].push({expr:exprStr,result});
+  scores[curSq]+=result;
+  updateNotebook(curSq);
+  addLog(`📝 Soluzione: <b>${exprStr} = ${result}</b>`);
+  if(result===0){
+    skips[curSq]=1;
+    setStatus(`✅ <b>${exprStr} = ${result}</b> — Risultato 0, ${names[curSq]} salterà un turno.`);
+  } else {
+    setStatus(`✅ Soluzione: <b>${exprStr} = ${result}</b>`);
+  }
+  phase='next'; updateUI();
+}
+
+function doNext(){ nextSquad(); }
+
+function nextSquad(){
+  curSq=1-curSq; phase='roll'; diceVal=0;
+  document.getElementById('big-dice').textContent='🎲';
+  setStatus(`Tocca a <b>${names[curSq]}</b> — premi Lancia il dado!`);
+  updateUI();
+  addLog(`Tocca a ${names[curSq]}.`);
+}
+
+function updateNotebook(s){
+  const nb=document.getElementById('nb'+(s+1));
+  nb.innerHTML=notebook[s].map(e=>`${e.expr} = ${e.result}`).join('<br>');
+  nb.scrollTop=nb.scrollHeight;
+}
+
+function endGame(){
+  if(timerInterval) clearInterval(timerInterval);
+  document.getElementById('game').style.display='none';
+  document.getElementById('scoreboard').style.display='flex';
+  const tbody=document.getElementById('score-body');
+  tbody.innerHTML='';
+  let res=names.map((n,i)=>({name:n,score:scores[i],idx:i})).sort((a,b)=>b.score-a.score);
+  res.forEach((r,rank)=>{
+    const exprs=notebook[r.idx].map(e=>e.expr).join(' + ');
+    const tr=document.createElement('tr');
+    if(rank===0) tr.className='winner-row';
+    tr.innerHTML=`<td>${rank===0?'🏆 ':''}<span class="${r.idx===0?'s1c':'s2c'}">${r.name}</span></td><td style="font-size:0.75em;font-family:monospace">${exprs||'—'}</td><td><b>${r.score}</b></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function goHome(){
+  if(timerInterval) clearInterval(timerInterval);
+  document.getElementById('game').style.display='none';
+  document.getElementById('scoreboard').style.display='none';
+  document.getElementById('setup').style.display='flex';
+}
+
+function addLog(msg){}
+</script>
+</body>
+</html>
