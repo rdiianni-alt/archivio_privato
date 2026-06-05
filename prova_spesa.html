@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Spesa al Supermercato</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: sans-serif; background: #f0f7e6; min-height: 100vh; }
@@ -187,7 +188,8 @@
 
   <div class="btn-row">
     <button class="nuovo-btn" onclick="nuovoRound()">🔄 Nuova spesa</button>
-    <button class="pdf-btn" onclick="generaPDF()">📄 Genera scheda PDF</button>
+    <button class="pdf-btn" onclick="generaPDF()">📄 Genera una scheda</button>
+    <button class="pdf-btn" style="background:#6a1b9a;" onclick="generaQuestaScheda()">📸 Genera questa scheda</button>
   </div>
 </div>
 
@@ -211,7 +213,21 @@ function fmt(n){ return n.toFixed(2).replace('.',','); }
 function setLevel(l){
   livello=l;
   document.querySelectorAll('.level-btn').forEach((b,i)=>b.classList.toggle('active',i===l-1));
-  nuovoRound();
+  function generaQuestaScheda(){
+  const { jsPDF } = window.jspdf;
+  const el = document.querySelector('.container');
+  html2canvas(el, {scale:2, backgroundColor:'#f0f7e6'}).then(canvas=>{
+    const img = canvas.toDataURL('image/png');
+    const doc = new jsPDF({unit:'mm', format:'a4'});
+    const W=210, M=10;
+    const imgW=W-M*2;
+    const imgH=canvas.height*(imgW/canvas.width);
+    doc.addImage(img,'PNG',M,10,imgW,Math.min(imgH,277));
+    doc.save('questa-scheda-spesa.pdf');
+  });
+}
+
+nuovoRound();
 }
 
 function prezzoRandom(){
