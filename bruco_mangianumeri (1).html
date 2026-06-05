@@ -124,7 +124,7 @@
       <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
     </a>
   </div>
-  <div class="blog-title">Matematiche non si nasce</div>
+  <div class="blog-title" style="flex:1; text-align:center;">Matematiche non si nasce</div>
 </header>
 
 <h1>🐛 Il Bruco Mangianumeri</h1>
@@ -252,8 +252,8 @@ function showCurrentStep() {
   if (!game || stepIdx >= game.steps.length) return;
   const s = game.steps[stepIdx];
   const word = toWords(s.val);
-  setBubble(`Mangio ${word}! Tocca la cifra giusta! 👆`);
-  setHint('Trova la cifra che vale ' + word);
+  setBubble(`MANGIO ${word}!`);
+  setHint('TOCCA LA CIFRA GIUSTA 👆');
   makeAllClickable();
   waitingClick = true;
 }
@@ -293,7 +293,7 @@ function onDigitClick(ni, di) {
       showLog();
       showFinal();
     } else {
-      setBubble('Esatto! 🌟');
+      setBubble('ESATTO! 🌟');
       setTimeout(showCurrentStep, 900);
     }
   } else {
