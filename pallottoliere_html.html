@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pallottoliere — Matematiche non si nasce</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f5f4ef; color: #1a1a18; min-height: 100vh; padding: 2rem 1rem; }
+  #app { max-width: 680px; margin: 0 auto; }
+
+  .logo-bar {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 8px; margin-bottom: 1.6rem; text-align: center;
+  }
+  .logo-bar a { display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; color: inherit; }
+  .logo-bar img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; border: 1.5px solid #ccc; }
+  .logo-bar span { font-size: 15px; font-weight: 500; line-height: 1.3; }
+
+  .intro { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 1.4rem; }
+
+  #abacus-container {
+    background: #fff; border: 1px solid #ddd; border-radius: 16px;
+    padding: 2rem 1.2rem 1.4rem; margin-bottom: 1.4rem;
+  }
+  #rail { position: relative; height: 44px; margin-bottom: 0.5rem; }
+  #rail-line {
+    position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+    height: 6px; background: #d0cfc8; border-radius: 3px;
+  }
+  .divider {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 2px; height: 34px; background: #999; border-radius: 1px; z-index: 3;
+  }
+  .bead {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 22px; height: 22px; border-radius: 50%; z-index: 2;
+    border: 1.5px solid transparent; cursor: pointer;
+    transition: left 0.18s ease;
+  }
+  .bead.white { background: #fff; border-color: #aaa; }
+  .bead.red   { background: #e24b4a; border-color: #a32d2d; }
+  .bead:hover { filter: brightness(0.88); }
+
+  .controls { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 1rem; flex-wrap: wrap; }
+  .ctrl-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 1px solid #ccc; background: #fff;
+    font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: #1a1a18; font-family: inherit; font-weight: 500;
+  }
+  .ctrl-btn:hover { background: #f0efea; }
+  .ctrl-btn.wide { width: auto; padding: 0 14px; border-radius: 22px; font-size: 15px; }
+  .sep { width: 1px; height: 28px; background: #ddd; flex-shrink: 0; }
+
+  hr { border: none; border-top: 1px solid #e5e4de; margin: 2rem 0; }
+
+  .op-card {
+    background: #fff; border: 1px solid #ddd; border-radius: 12px;
+    padding: 1.2rem 1.4rem; margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .op-text { font-size: 32px; font-weight: 500; min-width: 130px; }
+  .op-input {
+    width: 80px; font-size: 28px; font-weight: 500;
+    border: none; border-bottom: 2px solid #aaa;
+    background: transparent; outline: none; text-align: center; font-family: inherit;
+  }
+  .btn { padding: 8px 16px; border: 1px solid #ccc; border-radius: 8px; background: #fff; color: #1a1a18; font-size: 14px; cursor: pointer; font-family: inherit; }
+  .btn:hover { background: #f0efea; }
+  .btn.primary { background: #378add; color: #fff; border-color: #185fa5; }
+  .btn.primary:hover { background: #185fa5; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .feedback { font-size: 15px; font-weight: 500; min-height: 24px; padding: 4px 0; margin-bottom: 0.8rem; }
+  .ok { color: #1d9e75; }
+  .ko { color: #e24b4a; }
+  .score-note { font-size: 13px; color: #888; margin-top: 10px; min-height: 18px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="logo-bar">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/compiti/main/logo.png" alt="Logo Matematiche non si nasce">
+  </div>
+
+  <p class="intro">Un pallottoliere proprio come a scuola, esercitati a fare tutte le operazioni che vuoi.</p>
+
+  <div id="abacus-container">
+    <div id="rail">
+      <div id="rail-line"></div>
+      <div class="divider" id="divider" style="display:none;"></div>
+
+    </div>
+    <div class="controls">
+      <button class="ctrl-btn" onclick="setLeft(20,true)">◀◀</button>
+      <button class="ctrl-btn wide" onclick="setLeft(leftN+5,true)">+5</button>
+      <button class="ctrl-btn" onclick="setLeft(leftN+1,true)">+1</button>
+      <div class="sep"></div>
+      <button class="ctrl-btn" onclick="setLeft(leftN-1,true)">−1</button>
+      <button class="ctrl-btn wide" onclick="setLeft(leftN-5,true)">−5</button>
+      <button class="ctrl-btn" onclick="setLeft(0,true)">▶▶</button>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="op-card">
+    <span class="op-text" id="op-text"></span>
+    <input class="op-input" id="op-input" type="number" min="0" max="20"
+      onkeydown="if(event.key==='Enter') checkOp()">
+    <button class="btn primary" onclick="checkOp()">OK</button>
+  </div>
+  <div class="feedback" id="op-feedback"></div>
+  <div class="btn-row">
+    <button class="btn" onclick="newOp()">Nuova operazione</button>
+    <button class="btn" onclick="startSeries()">Serie da 5</button>
+  </div>
+  <div class="score-note" id="op-score"></div>
+
+</div>
+
+<script>
+const TOTAL = 20;
+const COLORS = Array(5).fill('white').concat(Array(5).fill('red'))
+                       .concat(Array(5).fill('white')).concat(Array(5).fill('red'));
+const D = 22;
+let railW = 0, leftN = 0, beadEls = [];
+
+function initAbacus() {
+  const rail = document.getElementById('rail');
+  rail.querySelectorAll('.bead').forEach(b => b.remove());
+  railW = rail.offsetWidth;
+  beadEls = [];
+  for (let i = 0; i < TOTAL; i++) {
+    const el = document.createElement('div');
+    el.className = 'bead ' + COLORS[i];
+    el.dataset.idx = i;
+    el.addEventListener('click', onBeadClick);
+    rail.appendChild(el);
+    beadEls.push(el);
+  }
+  leftN = 0;
+  render(false);
+  updateDivider();
+}
+
+function beadX(i) {
+  if (i < leftN) return i * D;
+  return railW - D - (TOTAL - 1 - i) * D;
+}
+
+function render(animate) {
+  beadEls.forEach((el, i) => {
+    el.style.transition = animate ? 'left 0.18s ease' : 'none';
+    el.style.left = beadX(i) + 'px';
+  });
+}
+
+function updateDivider() {
+  railW = document.getElementById('rail').offsetWidth;
+  document.getElementById('divider').style.left = (railW / 2 - 1) + 'px';
+}
+
+function setLeft(n, animate) {
+  leftN = Math.max(0, Math.min(TOTAL, n));
+  render(animate);
+}
+
+function onBeadClick(e) {
+  const i = parseInt(e.currentTarget.dataset.idx);
+  setLeft(i < leftN ? i : i + 1, true);
+}
+
+window.addEventListener('resize', () => {
+  railW = document.getElementById('rail').offsetWidth;
+  updateDivider(); render(false);
+});
+
+let opCurrent = null, opSeriesLeft = 0, opScore = 0, opTotal = 0;
+
+function makeOp() {
+  const a = Math.floor(Math.random() * 18) + 1;
+  if (Math.random() < 0.5 && a < 20) {
+    const b = Math.floor(Math.random() * (20 - a)) + 1;
+    return { text: a + ' + ' + b + ' =', result: a + b };
+  } else {
+    const b = Math.floor(Math.random() * a) + 1;
+    return { text: a + ' − ' + b + ' =', result: a - b };
+  }
+}
+
+function showOp() {
+  opCurrent = makeOp();
+  document.getElementById('op-text').textContent = opCurrent.text;
+  document.getElementById('op-input').value = '';
+  document.getElementById('op-feedback').textContent = '';
+  document.getElementById('op-feedback').className = 'feedback';
+  document.getElementById('op-input').focus();
+}
+
+function newOp() {
+  opSeriesLeft = 0; opScore = 0; opTotal = 0;
+  document.getElementById('op-score').textContent = '';
+  showOp();
+}
+
+function startSeries() {
+  opSeriesLeft = 5; opScore = 0; opTotal = 5;
+  document.getElementById('op-score').textContent = '0 / 5';
+  showOp();
+}
+
+function checkOp() {
+  if (!opCurrent) return;
+  const val = parseInt(document.getElementById('op-input').value);
+  const fb = document.getElementById('op-feedback');
+  if (isNaN(val)) return;
+  if (val === opCurrent.result) {
+    fb.textContent = '✓ Esatto!';
+    fb.className = 'feedback ok';
+    if (opSeriesLeft > 0) {
+      opScore++;
+      opSeriesLeft--;
+      document.getElementById('op-score').textContent = opScore + ' / ' + opTotal;
+      if (opSeriesLeft === 0) {
+        fb.textContent = '🎉 Serie finita! ' + opScore + ' / ' + opTotal;
+        opCurrent = null; return;
+      }
+    }
+    setTimeout(showOp, 800);
+  } else {
+    fb.textContent = '✗ Riprova!';
+    fb.className = 'feedback ko';
+    document.getElementById('op-input').value = '';
+    document.getElementById('op-input').focus();
+  }
+}
+
+window.addEventListener('load', () => { initAbacus(); newOp(); });
+</script>
+</body>
+</html>
