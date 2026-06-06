@@ -6,23 +6,23 @@
 <title>Cannucce per contare</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:sans-serif;background:#d8f0d8;padding:16px;min-height:100vh;}
+body{font-family:sans-serif;background:#f5f4ef;padding:16px;min-height:100vh;}
 
 #header{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:14px;}
 #header a{display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;}
 #header img{width:60px;height:60px;object-fit:contain;border-radius:50%;}
-#header .blog-name{font-size:13px;font-weight:600;color:#3a7a3a;letter-spacing:0.3px;}
-h1{font-size:20px;font-weight:700;color:#2a5a2a;text-align:center;margin-bottom:12px;}
+#header .blog-name{font-size:13px;font-weight:600;color:#6b6456;letter-spacing:0.3px;}
+h1{font-size:20px;font-weight:700;color:#3a342c;text-align:center;margin-bottom:12px;}
 
-.label{font-size:12px;color:#4a6a4a;}
-.counter{font-size:22px;font-weight:700;color:#1a3a1a;}
+.label{font-size:12px;color:#7a7268;}
+.counter{font-size:22px;font-weight:700;color:#3a342c;}
 .btn{cursor:pointer;border:none;border-radius:8px;padding:7px 16px;font-size:15px;font-weight:600;transition:transform 0.1s;}
 .btn:active{transform:scale(0.95);}
-.btn-add{background:#4caf50;color:#fff;}
-.section{background:#f0faf0;border-radius:12px;padding:10px 12px;border:1px solid #b0d8b0;margin-bottom:10px;}
-.section-title{font-size:13px;font-weight:600;color:#3a6a3a;margin-bottom:8px;}
+.btn-add{background:#a89880;color:#fff;}
+.section{background:#edecea;border-radius:12px;padding:10px 12px;border:1px solid #d8d5ce;margin-bottom:10px;}
+.section-title{font-size:13px;font-weight:600;color:#5a5248;margin-bottom:8px;}
 .stats{display:flex;gap:10px;flex-wrap:wrap;}
-.stat{background:#fff;border-radius:10px;padding:7px 12px;border:1px solid #b0d8b0;text-align:center;min-width:80px;}
+.stat{background:#faf9f7;border-radius:10px;padding:7px 12px;border:1px solid #d8d5ce;text-align:center;min-width:80px;}
 .warn{font-size:12px;color:#e53935;background:#ffebee;border-radius:6px;padding:4px 10px;margin-bottom:8px;display:none;}
 
 #tavolo-area{min-height:140px;display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start;}
@@ -47,9 +47,9 @@ h1{font-size:20px;font-weight:700;color:#2a5a2a;text-align:center;margin-bottom:
 #barattolo-btn:active{transform:scale(0.95);}
 #barattolo-btn.inattivo{opacity:0.3;cursor:not-allowed;}
 
-#barattolo{width:100%;min-height:150px;border:2.5px dashed #7ab07a;border-radius:14px;background:#e8f5e8;padding:8px 6px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;}
+#barattolo{width:100%;min-height:150px;border:2.5px dashed #b0aa9e;border-radius:14px;background:#edecea;padding:8px 6px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;}
 #barattolo-straws{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;}
-.bar-straw{width:5px;height:80px;border-radius:2px;background:#5a9a5a;}
+.bar-straw{width:5px;height:80px;border-radius:2px;background:#8a8070;}
 </style>
 </head>
 <body>
@@ -79,7 +79,7 @@ h1{font-size:20px;font-weight:700;color:#2a5a2a;text-align:center;margin-bottom:
   <button class="btn btn-add" onclick="aggiungi(1)">+1</button>
   <button class="btn btn-add" onclick="aggiungi(5)">+5</button>
   <button class="btn btn-add" onclick="aggiungi(10)">+10</button>
-  <button class="btn" style="background:#e53935;color:#fff;margin-left:8px;" onclick="reset()">↺ Ricomincia</button>
+  <button class="btn" style="background:#b08870;color:#fff;margin-left:8px;" onclick="reset()">↺ Ricomincia</button>
 </div>
 <div class="warn" id="warn-msg">⚠️ Che caos! Troppo disordine sul tavolo… lega qualche mazzetto prima di aggiungerne altre!</div>
 
@@ -99,13 +99,13 @@ h1{font-size:20px;font-weight:700;color:#2a5a2a;text-align:center;margin-bottom:
   </div>
 
   <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-    <div class="label" style="font-weight:600;color:#2a5a2a;">Barattolo</div>
+    <div class="label" style="font-weight:600;color:#5a5248;">Barattolo</div>
     <div id="barattolo">
       <div id="barattolo-straws"></div>
       <div id="barattolo-hint" style="font-size:11px;color:#aaa;margin-top:4px;">vuoto</div>
-      <div id="barattolo-num" style="font-size:18px;font-weight:700;color:#2a5a2a;margin-top:4px;">0</div>
+      <div id="barattolo-num" style="font-size:18px;font-weight:700;color:#3a342c;margin-top:4px;">0</div>
     </div>
-    <button style="width:100%;cursor:pointer;border:1px solid #b0d8b0;border-radius:6px;background:#d8f0d8;padding:4px;font-size:12px;color:#3a6a3a;" onclick="svuotaBarattolo()">Svuota</button>
+    <button style="width:100%;cursor:pointer;border:1px solid #d8d5ce;border-radius:6px;background:#edecea;padding:4px;font-size:12px;color:#5a5248;" onclick="svuotaBarattolo()">Svuota</button>
     <button id="elastico-btn" class="inattivo" onclick="legaConElastico()">elastico</button>
   </div>
 </div>
