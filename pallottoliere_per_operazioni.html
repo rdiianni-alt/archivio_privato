@@ -81,10 +81,7 @@
 <div id="app">
 
   <div class="logo-bar">
-    <a href="https://matematicaconlemani.wordpress.com/" target="_blank" rel="noopener">
-      <img src="logo.png" alt="Logo Matematiche non si nasce">
-      <span>Matematiche non si nasce</span>
-    </a>
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/compiti/main/logo.png" alt="Logo Matematiche non si nasce">
   </div>
 
   <p class="intro">Un pallottoliere proprio come a scuola, esercitati a fare tutte le operazioni che vuoi.</p>
@@ -231,10 +228,7 @@ function checkOp() {
         opCurrent = null; return;
       }
     }
-    setTimeout(() => {
-      if (opSeriesLeft > 0) { showOp(); return; }
-      if (confirm('Vuoi fare un\'altra operazione?')) showOp();
-    }, 800);
+    setTimeout(showOp, 800);
   } else {
     fb.textContent = '✗ Riprova!';
     fb.className = 'feedback ko';
