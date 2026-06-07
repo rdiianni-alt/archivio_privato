@@ -223,7 +223,7 @@ function startExecution() {
       running = false;
       if (beePos.r === flowerPos.r && beePos.c === flowerPos.c) {
         renderGrid(true, null, true);
-        setMessage('🎉 Bravissimo! Hai trovato il fiore!', 'win');
+        setMessage('🎉 Esatto! Hai trovato il fiore!', 'win');
       } else {
         setMessage('😅 L\'ape non ha trovato il fiore. Riprova!', 'lose');
       }
@@ -263,8 +263,7 @@ function startExecution() {
     if (beePos.r === flowerPos.r && beePos.c === flowerPos.c) {
       running = false;
       renderGrid(true, null, true);
-      setMessage('🎉 Bravissimo! Hai trovato il fiore!', 'win');
-      renderCommands();
+      setMessage('🎉 Esatto! Hai trovato il fiore!', 'win');      renderCommands();
       document.getElementById('btn-start').disabled = false;
       return;
     }
