@@ -8,7 +8,6 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Arial', sans-serif;
-    font-weight: normal;
     text-transform: uppercase;
     background: #fff9e6;
     min-height: 100vh;
@@ -20,15 +19,8 @@
     display: flex; flex-direction: column; align-items: center; gap: 6px;
     margin-bottom: 18px; text-decoration: none;
   }
-  .logo img {
-    width: 60px; height: 60px;
-    object-fit: contain; border-radius: 50%;
-  }
-  .logo-name {
-    font-size: 0.78em; color: #e07b00; letter-spacing: 2px;
-    font-family: 'Arial Black', Arial, sans-serif;
-    text-transform: uppercase; text-align: center;
-  }
+  .logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+  .logo-name { font-size: 0.78em; color: #e07b00; letter-spacing: 2px; text-align: center; }
   h1 { color: #e07b00; font-size: 1.6em; font-weight: normal; margin-bottom: 18px; text-align: center; letter-spacing: 3px; }
 
   #setup {
@@ -44,8 +36,7 @@
   #setup button {
     display: block; margin: 20px auto 0; background: #f0a500; color: white;
     border: none; border-radius: 15px; padding: 12px 35px; font-size: 1.1em;
-    cursor: pointer; font-family: inherit; text-transform: uppercase;
-    font-weight: bold; letter-spacing: 1px;
+    cursor: pointer; font-family: inherit; text-transform: uppercase; letter-spacing: 1px;
   }
   #setup button:hover { background: #d48e00; }
 
@@ -64,67 +55,55 @@
   .bubble span { color: #e07b00; font-weight: bold; font-size: 1.2em; }
 
   .hands-row {
-    display: flex; justify-content: center; gap: 40px;
-    margin-top: 28px; align-items: flex-start;
+    display: flex; justify-content: center; align-items: flex-start;
+    gap: 40px; margin-top: 28px;
   }
-
-  .hand-box {
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    min-width: 160px;
-  }
+  .hand-box { display: flex; flex-direction: column; align-items: center; gap: 6px; }
   .hand-label { font-size: 0.72em; color: #aaa; letter-spacing: 1px; margin-top: 4px; }
 
-  /* Container that stacks emoji and beans on top of each other */
-  .hand-visual {
+  .hand-open-wrap {
     position: relative;
-    width: 220px;
-    height: 240px;
-    display: flex; align-items: center; justify-content: center;
+    width: 200px;
+    height: 220px;
   }
-
-  .hand-emoji {
-    font-size: 210px;
-    line-height: 1;
+  .hand-open-wrap .emoji {
+    font-size: 190px;
     position: absolute;
     top: 0; left: 50%;
-    transform: translateX(-50%);
-    user-select: none;
+    transform: translateX(-50%) rotate(180deg);
+    line-height: 1;
+  }
+  .hand-open-wrap .emoji.mirror {
+    transform: translateX(-50%) rotate(180deg) scaleX(-1);
   }
 
-  .open-left  { transform: translateX(-50%) rotate(180deg) scaleX(-1); }
-  .open-right { transform: translateX(-50%) rotate(180deg); }
-  .fist-left  { transform: translateX(-50%) rotate(180deg) scaleX(-1); }
-  .fist-right { transform: translateX(-50%) rotate(180deg); }
-
-  .beans-overlay {
+  .hand-closed-wrap {
+    position: relative;
+    width: 133px;
+    height: 146px;
+  }
+  .hand-closed-wrap .emoji {
+    font-size: 127px;
     position: absolute;
-    top: 62px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90px;
-    display: flex; flex-wrap: wrap;
-    justify-content: center; align-items: center;
-    gap: 2px;
-    z-index: 2;
-    pointer-events: none;
+    top: 0; left: 50%;
+    transform: translateX(-50%) rotate(180deg);
+    line-height: 1;
   }
-  .bean { font-size: 11px; line-height: 1.1; }
-
+  .hand-closed-wrap .emoji.mirror {
+    transform: translateX(-50%) rotate(180deg) scaleX(-1);
+  }
   .fist-q {
     position: absolute;
-    top: 90px; left: 50%;
+    top: 22px; left: 50%;
     transform: translateX(-50%);
-    font-size: 3.5em;
-    font-weight: bold;
-    color: #e07b00;
-    z-index: 2;
+    font-size: 1.8em; font-weight: bold;
+    color: #e07b00; z-index: 2;
     font-family: 'Arial Black', Arial, sans-serif;
     pointer-events: none;
   }
 
   .question { margin-top: 24px; text-align: center; font-size: 1.05em; color: #444; letter-spacing: 1px; }
-
-  .answer-row { display: flex; justify-content: center; gap: 30px; margin-top: 15px; flex-wrap: wrap; }
+  .answer-row { display: flex; justify-content: center; gap: 30px; margin-top: 15px; }
   .answer-box { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.85em; color: #555; letter-spacing: 1px; }
   .answer-box input {
     width: 65px; font-size: 1.8em; text-align: center;
@@ -136,7 +115,7 @@
   .btn {
     background: #f0a500; color: white; border: none; border-radius: 15px;
     padding: 11px 22px; font-size: 0.88em; cursor: pointer; font-family: inherit;
-    text-transform: uppercase; font-weight: bold; letter-spacing: 1px;
+    text-transform: uppercase; letter-spacing: 1px;
   }
   .btn:hover { background: #d48e00; }
   .btn.secondary { background: #aaa; } .btn.secondary:hover { background: #888; }
@@ -148,6 +127,7 @@
 </style>
 </head>
 <body>
+
 <a class="logo" href="https://matematicaconlemani.wordpress.com/" target="_blank">
   <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo">
   <span class="logo-name">Matematiche non si nasce</span>
@@ -162,31 +142,19 @@
 
 <div id="game">
   <div class="bubble">Ho in tutto <span id="bubbleNum">5</span> fagioli. Guardate!</div>
-
   <div class="hands-row">
     <div class="hand-box">
-      <div class="hand-visual" id="visualLeft">
-        <span class="hand-emoji" id="emojiLeft">✋</span>
-        <div id="overlayLeft"></div>
-      </div>
+      <div id="wrapLeft"></div>
       <div class="hand-label" id="labelLeft"></div>
     </div>
     <div class="hand-box">
-      <div class="hand-visual" id="visualRight">
-        <span class="hand-emoji" id="emojiRight">✊</span>
-        <div id="overlayRight"></div>
-      </div>
+      <div id="wrapRight"></div>
       <div class="hand-label" id="labelRight"></div>
     </div>
   </div>
 
   <div class="question">Quanti fagioli ci sono nella mano chiusa?</div>
-
   <div class="answer-row">
-    <div class="answer-box">
-      <span>Mano aperta</span>
-      <input type="number" id="answerOpen" min="0" max="20" placeholder="?">
-    </div>
     <div class="answer-box">
       <span>Mano chiusa</span>
       <input type="number" id="answerClosed" min="0" max="20" placeholder="?">
@@ -220,68 +188,63 @@ function startGame(){
 
 function nextRound(){
   document.getElementById('feedback').textContent='';
-  document.getElementById('answerOpen').value='';
   document.getElementById('answerClosed').value='';
-  document.getElementById('answerOpen').style.borderColor='#ccc';
   document.getElementById('answerClosed').style.borderColor='#ccc';
-
   openCount=Math.floor(Math.random()*(total+1));
   closedCount=total-openCount;
   leftIsOpen=Math.random()<0.5;
-
-  setHand('Left',  leftIsOpen, leftIsOpen ? openCount : -1);
-  setHand('Right', !leftIsOpen, !leftIsOpen ? openCount : -1);
-
+  renderHand('Left',  leftIsOpen,  leftIsOpen  ? openCount : -1, true);
+  renderHand('Right', !leftIsOpen, !leftIsOpen ? openCount : -1, false);
   document.getElementById('labelLeft').textContent=leftIsOpen?'(aperta)':'(chiusa)';
   document.getElementById('labelRight').textContent=leftIsOpen?'(chiusa)':'(aperta)';
 }
 
-// isOpen: true = open hand; beansN: number of beans (-1 = fist, show ?)
-function setHand(side, isOpen, beansN){
-  var emoji=document.getElementById('emoji'+side);
-  var overlay=document.getElementById('overlay'+side);
-  var isLeft=side==='Left';
+function makeBeanSVG(){
+  return '<svg width="16" height="10" viewBox="0 0 16 10" style="display:inline-block;margin:2px">'
+    +'<ellipse cx="8" cy="5" rx="7" ry="4.2" fill="#7a3b10"/>'
+    +'<ellipse cx="6" cy="3.5" rx="3" ry="1.8" fill="#a0522d" opacity="0.6"/>'
+    +'</svg>';
+}
+
+function renderHand(side, isOpen, beans, isLeft){
+  var wrap=document.getElementById('wrap'+side);
+  var mc=isLeft?' mirror':'';
 
   if(isOpen){
-    emoji.textContent='✋🏻';
-    emoji.className='hand-emoji '+(isLeft?'open-left':'open-right');
-    // beans overlay on palm
-    var html='<div class="beans-overlay">';
-    for(var i=0;i<beansN;i++) html+='<svg width="16" height="10" viewBox="0 0 16 10" style="display:inline-block;margin:2px"><ellipse cx="8" cy="5" rx="7" ry="4.2" fill="#7a3b10"/><ellipse cx="6" cy="3.5" rx="3" ry="1.8" fill="#a0522d" opacity="0.6"/></svg>';
-    html+='</div>';
-    overlay.innerHTML=html;
+    var b='';
+    for(var i=0;i<beans;i++) b+=makeBeanSVG();
+    var leftPx=isLeft?'calc(50% - 12px)':'calc(50% + 12px)';
+    var overlayStyle='position:absolute;top:50px;left:'+leftPx+';transform:translateX(-50%);'
+      +'width:90px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:2px;z-index:2;';
+    wrap.innerHTML='<div class="hand-open-wrap">'
+      +'<span class="emoji'+mc+'">✋🏻</span>'
+      +'<div style="'+overlayStyle+'">'+b+'</div>'
+      +'</div>';
   } else {
-    emoji.textContent='✊🏻';
-    emoji.className='hand-emoji '+(isLeft?'fist-left':'fist-right');
-    overlay.innerHTML='<div class="fist-q">?</div>';
+    wrap.innerHTML='<div class="hand-closed-wrap">'
+      +'<span class="emoji'+mc+'">✊🏻</span>'
+      +'<div class="fist-q">?</div>'
+      +'</div>';
   }
 }
 
 function checkAnswer(){
-  var aOpen=parseInt(document.getElementById('answerOpen').value);
   var aClosed=parseInt(document.getElementById('answerClosed').value);
   var fb=document.getElementById('feedback');
-  if(isNaN(aOpen)||isNaN(aClosed)){fb.textContent='Inserisci entrambe le risposte!';fb.className='wrong';return;}
+  if(isNaN(aClosed)){fb.textContent='Inserisci la risposta!';fb.className='wrong';return;}
   rounds++;
-  var okO=aOpen===openCount, okC=aClosed===closedCount;
-  document.getElementById('answerOpen').style.borderColor=okO?'#4caf50':'#e53935';
+  var okC=aClosed===closedCount;
   document.getElementById('answerClosed').style.borderColor=okC?'#4caf50':'#e53935';
   var msgs=['Esatto! Hai indovinato!','Perfetto! Hai indovinato!','Giusto! Hai indovinato!'];
-  if(okO&&okC){
-    fb.textContent=msgs[Math.floor(Math.random()*msgs.length)];
-    fb.className='correct'; correct++;
-  } else {
-    fb.innerHTML='Non proprio! Aperti: '+openCount+' &nbsp;|&nbsp; Chiusi: '+closedCount;
-    fb.className='wrong';
-  }
+  if(okC){fb.textContent=msgs[Math.floor(Math.random()*msgs.length)];fb.className='correct';correct++;}
+  else{fb.innerHTML='Non proprio! Nella mano chiusa ci sono: '+closedCount;fb.className='wrong';}
   updateScore();
 }
 
 function showAnswer(){
   var fb=document.getElementById('feedback');
-  fb.innerHTML='Fagioli aperti: '+openCount+' &nbsp;|&nbsp; Fagioli chiusi: '+closedCount;
+  fb.innerHTML='Nella mano chiusa ci sono: '+closedCount;
   fb.className='';
-  document.getElementById('answerOpen').value=openCount;
   document.getElementById('answerClosed').value=closedCount;
 }
 
