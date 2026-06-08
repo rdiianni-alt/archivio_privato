@@ -36,8 +36,9 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
 .tchip.sel { outline: 3px solid #f0a500; outline-offset: 2px; }
 .tqty { font-size: 13px; font-weight: 700; color: #333; min-width: 20px; text-align: center; }
 .tlbl { font-size: 10px; color: #666; flex: 1; }
-.swp { font-size: 10px; padding: 2px 6px; background: #eee; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; }
-.swp:hover { background: #ddd; }
+.arr { width: 26px; height: 26px; border-radius: 6px; border: 1px solid #ccc; background: #eee; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.arr:hover { background: #ddd; }
+.arr:disabled { opacity: 0.25; cursor: default; }
 .res-line { font-size: 14px; font-weight: 700; color: #333; margin: 3px 0; }
 .res-line span { color: #5c3d9e; }
 .finale { margin-top: 8px; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: 700; text-align: center; display: none; border: 2px solid; }
@@ -54,6 +55,7 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
   <a href="https://matematichenonsinasce.com/" target="_blank">
     <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo">
     <span class="blog-name">Matematiche non si nasce</span>
+    <span style="font-size:16px;font-weight:800;color:#333;letter-spacing:0.5px;">La Tavola delle Divisioni</span>
   </a>
 </div>
 
@@ -70,8 +72,8 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
   </div>
   <div class="side-panel">
     <div class="panel-box">
-      <h3>👛 Portafoglio</h3>
-      <div class="sub">Il tuo dividendo in gettoni</div>
+      <h3>🏦 Banca</h3>
+      <div class="sub">Qui puoi cambiare i tuoi gettoni</div>
       <div id="port"></div>
     </div>
     <div class="panel-box">
@@ -182,6 +184,8 @@ function clickCella(r, c, el) {
     const ti=cells[ri][c];
     cells[ri][c]=-1; inGrid[ti]--; port[ti]++;
     el.innerHTML='';
+    el.classList.remove('done');
+    el.classList.add('on');
     // decolora riga
     for(let cc=0;cc<DIV;cc++) getCellEl(r,cc).classList.remove('done');
     renderPort(); renderSel(); aggRis();
@@ -231,11 +235,15 @@ function renderPort() {
     const qty=document.createElement('span'); qty.className='tqty'; qty.textContent=port[i];
     const lb=document.createElement('span'); lb.className='tlbl'; lb.textContent=t.l;
     row.appendChild(btn); row.appendChild(qty); row.appendChild(lb);
-    if(i>0) {
-      const sw=document.createElement('button'); sw.className='swp'; sw.textContent='÷10';
-      sw.onclick=()=>{port[i]--;port[i-1]+=10;renderPort();renderSel();};
-      row.appendChild(sw);
-    }
+    // ↑ punta verso valore inferiore (sopra nella lista) → scompone 1 di (i) in 10 di (i-1)
+    const up=document.createElement('button'); up.className='arr'; up.textContent='↑';
+    up.title=`1 ${TK[i].l} → 10 ${TK[i-1]?TK[i-1].l:''}`;
+    up.onclick=()=>{if(i-1>=0&&port[i]>=1){port[i]--;port[i-1]+=10;renderPort();renderSel();}};
+    // ↓ punta verso valore superiore (sotto nella lista) → raggruppa 10 di (i) in 1 di (i+1)
+    const dn=document.createElement('button'); dn.className='arr'; dn.textContent='↓';
+    dn.title=`10 ${TK[i].l} → 1 ${TK[i+1]?TK[i+1].l:''}`;
+    dn.onclick=()=>{if(i+1<TK.length&&port[i]>=10){port[i]-=10;port[i+1]++;renderPort();renderSel();}};
+    row.appendChild(dn); row.appendChild(up);
     el.appendChild(row);
   });
   if(!any) el.innerHTML='<div class="sub">Portafoglio vuoto</div>';
