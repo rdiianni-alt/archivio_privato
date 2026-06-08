@@ -204,6 +204,9 @@ function getCellEl(r,c) {
 
 function verificaRiga(r,ri) {
   for(let c=0;c<DIV;c++) if(cells[ri][c]===-1) return;
+  // tutti i gettoni devono avere lo stesso valore
+  const primoTok = cells[ri][0];
+  for(let c=1;c<DIV;c++) if(cells[ri][c]!==primoTok) return;
   for(let c=0;c<DIV;c++) getCellEl(r,c).classList.replace('on','done');
   if(ri===cells.length-1) aggiungiRighe(5);
 }
@@ -262,12 +265,18 @@ function renderSel() {
   </div>`;
 }
 
+function rigaValida(row) {
+  for(let c=0;c<DIV;c++) if(row[c]===-1) return false;
+  const primo=row[0];
+  for(let c=1;c<DIV;c++) if(row[c]!==primo) return false;
+  return true;
+}
+
 function aggRis() {
   let q=0,ok=0;
-  cells.forEach((row,ri)=>{
-    let piena=true,val=0;
-    for(let c=0;c<DIV;c++){ if(row[c]===-1){piena=false;break;} val+=TK[row[c]].v; }
-    if(piena){q+=val/DIV;ok++;}
+  cells.forEach(row=>{
+    if(!rigaValida(row)) return;
+    q+=TK[row[0]].v; ok++;
   });
   let tot=0; TK.forEach((t,i)=>tot+=inGrid[i]*t.v);
   document.getElementById('rq').textContent=ok>0?q:'—';
@@ -278,16 +287,14 @@ function mostraRisultato() {
   if(!active||!DIV) return;
   let q=0,ok=0;
   cells.forEach(row=>{
-    let piena=true,val=0;
-    for(let c=0;c<DIV;c++){if(row[c]===-1){piena=false;break;}val+=TK[row[c]].v;}
-    if(piena){q+=val/DIV;ok++;}
+    if(!rigaValida(row)) return;
+    q+=TK[row[0]].v; ok++;
   });
   let vPort=0; port.forEach((n,i)=>vPort+=n*TK[i].v);
   let vInc=0;
   cells.forEach(row=>{
-    let piena=true,val=0;
-    for(let c=0;c<DIV;c++){if(row[c]===-1)piena=false;else val+=TK[row[c]].v;}
-    if(!piena)vInc+=val;
+    if(rigaValida(row)) return;
+    for(let c=0;c<DIV;c++) if(row[c]!==-1) vInc+=TK[row[c]].v;
   });
   const resto=vPort+vInc;
   const fin=document.getElementById('fin');
@@ -300,7 +307,13 @@ function mostraRisultato() {
     fin.textContent=`Puoi riempire ancora un\'altra riga! Hai ${resto} da distribuire.`;
   } else {
     fin.style.cssText+='background:#f0fff0;border-color:#3a9e5c;color:#2a7a4a;';
-    fin.textContent=resto===0?`${DVD} = ${q} × ${DIV}`:`${DVD} = ${q} × ${DIV} + ${resto}`;
+    fin.textContent=''; 
+    const r1=document.createElement('div');
+    r1.textContent=resto===0?`${DVD} = ${q} × ${DIV}`:`${DVD} = ${q} × ${DIV} + ${resto}`;
+    const r2=document.createElement('div');
+    r2.style.marginTop='4px';
+    r2.textContent=resto===0?`${DVD} ÷ ${DIV} = ${q}`:`${DVD} ÷ ${DIV} = ${q} + ${resto}/${DIV}`;
+    fin.appendChild(r1); fin.appendChild(r2);
   }
 }
 
