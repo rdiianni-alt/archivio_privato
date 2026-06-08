@@ -9,6 +9,9 @@ h1{text-align:center;font-size:20px;font-weight:500;margin-bottom:12px;color:#33
 .setup{background:#fff;border-radius:12px;padding:16px;max-width:400px;margin:0 auto 16px;border:1px solid #ddd}
 .setup label{font-size:14px;color:#555;display:block;margin-bottom:6px}
 .setup input{width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;font-size:14px;margin-bottom:10px}
+.mode-btns{display:flex;gap:8px;margin-bottom:14px}
+.mode-btn{flex:1;padding:10px;border:2px solid #ccc;border-radius:8px;background:#fff;font-size:14px;cursor:pointer;color:#555;transition:all .2s}
+.mode-btn.active{border-color:#4a7c59;background:#4a7c59;color:#fff;font-weight:500}
 .setup button,.action-btn{background:#4a7c59;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:15px;cursor:pointer;width:100%}
 .setup button:hover,.action-btn:hover{background:#3a6347}
 .game{display:none;max-width:520px;margin:0 auto}
@@ -37,7 +40,7 @@ h1{text-align:center;font-size:20px;font-weight:500;margin-bottom:12px;color:#33
 .score-input-area{background:#fff9e6;border-radius:10px;padding:12px;border:1px solid #f0d060;margin-bottom:10px}
 .score-input-area p{font-size:14px;color:#555;margin-bottom:8px}
 .score-input-area input{width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;font-size:18px;text-align:center;margin-bottom:8px}
-.btn-row{display:flex;gap:8px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
 .action-btn{flex:1;padding:10px;font-size:14px}
 .action-btn.secondary{background:#888}
 .action-btn.secondary:hover{background:#666}
@@ -46,29 +49,42 @@ h1{text-align:center;font-size:20px;font-weight:500;margin-bottom:12px;color:#33
 .final-results h2{font-size:20px;margin-bottom:12px}
 .result-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:15px}
 .result-row:last-child{border-bottom:none}
-.winner-badge{background:#4a7c59;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;margin-left:6px}
 </style>
 </head>
 <body>
-<h2 class="sr-only" style="position:absolute;left:-9999px">Chiudi la Scatola — gioco da tavolo digitale</h2>
+
 <div style="text-align:center;margin-bottom:14px">
   <a href="https://matematichenonsinasce.com/" target="_blank" style="text-decoration:none;display:inline-flex;flex-direction:column;align-items:center;gap:6px">
     <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" style="width:60px;height:60px;object-fit:contain;border-radius:50%">
     <span style="font-size:15px;font-weight:500;color:#4a7c59;letter-spacing:0.3px">Matematiche non si nasce</span>
   </a>
 </div>
+
 <h1>Chiudi la Scatola</h1>
 
 <div class="setup" id="setupPanel">
-  <label>Numero di giocatori (2–4)</label>
-  <input type="number" id="numPlayers" min="2" max="4" value="2">
-  <div id="playerNames"></div>
+  <label>Modalità di gioco</label>
+  <div class="mode-btns">
+    <button class="mode-btn active" id="modeMulti" onclick="setMode('multi')">Più giocatori</button>
+    <button class="mode-btn" id="modeSolo" onclick="setMode('solo')">Contro il computer</button>
+  </div>
+  <div id="multiSetup">
+    <label>Numero di giocatori (2–4)</label>
+    <input type="number" id="numPlayers" min="2" max="4" value="2">
+    <div id="playerNames"></div>
+  </div>
+  <div id="soloSetup" style="display:none">
+    <label>Il tuo nome</label>
+    <input type="text" id="soloName" placeholder="Il tuo nome">
+  </div>
   <button onclick="startGame()">Inizia la partita</button>
 </div>
 
+<div style="max-width:520px;margin:0 auto 8px;text-align:right">
+  <button onclick="backToHome()" style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:4px 0">← Torna alla schermata iniziale</button>
+</div>
 <div class="game" id="gamePanel">
   <div class="boxes-row" id="boxesRow"></div>
-
   <div class="main-board">
     <div class="turn-label" id="turnLabel"></div>
     <div class="big-nums" id="bigNums"></div>
@@ -86,10 +102,9 @@ h1{text-align:center;font-size:20px;font-weight:500;margin-bottom:12px;color:#33
     <div class="btn-row">
       <button class="action-btn" id="btnRoll" onclick="rollDice()">Lancia i dadi</button>
       <button class="action-btn secondary" id="btnConfirm" onclick="confirmSelection()" style="display:none">Conferma scelta</button>
-      <div id="btnChoiceDice" style="display:none;gap:8px;width:100%">
-        <button class="action-btn" onclick="doRoll(1)" style="background:#4a7c59">1 dado</button>
-        <button class="action-btn" onclick="doRoll(2)" style="background:#4a7c59">2 dadi</button>
-      </div>
+      <button class="action-btn" id="btn1die" onclick="doRoll(1)" style="display:none">1 dado</button>
+      <button class="action-btn" id="btn2dice" onclick="doRoll(2)" style="display:none">2 dadi</button>
+      <button class="action-btn" id="btnMyTurn" onclick="myTurn()" style="display:none;background:#c0392b">Tocca a me! →</button>
     </div>
   </div>
 </div>
@@ -98,11 +113,22 @@ h1{text-align:center;font-size:20px;font-weight:500;margin-bottom:12px;color:#33
   <h2>Risultati finali</h2>
   <div id="resultsList"></div>
   <button class="action-btn" style="margin-top:16px" onclick="location.reload()">Nuova partita</button>
+  <button onclick="backToHome()" style="margin-top:8px;background:none;border:none;color:#888;font-size:13px;cursor:pointer;width:100%">← Torna alla schermata iniziale</button>
 </div>
 
 <script>
 const faces=['⚀','⚁','⚂','⚃','⚄','⚅'];
 let players=[], states=[], active=[], currentIdx=0, rolled=false, selected=[], diceSum=0, diceVals=[];
+let gameMode='multi';
+const COMPUTER='Computer';
+
+function setMode(m){
+  gameMode=m;
+  document.getElementById('modeMulti').className='mode-btn'+(m==='multi'?' active':'');
+  document.getElementById('modeSolo').className='mode-btn'+(m==='solo'?' active':'');
+  document.getElementById('multiSetup').style.display=m==='multi'?'block':'none';
+  document.getElementById('soloSetup').style.display=m==='solo'?'block':'none';
+}
 
 document.getElementById('numPlayers').addEventListener('input', buildNameInputs);
 buildNameInputs();
@@ -121,11 +147,16 @@ function buildNameInputs(){
 }
 
 function startGame(){
-  const n=parseInt(document.getElementById('numPlayers').value)||2;
-  players=[];
-  for(let i=0;i<n;i++){
-    const v=document.getElementById(`pname${i}`).value.trim();
-    players.push(v||`Giocatore ${i+1}`);
+  if(gameMode==='solo'){
+    const nm=document.getElementById('soloName').value.trim()||'Giocatore';
+    players=[nm, COMPUTER];
+  } else {
+    const n=parseInt(document.getElementById('numPlayers').value)||2;
+    players=[];
+    for(let i=0;i<n;i++){
+      const v=document.getElementById(`pname${i}`).value.trim();
+      players.push(v||`Giocatore ${i+1}`);
+    }
   }
   states=players.map(()=>({closed:[],score:null,done:false,won:false}));
   active=players.map((_,i)=>i);
@@ -135,60 +166,109 @@ function startGame(){
   initTurn();
 }
 
-function currentPlayer(){ return active[currentIdx]; }
+function cp(){ return active[currentIdx]; }
+function isComputer(){ return players[cp()]===COMPUTER; }
+
+// mostra tutti i bottoni nella loro configurazione iniziale per il turno
+function resetButtons(){
+  document.getElementById('btnRoll').style.display='block';
+  document.getElementById('btnRoll').disabled=false;
+  document.getElementById('btnConfirm').style.display='none';
+  document.getElementById('btn1die').style.display='none';
+  document.getElementById('btn2dice').style.display='none';
+  document.getElementById('btnMyTurn').style.display='none';
+}
 
 function initTurn(){
   rolled=false; selected=[]; diceSum=0; diceVals=[];
-  renderMiniBoxes();
-  renderBigNums();
+  renderMiniBoxes(); renderBigNums();
   document.getElementById('d1').textContent='-';
   document.getElementById('d2').textContent='-';
   document.getElementById('sumInfo').textContent='';
   document.getElementById('scoreInputArea').style.display='none';
-  document.getElementById('btnConfirm').style.display='none';
-  document.getElementById('btnRoll').disabled=false;
-  const p=currentPlayer();
-  document.getElementById('turnLabel').textContent=`Turno di ${players[p]}`;
-  setMsg('Lancia i dadi!','');
-}
-
-function renderMiniBoxes(){
-  const cont=document.getElementById('boxesRow');
-  cont.innerHTML='';
-  players.forEach((name,i)=>{
-    const st=states[i];
-    const div=document.createElement('div');
-    const isActive=active.includes(i)&&active[currentIdx]===i;
-    div.className='player-box'+(isActive?' active':st.done?' done':'');
-    let numsHtml='';
-    for(let n=1;n<=9;n++){
-      numsHtml+=`<div class="mini-tile${st.closed.includes(n)?' closed':''}">${st.closed.includes(n)?'':n}</div>`;
-    }
-    const scoreStr=st.score!==null?`${st.score} pt`:(st.won?'0 pt':'');
-    div.innerHTML=`<div class="box-label">${name}</div><div class="mini-nums">${numsHtml}</div><div class="mini-score">${scoreStr}</div>`;
-    cont.appendChild(div);
-  });
-}
-
-function renderBigNums(){
-  const p=currentPlayer();
-  const st=states[p];
-  const cont=document.getElementById('bigNums');
-  cont.innerHTML='';
-  for(let n=1;n<=9;n++){
-    const div=document.createElement('div');
-    const isClosed=st.closed.includes(n);
-    const isSel=selected.includes(n);
-    div.className='num-tile'+(isClosed?' closed':isSel?' selected':' open');
-    div.textContent=isClosed?'':n;
-    if(!isClosed) div.onclick=()=>toggleSelect(n);
-    cont.appendChild(div);
+  resetButtons();
+  document.getElementById('turnLabel').textContent=`Turno di ${players[cp()]}`;
+  if(isComputer()){
+    setMsg('Il computer sta pensando...','');
+    document.getElementById('btnRoll').disabled=true;
+    setTimeout(computerTurn, 2000);
+  } else {
+    setMsg('Lancia i dadi!','');
   }
 }
 
-function canUseSingleDie(){
-  const st=states[currentPlayer()];
-  return [7,8,9].every(n=>st.closed.includes(n));
+function computerTurn(){
+  if(canUseSingleDie()){
+    const open=[1,2,3,4,5,6,7,8,9].filter(n=>!states[cp()].closed.includes(n));
+    const sumOpen=open.reduce((a,b)=>a+b,0);
+    computerDoRoll(sumOpen<=6?1:2);
+  } else {
+    computerDoRoll(2);
+  }
+}
+
+function computerDoRoll(numDice){
+  const v1=Math.ceil(Math.random()*6);
+  const v2=numDice===2?Math.ceil(Math.random()*6):null;
+  diceVals=v2?[v1,v2]:[v1];
+  diceSum=diceVals.reduce((a,b)=>a+b,0);
+  document.getElementById('d1').textContent=faces[v1-1];
+  document.getElementById('d2').textContent=v2?faces[v2-1]:'-';
+  rolled=true;
+  setMsg('Il computer ha lanciato i dadi...','');
+
+  setTimeout(()=>{
+    const open=[1,2,3,4,5,6,7,8,9].filter(n=>!states[cp()].closed.includes(n));
+    const combos=findCombinations(open,diceSum);
+
+    if(combos.length===0){
+      const score=open.reduce((a,b)=>a+b,0);
+      states[cp()].score=score;
+      states[cp()].done=true;
+      renderMiniBoxes();
+      setMsg(`Il computer non ha più mosse! Punteggio: ${score}.`,'warn');
+      removeFromActive(cp());
+      // aspetta click se c'è ancora un giocatore umano
+      if(active.length===0){
+        setTimeout(showFinalResults, 2500);
+      } else {
+        document.getElementById('btnMyTurn').style.display='block';
+      }
+      return;
+    }
+
+    const best=combos.sort((a,b)=>b.reduce((x,y)=>x+y,0)-a.reduce((x,y)=>x+y,0))[0];
+    selected=[...best];
+    renderBigNums();
+    setMsg(`Il computer sceglie: ${best.join(', ')}...`,'ok');
+
+    setTimeout(()=>{
+      best.forEach(n=>states[cp()].closed.push(n));
+      selected=[];
+      renderBigNums(); renderMiniBoxes();
+
+      if(states[cp()].closed.length===9){
+        states[cp()].done=true; states[cp()].won=true; states[cp()].score=0;
+        setMsg('Il computer ha chiuso la scatola!','ok');
+        removeFromActive(cp());
+        if(active.length===0){
+          setTimeout(showFinalResults, 2500);
+        } else {
+          document.getElementById('btnMyTurn').style.display='block';
+        }
+      } else {
+        // turno finito, aspetta il click del giocatore
+        setMsg('Hai visto la mossa del computer?','');
+        document.getElementById('btnMyTurn').style.display='block';
+      }
+    }, 2500);
+  }, 2200);
+}
+
+function myTurn(){
+  document.getElementById('btnMyTurn').style.display='none';
+  advanceTurn();
+  initTurn();
 }
 
 function rollDice(){
@@ -196,7 +276,8 @@ function rollDice(){
   if(canUseSingleDie()){
     setMsg('Quanti dadi vuoi lanciare?','');
     document.getElementById('btnRoll').style.display='none';
-    document.getElementById('btnChoiceDice').style.display='flex';
+    document.getElementById('btn1die').style.display='inline-block';
+    document.getElementById('btn2dice').style.display='inline-block';
     return;
   }
   doRoll(2);
@@ -204,14 +285,14 @@ function rollDice(){
 
 function doRoll(numDice){
   document.getElementById('btnRoll').style.display='block';
-  document.getElementById('btnChoiceDice').style.display='none';
+  document.getElementById('btn1die').style.display='none';
+  document.getElementById('btn2dice').style.display='none';
   const v1=Math.ceil(Math.random()*6);
   const v2=numDice===2?Math.ceil(Math.random()*6):null;
   diceVals=v2?[v1,v2]:[v1];
   diceSum=diceVals.reduce((a,b)=>a+b,0);
   document.getElementById('d1').textContent=faces[v1-1];
   document.getElementById('d2').textContent=v2?faces[v2-1]:'-';
-  document.getElementById('sumInfo').textContent='';
   rolled=true; selected=[];
   renderBigNums();
   if(!hasMoves()){
@@ -225,7 +306,7 @@ function doRoll(numDice){
 
 function toggleSelect(n){
   if(!rolled) return;
-  if(states[currentPlayer()].closed.includes(n)) return;
+  if(states[cp()].closed.includes(n)) return;
   const idx=selected.indexOf(n);
   if(idx>=0) selected.splice(idx,1); else selected.push(n);
   renderBigNums();
@@ -235,7 +316,7 @@ function confirmSelection(){
   if(selected.length===0){ setMsg('Seleziona almeno un numero!','warn'); return; }
   const s=selected.reduce((a,b)=>a+b,0);
   if(s!==diceSum){ setMsg(`La somma dei numeri scelti (${s}) non corrisponde a ${diceSum}. Riprova.`,'warn'); return; }
-  const st=states[currentPlayer()];
+  const st=states[cp()];
   selected.forEach(n=>st.closed.push(n));
   selected=[];
   document.getElementById('btnConfirm').style.display='none';
@@ -244,40 +325,35 @@ function confirmSelection(){
     renderMiniBoxes();
     setMsg('Esatto! Hai chiuso la scatola!','ok');
     document.getElementById('btnRoll').disabled=true;
-    removeFromActive(currentPlayer());
-    setTimeout(()=>{ if(active.length===0){ showFinalResults(); } else { advanceTurn(); initTurn(); } },1800);
+    removeFromActive(cp());
+    setTimeout(()=>{ if(active.length===0) showFinalResults(); else { advanceTurn(); initTurn(); }},2000);
   } else {
     rolled=false;
-    renderBigNums();
-    document.getElementById('sumInfo').textContent='';
+    renderBigNums(); renderMiniBoxes();
     document.getElementById('d1').textContent='-';
     document.getElementById('d2').textContent='-';
-    advanceTurn();
-    initTurn();
+    advanceTurn(); initTurn();
   }
 }
 
 function hasMoves(){
-  const st=states[currentPlayer()];
-  const open=[1,2,3,4,5,6,7,8,9].filter(n=>!st.closed.includes(n));
+  const open=[1,2,3,4,5,6,7,8,9].filter(n=>!states[cp()].closed.includes(n));
   return findCombinations(open,diceSum).length>0;
 }
 
 function findCombinations(nums,target){
   const res=[];
-  function bt(i,curr,sum){
-    if(sum===target){res.push([...curr]);return;}
-    if(sum>target||i>=nums.length) return;
-    curr.push(nums[i]); bt(i+1,curr,sum+nums[i]); curr.pop();
-    bt(i+1,curr,sum);
+  for(let i=0;i<nums.length;i++){
+    if(nums[i]===target) res.push([nums[i]]);
+    for(let j=i+1;j<nums.length;j++){
+      if(nums[i]+nums[j]===target) res.push([nums[i],nums[j]]);
+    }
   }
-  bt(0,[],0);
   return res;
 }
 
 function noMoreMoves(){
-  const st=states[currentPlayer()];
-  const open=[1,2,3,4,5,6,7,8,9].filter(n=>!st.closed.includes(n));
+  const open=[1,2,3,4,5,6,7,8,9].filter(n=>!states[cp()].closed.includes(n));
   const real=open.reduce((a,b)=>a+b,0);
   document.getElementById('btnRoll').disabled=true;
   document.getElementById('btnConfirm').style.display='none';
@@ -293,16 +369,52 @@ function checkScore(){
   const real=parseInt(document.getElementById('scoreInput').dataset.real);
   if(isNaN(input)){setMsg('Inserisci un numero!','warn');return;}
   if(input===real){
-    const p=currentPlayer();
+    const p=cp();
     states[p].done=true; states[p].score=real;
     setMsg(`Esatto! Punteggio: ${real}.`,'ok');
     document.getElementById('scoreInputArea').style.display='none';
     renderMiniBoxes();
     removeFromActive(p);
-    setTimeout(()=>{ if(active.length===0){ showFinalResults(); } else { advanceTurn(); initTurn(); } },1500);
+    setTimeout(()=>{ if(active.length===0) showFinalResults(); else { advanceTurn(); initTurn(); }},1500);
   } else {
     setMsg('Non è corretto. Riprova!','warn');
     document.getElementById('scoreInput').value='';
+  }
+}
+
+function canUseSingleDie(){
+  return [7,8,9].every(n=>states[cp()].closed.includes(n));
+}
+
+function renderMiniBoxes(){
+  const cont=document.getElementById('boxesRow');
+  cont.innerHTML='';
+  players.forEach((name,i)=>{
+    const st=states[i];
+    const isActive=active.includes(i)&&active[currentIdx]===i;
+    const div=document.createElement('div');
+    div.className='player-box'+(isActive?' active':st.done?' done':'');
+    let numsHtml='';
+    for(let n=1;n<=9;n++) numsHtml+=`<div class="mini-tile${st.closed.includes(n)?' closed':''}">${st.closed.includes(n)?'':n}</div>`;
+    const sc=st.score!==null?`${st.score} pt`:(st.won?'0 pt':'');
+    div.innerHTML=`<div class="box-label">${name}</div><div class="mini-nums">${numsHtml}</div><div class="mini-score">${sc}</div>`;
+    cont.appendChild(div);
+  });
+}
+
+function renderBigNums(){
+  const p=cp();
+  const st=states[p];
+  const cont=document.getElementById('bigNums');
+  cont.innerHTML='';
+  for(let n=1;n<=9;n++){
+    const div=document.createElement('div');
+    const isClosed=st.closed.includes(n);
+    const isSel=selected.includes(n);
+    div.className='num-tile'+(isClosed?' closed':isSel?' selected':' open');
+    div.textContent=isClosed?'':n;
+    if(!isClosed&&!isComputer()) div.onclick=()=>toggleSelect(n);
+    cont.appendChild(div);
   }
 }
 
@@ -327,12 +439,19 @@ function showFinalResults(){
   sorted.forEach((p,i)=>{
     const row=document.createElement('div');
     row.className='result-row';
-    row.style.background=p.score===minScore?'#e8f5e9':''
-    row.style.borderRadius=p.score===minScore?'8px':''
-    row.style.padding=p.score===minScore?'8px 10px':'8px 0'
+    row.style.background=p.score===minScore?'#e8f5e9':'';
+    row.style.borderRadius=p.score===minScore?'8px':'';
+    row.style.padding=p.score===minScore?'8px 10px':'8px 0';
     row.innerHTML=`<span>${i+1}. ${p.name}</span><span>${p.score} punti</span>`;
     list.appendChild(row);
   });
+}
+
+function backToHome(){
+  document.getElementById('gamePanel').style.display='none';
+  document.getElementById('finalResults').style.display='none';
+  document.getElementById('setupPanel').style.display='block';
+  buildNameInputs();
 }
 
 function setMsg(text,type){
