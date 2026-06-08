@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Armadio del 100</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f5f5f5; min-height: 100vh; }
+  .menu { display: flex; flex-direction: column; align-items: center; padding: 40px 24px; gap: 20px; }
+  .menu h1 { font-size: 28px; font-weight: 700; color: #222; margin-bottom: 10px; }
+  .menu-card { width: 100%; max-width: 360px; background: #fff; border: 1.5px solid #ddd; border-radius: 14px; padding: 22px 24px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
+  .menu-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.10); border-color: #E24B4A; }
+  .menu-card h2 { font-size: 18px; font-weight: 600; color: #E24B4A; margin-bottom: 6px; }
+  .menu-card p { font-size: 14px; color: #666; line-height: 1.5; }
+  .screen { display: none; flex-direction: column; align-items: center; padding: 20px 16px; min-height: 100vh; }
+  .screen.active { display: flex; }
+  .back-btn { align-self: flex-start; font-size: 14px; color: #888; background: none; border: none; cursor: pointer; margin-bottom: 12px; padding: 4px 0; }
+  .back-btn:hover { color: #E24B4A; }
+  h1.game-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; color: #222; }
+  .grid { display: flex; flex-direction: column; gap: 5px; margin-bottom: 20px; }
+  .row-gap { height: 14px; }
+  .row { display: flex; gap: 5px; align-items: center; justify-content: center; }
+  .col-gap { width: 14px; }
+  .ball { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #bbb; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #bbb; transition: background 0.15s, border-color 0.15s, color 0.15s; user-select: none; }
+  .ball.on { background: #E24B4A; border-color: #A32D2D; color: #fff; }
+  .ball.single { background: #E24B4A; border-color: #A32D2D; }
+  .controls { display: flex; flex-direction: column; align-items: center; gap: 14px; width: 100%; max-width: 420px; }
+  .btn { font-size: 16px; padding: 10px 28px; border-radius: 8px; border: 1.5px solid #bbb; background: #fff; cursor: pointer; font-weight: 500; }
+  .btn:hover { background: #f0f0f0; }
+  .btn.primary { background: #E24B4A; border-color: #A32D2D; color: #fff; }
+  .btn.primary:hover { background: #c73938; }
+  .num-box { font-size: 64px; font-weight: 700; color: #222; text-align: center; line-height: 1; }
+  .hint { font-size: 18px; color: #555; min-height: 28px; text-align: center; }
+  .question { font-size: 26px; font-weight: 700; color: #222; text-align: center; }
+</style>
+</head>
+<body>
+
+<div id="menuScreen" class="menu">
+  <h1>🧮 Armadio del 100</h1>
+  <div class="menu-card" onclick="startGame('conta')">
+    <h2>🔴 Quante palline?</h2>
+    <p>Si colorano alcune palline e il bambino deve indovinare quante sono.</p>
+  </div>
+  <div class="menu-card" onclick="startGame('trova')">
+    <h2>🎯 Trova la pallina</h2>
+    <p>Il computer dice un numero, il bambino lo indica sulla griglia, poi si controlla.</p>
+  </div>
+  <div class="menu-card" onclick="startGame('indovina')">
+    <h2>❓ Che numero è?</h2>
+    <p>Si accende una pallina sulla griglia, il bambino deve indovinare che numero è, poi si controlla.</p>
+  </div>
+</div>
+
+<div id="contaScreen" class="screen">
+  <button class="back-btn" onclick="goMenu()">← Menu</button>
+  <h1 class="game-title">Quante palline sono colorate?</h1>
+  <div class="grid" id="contaGrid"></div>
+  <div class="controls">
+    <button class="btn" onclick="newConta()">🎲 Nuovo numero</button>
+    <div class="num-box" id="contaNum">?</div>
+    <div class="hint" id="contaHint"></div>
+    <button class="btn primary" id="contaRevBtn" onclick="revealConta()">Mostra risposta</button>
+  </div>
+</div>
+
+<div id="trovaScreen" class="screen">
+  <button class="back-btn" onclick="goMenu()">← Menu</button>
+  <h1 class="game-title">Trova la pallina!</h1>
+  <div class="grid" id="trovaGrid"></div>
+  <div class="controls">
+    <button class="btn" onclick="newTrova()">🎲 Nuovo numero</button>
+    <div class="question" id="trovaQuestion">—</div>
+    <button class="btn primary" id="trovaRevBtn" onclick="revealTrova()">Controlla!</button>
+  </div>
+</div>
+
+<div id="indovinaScreen" class="screen">
+  <button class="back-btn" onclick="goMenu()">← Menu</button>
+  <h1 class="game-title">Che numero è?</h1>
+  <div class="grid" id="indovinaGrid"></div>
+  <div class="controls">
+    <button class="btn" onclick="newIndovina()">🎲 Nuova pallina</button>
+    <div class="num-box" id="indovinaNum"></div>
+    <div class="hint" id="indovinaHint"></div>
+    <button class="btn primary" id="indovinaRevBtn" onclick="revealIndovina()">Controlla!</button>
+  </div>
+</div>
+
+<script>
+  var contaCurrent = 0;
+  var trovaCurrent = 0;
+  var indovinaCurrent = 0;
+
+  function buildGrid(gridId, prefix) {
+    var grid = document.getElementById(gridId);
+    grid.innerHTML = '';
+    for (var r = 0; r < 10; r++) {
+      if (r === 5) {
+        var rg = document.createElement('div');
+        rg.className = 'row-gap';
+        grid.appendChild(rg);
+      }
+      var row = document.createElement('div');
+      row.className = 'row';
+      for (var c = 0; c < 10; c++) {
+        if (c === 5) {
+          var cg = document.createElement('div');
+          cg.className = 'col-gap';
+          row.appendChild(cg);
+        }
+        var b = document.createElement('div');
+        b.className = 'ball';
+        b.id = prefix + (r * 10 + c);
+        row.appendChild(b);
+      }
+      grid.appendChild(row);
+    }
+  }
+
+  function goMenu() {
+    document.getElementById('menuScreen').style.display = 'flex';
+    document.getElementById('contaScreen').classList.remove('active');
+    document.getElementById('trovaScreen').classList.remove('active');
+    document.getElementById('indovinaScreen').classList.remove('active');
+  }
+
+  function startGame(g) {
+    document.getElementById('menuScreen').style.display = 'none';
+    document.getElementById('contaScreen').classList.remove('active');
+    document.getElementById('trovaScreen').classList.remove('active');
+    document.getElementById('indovinaScreen').classList.remove('active');
+    if (g === 'conta') {
+      document.getElementById('contaScreen').classList.add('active');
+      buildGrid('contaGrid', 'c');
+      newConta();
+    } else if (g === 'trova') {
+      document.getElementById('trovaScreen').classList.add('active');
+      buildGrid('trovaGrid', 't');
+      newTrova();
+    } else if (g === 'indovina') {
+      document.getElementById('indovinaScreen').classList.add('active');
+      buildGrid('indovinaGrid', 'i');
+      newIndovina();
+    }
+  }
+
+  function newConta() {
+    contaCurrent = Math.floor(Math.random() * 100) + 1;
+    for (var i = 0; i < 100; i++) {
+      var b = document.getElementById('c' + i);
+      if (b) { b.className = 'ball' + (i < contaCurrent ? ' on' : ''); b.textContent = ''; b.style.color = ''; }
+    }
+    document.getElementById('contaNum').textContent = '?';
+    document.getElementById('contaHint').textContent = '';
+    document.getElementById('contaRevBtn').style.display = 'inline-block';
+  }
+
+  function revealConta() {
+    for (var i = 0; i < 100; i++) {
+      var b = document.getElementById('c' + i);
+      if (!b) continue;
+      var isOn = i < contaCurrent;
+      b.className = 'ball' + (isOn ? ' on' : '');
+      b.textContent = i + 1;
+      b.style.color = isOn ? '#fff' : '#bbb';
+    }
+    var dec = Math.floor(contaCurrent / 10);
+    var uni = contaCurrent % 10;
+    document.getElementById('contaNum').textContent = contaCurrent;
+    var txt = '';
+    if (contaCurrent === 100) txt = '10 decine = 100';
+    else if (dec === 0) txt = uni + ' unità';
+    else if (uni === 0) txt = dec + (dec === 1 ? ' decina' : ' decine');
+    else txt = dec + (dec === 1 ? ' decina' : ' decine') + ' + ' + uni + ' unità';
+    document.getElementById('contaHint').textContent = txt;
+    document.getElementById('contaRevBtn').style.display = 'none';
+  }
+
+  function newTrova() {
+    trovaCurrent = Math.floor(Math.random() * 100) + 1;
+    for (var i = 0; i < 100; i++) {
+      var b = document.getElementById('t' + i);
+      if (b) { b.className = 'ball'; b.textContent = ''; b.style.color = ''; }
+    }
+    document.getElementById('trovaQuestion').textContent = 'Trova la pallina numero ' + trovaCurrent;
+    document.getElementById('trovaRevBtn').style.display = 'inline-block';
+  }
+
+  function revealTrova() {
+    for (var i = 0; i < 100; i++) {
+      var b = document.getElementById('t' + i);
+      if (!b) continue;
+      var isTarget = i === trovaCurrent - 1;
+      b.className = 'ball' + (isTarget ? ' on' : '');
+      b.textContent = i + 1;
+      b.style.color = isTarget ? '#fff' : '#bbb';
+    }
+    document.getElementById('trovaRevBtn').style.display = 'none';
+  }
+
+  function newIndovina() {
+    indovinaCurrent = Math.floor(Math.random() * 100) + 1;
+    for (var i = 0; i < 100; i++) {
+      var b = document.getElementById('i' + i);
+      if (b) { b.className = 'ball' + (i === indovinaCurrent - 1 ? ' single' : ''); b.textContent = ''; b.style.color = ''; }
+    }
+    document.getElementById('indovinaNum').textContent = '';
+    document.getElementById('indovinaHint').textContent = '';
+    document.getElementById('indovinaRevBtn').style.display = 'inline-block';
+  }
+
+  function revealIndovina() {
+    for (var i = 0; i < 100; i++) {
+      var b = document.getElementById('i' + i);
+      if (!b) continue;
+      var isTarget = i === indovinaCurrent - 1;
+      b.className = 'ball' + (isTarget ? ' on' : '');
+      b.textContent = i + 1;
+      b.style.color = isTarget ? '#fff' : '#bbb';
+    }
+    var dec = Math.floor(indovinaCurrent / 10);
+    var uni = indovinaCurrent % 10;
+    document.getElementById('indovinaNum').textContent = indovinaCurrent;
+    var txt = '';
+    if (indovinaCurrent === 100) txt = '10 decine = 100';
+    else if (dec === 0) txt = uni + ' unità';
+    else if (uni === 0) txt = dec + (dec === 1 ? ' decina' : ' decine');
+    else txt = dec + (dec === 1 ? ' decina' : ' decine') + ' + ' + uni + ' unità';
+    document.getElementById('indovinaHint').textContent = txt;
+    document.getElementById('indovinaRevBtn').style.display = 'none';
+  }
+</script>
+</body>
+</html>
