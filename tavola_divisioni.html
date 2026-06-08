@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tavola delle Divisioni</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100vh; }
+.header { text-align: center; padding: 12px 10px 6px; }
+.header a { text-decoration: none; display: inline-flex; flex-direction: column; align-items: center; gap: 5px; }
+.header img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+.header .blog-name { font-size: 13px; font-weight: 700; color: #5c3d9e; }
+.setup { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 8px 10px; flex-wrap: wrap; }
+.setup label { font-weight: 600; color: #333; font-size: 14px; }
+.setup input { width: 110px; padding: 6px 10px; border: 2px solid #9b72d8; border-radius: 8px; font-size: 15px; text-align: center; }
+.setup button { padding: 7px 18px; background: #5c3d9e; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+.setup button:hover { background: #7b52c4; }
+.main { display: flex; gap: 14px; padding: 8px 14px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+.grid-wrap { flex: 1; min-width: 300px; overflow-x: auto; }
+#grid { display: grid; grid-template-columns: repeat(20, 1fr); border: 2px solid #9b72d8; border-radius: 10px; overflow: hidden; }
+.cell { border: 1px solid #d0bfee; min-height: 36px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; user-select: none; }
+.hdr  { background: #5c3d9e; color: #fff; font-size: 12px; min-height: 28px; }
+.hdr.sel { background: #f0a500; }
+.off  { background: #e8e0f5; }
+.on   { background: #fff; cursor: pointer; }
+.on:hover { background: #f3ecff; }
+.done { background: #c5f0c5 !important; cursor: pointer; }
+.tok  { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; color: #fff; }
+.side-panel { display: flex; flex-direction: column; gap: 10px; min-width: 210px; max-width: 230px; }
+.panel-box { background: #fff; border: 2px solid #9b72d8; border-radius: 12px; padding: 12px; }
+.panel-box h3 { color: #5c3d9e; font-size: 13px; margin-bottom: 8px; text-align: center; font-weight: 700; }
+.sub { font-size: 11px; color: #888; text-align: center; margin: 2px 0 6px; }
+.trow { display: flex; align-items: center; gap: 6px; margin-bottom: 7px; }
+.tchip { width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; color: #fff; flex-shrink: 0; }
+.tchip.sel { outline: 3px solid #f0a500; outline-offset: 2px; }
+.tqty { font-size: 13px; font-weight: 700; color: #333; min-width: 20px; text-align: center; }
+.tlbl { font-size: 10px; color: #666; flex: 1; }
+.swp { font-size: 10px; padding: 2px 6px; background: #eee; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; }
+.swp:hover { background: #ddd; }
+.res-line { font-size: 14px; font-weight: 700; color: #333; margin: 3px 0; }
+.res-line span { color: #5c3d9e; }
+.finale { margin-top: 8px; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: 700; text-align: center; display: none; border: 2px solid; }
+.hint { font-size: 10px; color: #999; text-align: center; margin-top: 5px; }
+.bottom-bar { display: flex; gap: 12px; justify-content: center; padding: 8px; }
+.btn { padding: 7px 22px; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+.btn-red { background: #e05050; } .btn-red:hover { background: #c03030; }
+.btn-green { background: #3a9e5c; } .btn-green:hover { background: #2a7a4a; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="https://matematichenonsinasce.com/" target="_blank">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo">
+    <span class="blog-name">Matematiche non si nasce</span>
+  </a>
+</div>
+
+<div class="setup">
+  <label>Dividendo: <input type="number" id="inp-div" min="1" max="99999" placeholder="es. 121"></label>
+  <label>Divisore: <strong id="div-lbl" style="color:#5c3d9e;font-size:16px;">— clicca la griglia</strong></label>
+  <button onclick="avvia()">Avvia</button>
+</div>
+
+<div class="main">
+  <div class="grid-wrap">
+    <div id="grid"></div>
+    <div class="hint">① Scrivi il dividendo e clicca un numero nella prima riga → ② Avvia → ③ Seleziona un gettone dal portafoglio → ④ Clicca le celle</div>
+  </div>
+  <div class="side-panel">
+    <div class="panel-box">
+      <h3>👛 Portafoglio</h3>
+      <div class="sub">Il tuo dividendo in gettoni</div>
+      <div id="port"></div>
+    </div>
+    <div class="panel-box">
+      <h3>🎯 Selezionato</h3>
+      <div id="sel-box"><div class="sub">Nessun gettone selezionato</div></div>
+    </div>
+    <div class="panel-box">
+      <h3>📊 Risultato</h3>
+      <div class="res-line">Quoziente: <span id="rq">—</span></div>
+      <div class="res-line">Resto: <span id="rr">—</span></div>
+      <div class="finale" id="fin"></div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <button class="btn btn-red" onclick="reset()">🔄 Ricomincia</button>
+  <button class="btn btn-green" onclick="mostraRisultato()">✅ Risultato</button>
+</div>
+
+<script>
+const COLS = 20;
+const TK = [
+  {l:'Unità',        v:1,     c:'#e05050'},
+  {l:'Decine',       v:10,    c:'#e08800'},
+  {l:'Centinaia',    v:100,   c:'#3a9e5c'},
+  {l:'Migliaia',     v:1000,  c:'#2a72c4'},
+  {l:'Decine di m.', v:10000, c:'#8e44ad'},
+];
+function lbl(v){ return v>=10000?'10k':v>=1000?(v/1000)+'k':v; }
+
+let DIV=0, DVD=0, active=false, selTok=-1;
+let port=[0,0,0,0,0], inGrid=[0,0,0,0,0];
+// cells[r][c] = -1 o indice token (r=0 header)
+let cells=[], totalRows=10;
+
+const gridEl = document.getElementById('grid');
+
+// Unico listener sull'intera griglia
+gridEl.addEventListener('click', function(e) {
+  const cell = e.target.closest('.cell');
+  if (!cell) return;
+  const r = +cell.dataset.r, c = +cell.dataset.c;
+  if (r === 0) { if (!active) clickHeader(c); return; }
+  if (active) clickCella(r, c, cell);
+});
+
+function mkCell(r, c) {
+  const d = document.createElement('div');
+  d.className = 'cell' + (r===0 ? ' hdr' : ' off');
+  d.dataset.r = r; d.dataset.c = c;
+  if (r===0) d.textContent = c+1;
+  return d;
+}
+
+function buildGrid() {
+  gridEl.innerHTML = '';
+  cells = [];
+  totalRows = 10;
+  for (let r=0; r<=totalRows; r++) {
+    const row = [];
+    for (let c=0; c<COLS; c++) {
+      const d = mkCell(r,c);
+      gridEl.appendChild(d);
+      row.push(d);
+    }
+    if (r>0) cells.push(new Array(COLS).fill(-1));
+  }
+}
+
+function clickHeader(c) {
+  DIV = c+1;
+  document.getElementById('div-lbl').textContent = DIV;
+  document.querySelectorAll('#grid .hdr').forEach((el,i) => el.classList.toggle('sel', i<DIV));
+}
+
+function avvia() {
+  const v = parseInt(document.getElementById('inp-div').value);
+  if (!v||v<1) { alert('Inserisci un dividendo valido!'); return; }
+  if (!DIV)    { alert('Clicca un numero nella griglia!'); return; }
+  DVD=v; active=true; selTok=-1;
+  inGrid=[0,0,0,0,0];
+  cells = Array.from({length:totalRows}, ()=>new Array(COLS).fill(-1));
+  // aggiorna classi celle
+  document.querySelectorAll('#grid .cell:not(.hdr)').forEach(el => {
+    const c = +el.dataset.c;
+    el.className = 'cell ' + (c<DIV?'on':'off');
+    el.innerHTML = '';
+  });
+  port = scomponi(DVD);
+  renderPort(); renderSel(); aggRis();
+  document.getElementById('fin').style.display='none';
+}
+
+function scomponi(n) {
+  const q=[0,0,0,0,0]; let rem=n;
+  for (let i=TK.length-1;i>=0;i--) { q[i]=Math.floor(rem/TK[i].v); rem%=TK[i].v; }
+  return q;
+}
+
+function clickCella(r, c, el) {
+  const ri = r-1;
+  if (c>=DIV) return;
+  if (!el.classList.contains('on') && !el.classList.contains('done')) return;
+
+  if (cells[ri][c] !== -1) {
+    // rimuovi
+    const ti=cells[ri][c];
+    cells[ri][c]=-1; inGrid[ti]--; port[ti]++;
+    el.innerHTML='';
+    // decolora riga
+    for(let cc=0;cc<DIV;cc++) getCellEl(r,cc).classList.remove('done');
+    renderPort(); renderSel(); aggRis();
+    return;
+  }
+  if (selTok===-1||port[selTok]===0) return;
+  const ti=selTok;
+  cells[ri][c]=ti; inGrid[ti]++; port[ti]--;
+  el.innerHTML=`<div class="tok" style="background:${TK[ti].c}">${lbl(TK[ti].v)}</div>`;
+  renderPort(); renderSel(); verificaRiga(r,ri); aggRis();
+}
+
+function getCellEl(r,c) {
+  return gridEl.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+}
+
+function verificaRiga(r,ri) {
+  for(let c=0;c<DIV;c++) if(cells[ri][c]===-1) return;
+  for(let c=0;c<DIV;c++) getCellEl(r,c).classList.replace('on','done');
+  if(ri===cells.length-1) aggiungiRighe(5);
+}
+
+function aggiungiRighe(n) {
+  for(let i=0;i<n;i++) {
+    totalRows++;
+    const r=totalRows;
+    cells.push(new Array(COLS).fill(-1));
+    for(let c=0;c<COLS;c++) {
+      const d=mkCell(r,c);
+      d.className='cell '+(c<DIV?'on':'off');
+      gridEl.appendChild(d);
+    }
+  }
+}
+
+function renderPort() {
+  const el=document.getElementById('port');
+  el.innerHTML='';
+  let any=false;
+  TK.forEach((t,i)=>{
+    if(port[i]===0) return; any=true;
+    const row=document.createElement('div'); row.className='trow';
+    const btn=document.createElement('button');
+    btn.className='tchip'+(selTok===i?' sel':'');
+    btn.style.background=t.c; btn.textContent=lbl(t.v);
+    btn.onclick=()=>{selTok=(selTok===i?-1:i);renderPort();renderSel();};
+    const qty=document.createElement('span'); qty.className='tqty'; qty.textContent=port[i];
+    const lb=document.createElement('span'); lb.className='tlbl'; lb.textContent=t.l;
+    row.appendChild(btn); row.appendChild(qty); row.appendChild(lb);
+    if(i>0) {
+      const sw=document.createElement('button'); sw.className='swp'; sw.textContent='÷10';
+      sw.onclick=()=>{port[i]--;port[i-1]+=10;renderPort();renderSel();};
+      row.appendChild(sw);
+    }
+    el.appendChild(row);
+  });
+  if(!any) el.innerHTML='<div class="sub">Portafoglio vuoto</div>';
+}
+
+function renderSel() {
+  const el=document.getElementById('sel-box');
+  if(selTok===-1||port[selTok]===0) {
+    if(selTok!==-1&&port[selTok]===0) selTok=-1;
+    el.innerHTML='<div class="sub">Nessun gettone selezionato</div>'; return;
+  }
+  const t=TK[selTok];
+  el.innerHTML=`<div class="trow" style="justify-content:center">
+    <div class="tok" style="width:46px;height:46px;font-size:13px;background:${t.c}">${lbl(t.v)}</div>
+    <span style="font-size:13px;font-weight:700;margin-left:8px">×${port[selTok]} — clicca le celle</span>
+  </div>`;
+}
+
+function aggRis() {
+  let q=0,ok=0;
+  cells.forEach((row,ri)=>{
+    let piena=true,val=0;
+    for(let c=0;c<DIV;c++){ if(row[c]===-1){piena=false;break;} val+=TK[row[c]].v; }
+    if(piena){q+=val/DIV;ok++;}
+  });
+  let tot=0; TK.forEach((t,i)=>tot+=inGrid[i]*t.v);
+  document.getElementById('rq').textContent=ok>0?q:'—';
+  document.getElementById('rr').textContent=tot>0?DVD-tot:'—';
+}
+
+function mostraRisultato() {
+  if(!active||!DIV) return;
+  let q=0,ok=0;
+  cells.forEach(row=>{
+    let piena=true,val=0;
+    for(let c=0;c<DIV;c++){if(row[c]===-1){piena=false;break;}val+=TK[row[c]].v;}
+    if(piena){q+=val/DIV;ok++;}
+  });
+  let vPort=0; port.forEach((n,i)=>vPort+=n*TK[i].v);
+  let vInc=0;
+  cells.forEach(row=>{
+    let piena=true,val=0;
+    for(let c=0;c<DIV;c++){if(row[c]===-1)piena=false;else val+=TK[row[c]].v;}
+    if(!piena)vInc+=val;
+  });
+  const resto=vPort+vInc;
+  const fin=document.getElementById('fin');
+  fin.style.display='block';
+  if(ok===0){
+    fin.style.cssText+='background:#fff0f0;border-color:#e05050;color:#c03030;';
+    fin.textContent='Nessuna riga completa ancora!';
+  } else if(resto>=DIV){
+    fin.style.cssText+='background:#fff8e0;border-color:#e08800;color:#7a5000;';
+    fin.textContent=`Puoi riempire ancora un\'altra riga! Hai ${resto} da distribuire.`;
+  } else {
+    fin.style.cssText+='background:#f0fff0;border-color:#3a9e5c;color:#2a7a4a;';
+    fin.textContent=resto===0?`${DVD} = ${q} × ${DIV}`:`${DVD} = ${q} × ${DIV} + ${resto}`;
+  }
+}
+
+function reset() {
+  active=false;DIV=0;DVD=0;selTok=-1;
+  port=[0,0,0,0,0];inGrid=[0,0,0,0,0];
+  document.getElementById('inp-div').value='';
+  document.getElementById('div-lbl').textContent='— clicca la griglia';
+  document.getElementById('rq').textContent='—';
+  document.getElementById('rr').textContent='—';
+  document.getElementById('fin').style.display='none';
+  document.getElementById('port').innerHTML='';
+  document.getElementById('sel-box').innerHTML='<div class="sub">Nessun gettone selezionato</div>';
+  buildGrid();
+}
+
+buildGrid();
+</script>
+</body>
+</html>
