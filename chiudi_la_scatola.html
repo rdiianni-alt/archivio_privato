@@ -314,6 +314,7 @@ function toggleSelect(n){
 
 function confirmSelection(){
   if(selected.length===0){ setMsg('Seleziona almeno un numero!','warn'); return; }
+  if(selected.length>2){ setMsg('Puoi selezionare al massimo 2 numeri!','warn'); return; }
   const s=selected.reduce((a,b)=>a+b,0);
   if(s!==diceSum){ setMsg(`La somma dei numeri scelti (${s}) non corrisponde a ${diceSum}. Riprova.`,'warn'); return; }
   const st=states[cp()];
