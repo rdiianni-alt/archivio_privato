@@ -361,6 +361,31 @@ const FR_GEO = {
   ],
 };
 
+
+const FR_STO_1 = {
+  fonti: [
+    "Riconosce le fonti storiche (oggetti, fotografie, racconti) solo se guidato dall'insegnante.",
+    "Sa riconoscere le fonti storiche e con l'aiuto dell'insegnante ne ricava semplici informazioni.",
+    "Sa riconoscere le fonti storiche (oggetti, fotografie, racconti) e ne ricava informazioni essenziali.",
+    "Sa riconoscere le fonti storiche e ne ricava informazioni, mettendole in relazione con i fatti vissuti.",
+    "Sa riconoscere le fonti storiche, ne ricava informazioni e le mette autonomamente in relazione con i fatti vissuti e studiati.",
+  ],
+  tempo: [
+    "Con l'aiuto dell'insegnante sa collocare semplici fatti sulla linea del tempo (ieri, oggi, domani).",
+    "Sa collocare semplici fatti sulla linea del tempo usando le principali coordinate (ieri, oggi, domani, prima, dopo).",
+    "Sa collocare i fatti sulla linea del tempo e individua relazioni di successione e contemporaneità in situazioni semplici.",
+    "Sa collocare i fatti sulla linea del tempo e riconosce relazioni di successione e contemporaneità.",
+    "Sa collocare con sicurezza i fatti sulla linea del tempo riconoscendo relazioni di successione e contemporaneità.",
+  ],
+  produzione: [
+    "Se stimolato con domande rappresenta graficamente e/o verbalmente i fatti vissuti usando semplici coordinate temporali.",
+    "Rappresenta graficamente e/o verbalmente i fatti vissuti usando le principali coordinate temporali (prima, dopo, intanto).",
+    "Rappresenta graficamente e/o verbalmente i fatti vissuti e con l'aiuto dell'insegnante produce brevi testi di sintesi.",
+    "Sa rappresentare e raccontare i fatti vissuti usando le coordinate temporali con discreta autonomia.",
+    "Sa rappresentare e raccontare i fatti vissuti con autonomia e ricchezza di particolari, usando correttamente le coordinate temporali.",
+  ],
+};
+
 const FR_STO = {
   fonti: [
     "Sa riconoscere le fonti storiche.",
@@ -574,8 +599,8 @@ const DOMANDE = {
       { id:"lettura",     area:"Lettura",       t:"Legge sillabando fino alla lettura scorrevole? Rispetta la punteggiatura di base?",            frasi: FR_ITA.lettura_12 },
       { id:"comprensione",area:"Comprensione",  t:"Comprende le informazioni principali di un testo letto o ascoltato?",                         frasi: FR_ITA.comprensione_12 },
       { id:"oralita",     area:"Oralità",       t:"Partecipa alle conversazioni in modo pertinente? Ascolta narrazioni e ne riferisce il contenuto?", frasi: FR_ITA.oralita_12 },
-      { id:"scrittura",   area:"Scrittura",     t:"Scrive frasi rispettando le prime convenzioni ortografiche (maiuscole, apostrofo, suoni difficili)?", frasi: FR_ITA.scrittura_12 },
-      { id:"riflessione", area:"Riflessione",   t:"Riconosce le prime categorie grammaticali (nome, verbo, aggettivo)?",                         frasi: FR_ITA.riflessione_12 },
+      { id:"scrittura",   area:"Scrittura",     t:"Scrive frasi rispettando le prime convenzioni ortografiche? Scrive messaggi esprimendo a grandi linee lo scopo comunicativo?", frasi: FR_ITA.scrittura_12 },
+      { id:"riflessione", area:"Riflessione",   t:"Costruisce frasi e discorsi in modo corretto?",                                               frasi: FR_ITA.riflessione_12 },
     ],
     2: [
       { id:"lettura",     area:"Lettura",       t:"Legge testi in modo scorrevole rispettando la punteggiatura? Cura la lettura autonoma?",       frasi: FR_ITA.lettura_12 },
@@ -672,6 +697,11 @@ const DOMANDE = {
     ],
   },
   storia: {
+    1: [
+      { id:"fonti",      area:"Uso delle fonti",    t:"Sa riconoscere le fonti storiche (oggetti, fotografie, racconti) e trarne semplici informazioni?",               frasi: FR_STO_1.fonti },
+      { id:"tempo",      area:"Linea del tempo",    t:"Sa collocare semplici fatti sulla linea del tempo (ieri, oggi, domani, prima, dopo)?",                            frasi: FR_STO_1.tempo },
+      { id:"produzione", area:"Produzione",         t:"Sa rappresentare graficamente e/o verbalmente i fatti vissuti usando le coordinate temporali?",                   frasi: FR_STO_1.produzione },
+    ],
     2: [
       { id:"fonti",      area:"Uso delle fonti",    t:"Sa riconoscere le fonti storiche e trarne informazioni? Sa metterle in relazione con i fatti storici?", frasi: FR_STO.fonti },
       { id:"tempo",      area:"Linea del tempo",    t:"Sa collocare i fatti sulla linea del tempo? Riconosce relazioni di successione e contemporaneità?", frasi: FR_STO.tempo },
@@ -868,6 +898,7 @@ function render() {
     <p class="label-top">Strumento docente</p>
     <h1>Valutazione ${ml() || "scuola primaria"}</h1>
     <p class="subtitle">Scrutinio di fine anno · Scuola primaria</p>
+    <p style="font-size:12px;color:#999;margin-top:-18px;margin-bottom:28px;font-style:italic">Declinazione traguardi previsti nel PTOF — strumento di prova</p>
   `;
 
   if (STATE.step === "setup") {
@@ -882,7 +913,7 @@ function render() {
       <label class="section-label">Seleziona la classe</label>
       <select onchange="pick('classe',this.value)">
         <option value="">Seleziona la classe</option>
-        ${[1,2,3,4,5].map(c=>`<option value="${c}"${STATE.classe==c?" selected":""}>${c}ª elementare</option>`).join("")}
+        ${[['1','Prima'],['2','Seconda'],['3','Terza'],['4','Quarta'],['5','Quinta']].map(([v,n])=>`<option value="${v}"${STATE.classe===v?' selected':''}>${n}</option>`).join('')}
       </select>
     </div>
     <button class="btn btn-full" ${(!STATE.materia||!STATE.classe)?"disabled":""} onclick="go('info')">Inizia lo scrutinio →</button>`;
@@ -895,11 +926,11 @@ function render() {
     html += `<p class="step-nome">Nuovo alunno/a — Classe ${STATE.classe}ª — ${ml()}</p>
     <div class="mb24">
       <label class="section-label">Nome</label>
-      <input type="text" id="inp-nome" value="${escHtml(STATE.nome)}" placeholder="es. Sofia" oninput="STATE.nome=this.value">
+      <input type="text" id="inp-nome" value="${escHtml(STATE.nome)}" placeholder="es. Sofia" oninput="STATE.nome=this.value" onkeydown="if(event.key==='Enter')startDom()">
     </div>
     <div class="flex-row">
       ${STATE.alunni.length ? `<button class="btn" onclick="go('riepilogo')">Fine scrutinio →</button>` : ""}
-      <button class="btn btn-flex2" ${!STATE.nome?"disabled":""} onclick="startDom()">Inizia valutazione →</button>
+      <button class="btn btn-flex2" onclick="startDom()">Inizia valutazione →</button>
     </div>`;
   }
 
@@ -981,7 +1012,15 @@ function pick(field, val) { STATE[field] = val; render(); }
 function go(step)         { STATE.step = step; render(); }
 
 function startDom() {
-  if (!STATE.nome) return;
+  STATE.nome = (document.getElementById("inp-nome")||{}).value || STATE.nome;
+  if (!STATE.nome) { alert("Inserisci il nome dell'alunno/a prima di procedere."); return; }
+  const domCheck = getDom(STATE.materia, STATE.classe);
+  if (!domCheck || !domCheck.length) {
+    const nomiClasse = ['','prima','seconda','terza','quarta','quinta'];
+    const nomeM = (MATERIE.find(m=>m.id===STATE.materia)||{}).label || STATE.materia;
+    alert('La materia ' + nomeM + ' non è prevista per la classe ' + (nomiClasse[parseInt(STATE.classe)]||STATE.classe) + '.');
+    return;
+  }
   STATE.risposte = {}; STATE.dIdx = 0; STATE.step = "domande"; render();
 }
 
@@ -1026,7 +1065,7 @@ function stampaPDF() {
   p.sub{font-size:12px;color:#888;margin:0 0 20px}table{width:100%;border-collapse:collapse}
   th{font-size:10px;text-transform:uppercase;color:#aaa;padding:8px 12px;text-align:left;border-bottom:2px solid #ddd}</style>
   </head><body>
-  <h1>Scrutinio ${label} — Classe ${STATE.classe}ª elementare</h1>
+  <h1>Scrutinio ${label} — Classe ${['','prima','seconda','terza','quarta','quinta'][parseInt(STATE.classe)]||STATE.classe}</h1>
   <p class="sub">Anno scolastico 2024/25 · ${oggi} · ${STATE.alunni.length} alunni</p>
   <table><thead><tr><th style="width:18%">Alunno/a</th><th style="width:12%">Giudizio</th><th style="width:70%">Descrittori</th></tr></thead>
   <tbody>${righe}</tbody></table></body></html>`);
