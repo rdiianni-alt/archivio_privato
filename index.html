@@ -233,23 +233,38 @@
     return known.concat(extra);
   }
 
+  const gallery = document.getElementById("gallery");
+  let gameOpen = false;
+
   function openGame(filename, title){
     frame.src = PAGES_BASE + "/" + encodeURI(filename);
     ptitle.textContent = title;
+    gallery.style.display = "none";      // l'elenco sparisce: il gioco prende il suo posto
     player.classList.add("on");
     document.body.style.overflow = "hidden";
+    window.scrollTo(0, 0);
     showBar();
     frame.addEventListener("load", attachScrollTracking, {once:true});
+    // Il tasto Indietro del browser/telefono riporta all'elenco
+    if(!gameOpen){ history.pushState({game:true}, "", "#gioco"); }
+    gameOpen = true;
   }
-  function closeGame(){
+  function closeGame(fromPop){
+    if(!gameOpen) return;
+    gameOpen = false;
     player.classList.remove("on");
     frame.src = "about:blank";
+    gallery.style.display = "";          // torna l'elenco
     document.body.style.overflow = "";
     clearTimeout(hideTimer);
     pbar.classList.remove("hidden");
+    // Se chiudo col pulsante/Esc, annullo anche la voce di cronologia
+    if(!fromPop && history.state && history.state.game){ history.back(); }
   }
-  document.getElementById("backBtn").addEventListener("click", closeGame);
-  document.addEventListener("keydown", e => { if(e.key === "Escape") closeGame(); });
+  // Tasto Indietro del browser → chiude il gioco invece di lasciare la pagina
+  window.addEventListener("popstate", () => { if(gameOpen) closeGame(true); });
+  document.getElementById("backBtn").addEventListener("click", () => closeGame(false));
+  document.addEventListener("keydown", e => { if(e.key === "Escape") closeGame(false); });
 
   function renderCards(names){
     grid.innerHTML = "";
