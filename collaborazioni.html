@@ -1,17 +1,14 @@
 <style>
-.part-intro { font-size: 15px; color: #555; margin: 0 0 3.5rem; line-height: 1.6; }
+.part-intro { font-size: 15px; color: #555; line-height: 1.6; max-width: 1000px; margin: 0 auto 3.5rem; padding: 0 2rem; box-sizing: border-box; }
 
 .part-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
-  margin: 0 0 2.5rem;
-}
-@media (max-width: 900px) {
-  .part-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 600px) {
-  .part-grid { grid-template-columns: 1fr; }
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 1000px;
+  margin: 0 auto 2.5rem;
+  padding: 0 2rem;
+  box-sizing: border-box;
 }
 
 .part-card {
@@ -20,15 +17,38 @@
   border-radius: 12px;
   overflow: hidden;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
-.part-card-img { width: 100%; height: 180px; object-fit: cover; display: block; }
-.part-card-logo-wrap { width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; padding: 1.5rem; box-sizing: border-box; }
+.part-card-img {
+  flex: 0 0 340px;
+  width: 340px;
+  min-height: 230px;
+  object-fit: cover;
+  display: block;
+}
+.part-card-logo-wrap {
+  flex: 0 0 340px;
+  width: 340px;
+  min-height: 230px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
 .part-card-logo-wrap img { max-height: 90px; max-width: 100%; object-fit: contain; }
-.part-card-body { padding: 1rem 1.25rem 1.25rem; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.part-card-body { padding: 1.5rem 1.75rem; flex: 1; display: flex; flex-direction: column; gap: 8px; }
 .part-card-tag { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; display: inline-block; width: fit-content; }
-.part-card-title { font-size: 15px; font-weight: 600; color: #1a1a1a; margin: 0; }
-.part-card-desc { font-size: 13px; color: #555; line-height: 1.6; margin: 0; flex: 1; }
+.part-card-title { font-size: 17px; font-weight: 600; color: #1a1a1a; margin: 0; }
+.part-card-desc { font-size: 14px; color: #555; line-height: 1.65; margin: 0; }
+
+@media (max-width: 700px) {
+  .part-card { flex-direction: column; }
+  .part-card-img,
+  .part-card-logo-wrap { flex: none; width: 100%; min-height: 0; height: 200px; }
+  .part-card-body { padding: 1rem 1.25rem 1.25rem; }
+  .part-grid, .part-intro { padding: 0 1rem; }
+}
 </style>
 
 <p class="part-intro">Nel corso degli anni ho avuto la fortuna di contribuire a progetti e comunità che mi hanno dato molto più di quello che immaginavo. Questa pagina raccoglie le collaborazioni più significative.</p>
@@ -38,20 +58,13 @@
 <div class="part-grid">
 
   <div class="part-card">
-    <img class="part-card-img" src="https://matematichenonsinasce.com/wp-content/uploads/2025/08/schermata-2025-03-01-alle-17.41.49.webp" alt="I Lincei per la scuola e Scuola Normale Superiore">
-    <div class="part-card-body">
-      <span class="part-card-tag" style="background:#E6F1FB; color:#185FA5;">formazione · 2020, 2022, 2024</span>
-      <p class="part-card-title">I Lincei per la scuola e SNS</p>
-      <p class="part-card-desc">All'interno del progetto <em>I Lincei per la scuola</em>, ho partecipato come tutor ai cicli di formazione per insegnanti condotti da Pietro Di Martino (Università di Pisa): <em>Problem solving alla primaria</em> (2020), <em>Problem solving alla primaria e al primo anno della secondaria</em> (2022) e <em>Concretamente astratto: l'insegnamento della matematica al primo ciclo</em> (2024). Sono stati contesti in cui il confine tra formazione e ricerca si fa sottile e in cui si impara tanto quanto si contribuisce.</p>
+    <div class="part-card-logo-wrap" style="background:#f9f9f9; padding:0.75rem;">
+      <img src="https://matematichenonsinasce.com/wp-content/uploads/2026/09/ddm.png" alt="DdM Didattica della matematica" style="max-height:150px; width:100%; object-fit:contain;">
     </div>
-  </div>
-
-  <div class="part-card">
-    <img class="part-card-img" src="https://matematichenonsinasce.com/wp-content/uploads/2026/05/photo-2026-05-15-21-05-17.jpg" alt="Convegno CARME Ricerca in pratica">
     <div class="part-card-body">
-      <span class="part-card-tag" style="background:#FAEEDA; color:#854F0B;">laboratorio · 2025, 2026</span>
-      <p class="part-card-title">CARME — Convegno Ricerca in pratica</p>
-      <p class="part-card-desc"><em>Ricerca in pratica</em> è un'iniziativa di formazione e sviluppo professionale rivolta a insegnanti ed educatori, promossa dal <a href="https://www.carme.center/convegno-ricerca-in-pratica/" target="_blank" style="color:#0073aa;">CARME</a> (Center for Advanced Research on Mathematics Education). Ho condotto un laboratorio nella terza edizione (<em>Classe cooperativa e piano di lavoro matematico</em>) e uno nella quarta (<em>Albi illustrati e matematica</em>). Un contesto in cui la ricerca in didattica della matematica incontra davvero la pratica d'aula.</p>
+      <span class="part-card-tag" style="background:#FAECE7; color:#993C1D;">rivista · comitato scientifico</span>
+      <p class="part-card-title">DdM — Didattica della matematica</p>
+      <p class="part-card-desc"><em>Didattica della matematica. Dalla ricerca alle pratiche d'aula</em> è una rivista semestrale che mette in dialogo ricercatori e insegnanti, diretta da Silvia Sbaragli per il Centro competenze SUPSI. Sul <a href="https://www.journals-dfa.supsi.ch/index.php/rivistaddm/article/view/387" target="_blank" style="color:#0073aa;">numero 15</a> ho pubblicato un articolo scritto insieme ad Antonio Pellicori sull'introduzione del <em>piano di lavoro matematico</em> in due classi quinte. Lo puoi scaricare gratuitamente. Da poco faccio parte del comitato scientifico della rivista.</p>
     </div>
   </div>
 
@@ -67,36 +80,16 @@
   </div>
 
   <div class="part-card">
-    <div class="part-card-logo-wrap" style="background:#f9f9f9; padding:0.75rem;">
-      <img src="https://matematichenonsinasce.com/wp-content/uploads/2026/09/ddm.png" alt="DdM Didattica della matematica" style="max-height:150px; width:100%; object-fit:contain;">
-    </div>
+    <img class="part-card-img" src="https://matematichenonsinasce.com/wp-content/uploads/2026/05/photo-2026-05-15-21-05-17.jpg" alt="Convegno CARME Ricerca in pratica">
     <div class="part-card-body">
-      <span class="part-card-tag" style="background:#FAECE7; color:#993C1D;">rivista · comitato scientifico</span>
-      <p class="part-card-title">DdM — Didattica della matematica</p>
-      <p class="part-card-desc"><em>Didattica della matematica. Dalla ricerca alle pratiche d'aula</em> è una rivista semestrale che mette in dialogo ricercatori e insegnanti, diretta da Silvia Sbaragli per il Centro competenze SUPSI. Sul <a href="https://www.journals-dfa.supsi.ch/index.php/rivistaddm/article/view/387" target="_blank" style="color:#0073aa;">numero 15</a> ho pubblicato un articolo scritto insieme ad Antonio Pellicori sull'introduzione del <em>piano di lavoro matematico</em> in due classi quinte. Lo puoi scaricare gratuitamente. Da poco faccio parte del comitato scientifico della rivista.</p>
+      <span class="part-card-tag" style="background:#FAEEDA; color:#854F0B;">laboratorio · 2025, 2026</span>
+      <p class="part-card-title">CARME — Convegno Ricerca in pratica</p>
+      <p class="part-card-desc"><em>Ricerca in pratica</em> è un'iniziativa di formazione e sviluppo professionale rivolta a insegnanti ed educatori, promossa dal <a href="https://www.carme.center/convegno-ricerca-in-pratica/" target="_blank" style="color:#0073aa;">CARME</a> (Center for Advanced Research on Mathematics Education). Ho condotto un laboratorio nella terza edizione (<em>Classe cooperativa e piano di lavoro matematico</em>) e uno nella quarta (<em>Albi illustrati e matematica</em>). Un contesto in cui la ricerca in didattica della matematica incontra davvero la pratica d'aula.</p>
     </div>
   </div>
 
   <div class="part-card">
-    <img class="part-card-img" src="https://matematichenonsinasce.com/wp-content/uploads/2026/06/bormio.jpg" alt="Pianodilavoro.org">
-    <div class="part-card-body">
-      <span class="part-card-tag" style="background:#EEEDFE; color:#534AB7;">progetto collettivo</span>
-      <p class="part-card-title">Pianodilavoro.org</p>
-      <p class="part-card-desc"><a href="http://pianodilavoro.org/" target="_blank" style="color:#0073aa;">Pianodilavoro.org</a> è un progetto collettivo: un gruppo di insegnanti da tutta Italia che raccoglie e condivide strumenti didattici cooperativi, tutti gratuiti e scaricabili. Il cuore del progetto è il Piano di lavoro, uno strumento per individualizzare gli apprendimenti. Ho contribuito alla creazione di materiali e alle formazioni che accompagnano il blog.</p>
-    </div>
-  </div>
-
-  <div class="part-card">
-    <img class="part-card-img" src="https://matematichenonsinasce.com/wp-content/uploads/2026/06/didacta.jpg" alt="Didacta Italia 2026">
-    <div class="part-card-body">
-      <span class="part-card-tag" style="background:#EAF3DE; color:#3B6D11;">evento live · 2026</span>
-      <p class="part-card-title">Didacta Italia 2026</p>
-      <p class="part-card-desc">Didacta Italia è una fiera dedicata all'innovazione nel mondo della scuola, che si tiene ogni anno alla Fortezza da Basso di Firenze. Nel 2026 ho partecipato all'evento live <em>La paura della matematica</em>, organizzato da Giunti Scuola – Vita di classe, insieme a Sara Campana e condotto da Erika Pucci. Una conversazione pubblica su un tema che mi sta molto a cuore.</p>
-    </div>
-  </div>
-
-  <div class="part-card">
-    <img class="part-card-img" src="https://matematichenonsinasce.com/wp-content/uploads/2026/06/IMG_8938.jpg" alt="Naturalmente Scienza">
+    <img class="part-card-img" src="https://matematichenonsinasce.com/wp-content/uploads/2026/09/IMG_0918.jpg" alt="Naturalmente Scienza">
     <div class="part-card-body">
       <span class="part-card-tag" style="background:#E1F5EE; color:#0F6E56;">articoli · 2025, 2026</span>
       <p class="part-card-title">Naturalmente Scienza</p>
@@ -105,11 +98,11 @@
   </div>
 
   <div class="part-card">
-    <img class="part-card-img" src="https://matematichenonsinasce.com/wp-content/uploads/2026/01/19581758276_458714a605_o.jpg" alt="MCE Movimento di Cooperazione Educativa">
+    <img class="part-card-img" src="https://matematichenonsinasce.com/wp-content/uploads/2026/06/didacta.jpg" alt="Didacta Italia 2026">
     <div class="part-card-body">
-      <span class="part-card-tag" style="background:#FBEAF0; color:#993556;">formazione · 2012–2023</span>
-      <p class="part-card-title">MCE — Movimento di Cooperazione Educativa</p>
-      <p class="part-card-desc">Il <a href="https://www.mce-fimem.it/" target="_blank" style="color:#0073aa;">Movimento di Cooperazione Educativa</a> è una delle radici più antiche della pedagogia attiva in Italia, nata negli anni '50. A livello locale ho partecipato a diverse formazioni con il gruppo pisano tra il 2012 e il 2023. A livello nazionale, nel 2015 ho condotto il laboratorio <em>Un viaggio con le Sole</em> alla prima edizione di Cantieri a Cagliari, un corso residenziale di tre giorni per insegnanti, educatori e studenti.</p>
+      <span class="part-card-tag" style="background:#EAF3DE; color:#3B6D11;">evento live · 2026</span>
+      <p class="part-card-title">Didacta Italia</p>
+      <p class="part-card-desc">Didacta Italia è una fiera dedicata all'innovazione nel mondo della scuola, che si tiene ogni anno alla Fortezza da Basso di Firenze. Nel 2026 ho partecipato all'evento live <em>La paura della matematica</em>, organizzato da Giunti Scuola – Vita di classe, insieme a Sara Campana e condotto da Erika Pucci. Una conversazione pubblica su un tema che mi sta molto a cuore.</p>
     </div>
   </div>
 
@@ -119,6 +112,33 @@
       <span class="part-card-tag" style="background:#FAEEDA; color:#854F0B;">formazione docenti · 2026</span>
       <p class="part-card-title">Fare matematica con la testa e con le mani</p>
       <p class="part-card-desc">Nel 2026 ho tenuto il corso di formazione <em>Fare matematica con la testa e con le mani</em> per i docenti dell'IC Sacchetti di San Miniato. Abbiamo approfondito in particolare l'uso di strumenti e oggetti concreti, anche autocostruiti, per l'insegnamento della matematica.</p>
+    </div>
+  </div>
+
+  <div class="part-card">
+    <img class="part-card-img" src="https://matematichenonsinasce.com/wp-content/uploads/2025/08/schermata-2025-03-01-alle-17.41.49.webp" alt="I Lincei per la scuola e Scuola Normale Superiore">
+    <div class="part-card-body">
+      <span class="part-card-tag" style="background:#E6F1FB; color:#185FA5;">formazione · 2020, 2022, 2024</span>
+      <p class="part-card-title">I Lincei per la scuola e SNS</p>
+      <p class="part-card-desc">All'interno del progetto <em>I Lincei per la scuola</em>, ho partecipato come tutor ai cicli di formazione per insegnanti condotti da Pietro Di Martino (Università di Pisa): <em>Problem solving alla primaria</em> (2020), <em>Problem solving alla primaria e al primo anno della secondaria</em> (2022) e <em>Concretamente astratto: l'insegnamento della matematica al primo ciclo</em> (2024). Sono stati contesti in cui il confine tra formazione e ricerca si fa sottile e in cui si impara tanto quanto si contribuisce.</p>
+    </div>
+  </div>
+
+  <div class="part-card">
+    <img class="part-card-img" src="https://matematichenonsinasce.com/wp-content/uploads/2026/06/bormio.jpg" alt="Piano di lavoro">
+    <div class="part-card-body">
+      <span class="part-card-tag" style="background:#EEEDFE; color:#534AB7;">progetto collettivo</span>
+      <p class="part-card-title">Piano di lavoro</p>
+      <p class="part-card-desc"><a href="http://pianodilavoro.org/" target="_blank" style="color:#0073aa;">Pianodilavoro.org</a> è un progetto collettivo: un gruppo di insegnanti da tutta Italia che raccoglie e condivide strumenti didattici cooperativi, tutti gratuiti e scaricabili. Il cuore del progetto è il Piano di lavoro, uno strumento per individualizzare gli apprendimenti. Ho contribuito alla creazione di materiali e alle formazioni che accompagnano il blog.</p>
+    </div>
+  </div>
+
+  <div class="part-card">
+    <img class="part-card-img" src="https://matematichenonsinasce.com/wp-content/uploads/2026/01/19581758276_458714a605_o.jpg" alt="MCE Movimento di Cooperazione Educativa">
+    <div class="part-card-body">
+      <span class="part-card-tag" style="background:#FBEAF0; color:#993556;">formazione · 2012–2023</span>
+      <p class="part-card-title">MCE — Movimento di Cooperazione Educativa</p>
+      <p class="part-card-desc">Il <a href="https://www.mce-fimem.it/" target="_blank" style="color:#0073aa;">Movimento di Cooperazione Educativa</a> è una delle radici più antiche della pedagogia attiva in Italia, nata negli anni '50. A livello locale ho partecipato a diverse formazioni con il gruppo pisano tra il 2012 e il 2023. A livello nazionale, nel 2015 ho condotto il laboratorio <em>Un viaggio con le Sole</em> alla prima edizione di Cantieri a Cagliari, un corso residenziale di tre giorni per insegnanti, educatori e studenti.</p>
     </div>
   </div>
 
